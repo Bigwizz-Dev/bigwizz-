@@ -40,7 +40,7 @@
     document.getElementById("profile-avatar").textContent = initials(name);
     document.getElementById("account-switch-trigger").setAttribute(
       "aria-label",
-      user ? `Switch account. Current account: ${activeAccount === "seller" ? "Seller" : "Buyer"}` : "Sign in"
+      user ? `Switch account. Current account: ${activeAccount === "seller" ? "Seller" : "Buyer"}` : "Guest account"
     );
     if (!user) {
       document.getElementById("account-switch-menu").hidden = true;
@@ -49,14 +49,10 @@
   }
 
   function showAuth() {
-    document.getElementById("launch-screen").hidden = true;
-    document.getElementById("marketplace-app").hidden = true;
-    document.getElementById("auth-screen").hidden = false;
-    document.getElementById("auth-title").focus({ preventScroll: true });
+    notify("Sign-in isn't available yet. You can continue browsing Bigwizz.");
   }
 
   function showApp() {
-    document.getElementById("auth-screen").hidden = true;
     document.getElementById("marketplace-app").hidden = false;
   }
 
@@ -410,7 +406,7 @@
     return client.storage.from("listing-images").getPublicUrl(path).data.publicUrl;
   }
 
-  async function saveListing(event) {
+  async function saveSellerListing(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
     if (!user || !sellerProfileReady) {
@@ -609,36 +605,6 @@
     }
   }
 
-  function useDatabaseAuth() {
-    const form = document.getElementById("auth-form");
-    form.addEventListener("submit", async event => {
-      event.preventDefault();
-      event.stopImmediatePropagation();
-      const values = new FormData(form);
-      const email = String(values.get("email") || "").trim();
-      const signingUp = authMode === "signup";
-      const name = String(values.get("name") || email.split("@")[0] || "Member").trim();
-      const accountType = String(values.get("accountType") || "buyer");
-      const note = document.getElementById("auth-note");
-      note.textContent = "Sending a sign-in link…";
-      const { error } = await client.auth.signInWithOtp({
-        email,
-        options: {
-          shouldCreateUser: signingUp,
-          emailRedirectTo: new URL(window.location.pathname, window.location.origin).href,
-          data: { display_name: name, account_type: accountType }
-        }
-      });
-      if (error) {
-        report(error, "Could not send the sign-in link. Check the email and try again.");
-        note.textContent = "Sign-in link could not be sent.";
-        return;
-      }
-      note.textContent = "Check your email and open the Bigwizz sign-in link on this device.";
-      notify("Sign-in link sent.");
-    }, true);
-  }
-
   function stop(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -646,7 +612,7 @@
 
   document.addEventListener("submit", event => {
     if (event.target.id === "seller-setup-form") return saveSellerProfile(event);
-    if (event.target.id === "seller-listing-form") return saveListing(event);
+    if (event.target.id === "seller-listing-form") return saveSellerListing(event);
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
     if (event.target.id === "issue-form") return submitOrderReport(event);
     if (event.target.id === "search-form") {
@@ -790,7 +756,6 @@
   accountMenu.insertAdjacentHTML("beforeend",
     '<button type="button" data-supabase-signout><span class="account-option-icon">↪</span><span><b>Sign out</b><small>End this session</small></span></button>');
   setProfileDisplay("Guest");
-  useDatabaseAuth();
   loadCatalog();
 
   client.auth.onAuthStateChange((_event, session) => {
