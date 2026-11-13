@@ -66,27 +66,9 @@
     .launch-loader:after{content:"";display:block;width:45%;height:100%;border-radius:5px;background:var(--lime);animation:loading 1.1s ease-in-out infinite alternate}
     @keyframes brand-arrive{from{opacity:0;transform:translateY(9px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes loading{to{transform:translateX(120%)}}
-    .auth-screen{min-height:100vh;display:grid;place-items:center;padding:22px;background:var(--canvas);color:var(--ink)}
-    .auth-card{width:min(440px,100%);padding:30px;border:1px solid var(--line);border-radius:24px;background:var(--paper);box-shadow:var(--shadow)}
-    .auth-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}
-    .auth-brand{display:flex;align-items:center;gap:9px;color:var(--ink);font-weight:850;font-size:17px}
-    .auth-brand .brand-mark{width:30px;height:30px;font-size:16px}
-    .auth-card h1{margin:0;font-size:27px;letter-spacing:-.8px}
-    .auth-description{margin:8px 0 21px;color:var(--muted);font-size:13px;line-height:1.55}
-    .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;margin-bottom:18px;border-radius:12px;background:var(--canvas)}
-    .auth-tabs button{border:0;border-radius:9px;padding:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:800}
-    .auth-tabs button.active{background:var(--paper);color:var(--deep);box-shadow:0 2px 8px #2c183214}
-    .auth-field{display:grid;gap:7px;margin-top:14px}
-    .auth-field label{font-size:12px;font-weight:750}
-    .auth-field input{width:100%;min-height:45px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
-    .auth-submit{width:100%;margin-top:20px;background:var(--deep);color:white}
-    .auth-note{margin:14px 0 0;color:var(--muted);font-size:11px;line-height:1.5;text-align:center}
     .icon-button,.searchbar,.category,.listing,.side-card:not(.trust-card):not(.message-card),.service-card,.event-card,.community-card,.issue-wrap,.service-search,.service-filter:not(.active),.field input,.field select,.dialog-content textarea,.art-note,.mobile-nav,.save,.tag{background-color:var(--paper)}
     .service-filter.active{background-color:var(--deep);color:white}
     .trust-card{background-color:#eee7f2}.message-card{background-color:#f5ece5}.service-intro{background-color:#eee7f2}
-    .auth-field input{background-color:var(--paper)}
-    .auth-tabs{background:var(--canvas)}
-    .auth-tabs button.active{background:var(--paper);color:var(--deep)}
     .theme-toggle{font-size:18px}
     html[data-theme="dark"]{color-scheme:dark;--ink:#f5eef7;--muted:#c0b3c5;--line:#4a3d50;--green:#c29bd6;--deep:#34203f;--lime:#e8c27d;--paper:#2a2331;--canvas:#19151e;--shadow:0 14px 36px #00000055}
     html[data-theme="dark"] body{background:var(--canvas);color:var(--ink)}
@@ -118,14 +100,12 @@
     html[data-theme="dark"] .verified,html[data-theme="dark"] .text-button{color:#d4b8e3}
     html[data-theme="dark"] .mini-avatar{background:#44374b;color:#f0e2f5}
     html[data-theme="dark"] .field input,html[data-theme="dark"] .field select,html[data-theme="dark"] .dialog-content textarea{border-color:var(--line);background:#211b28;color:var(--ink)}
-    html[data-theme="dark"] .issue-wrap .primary,html[data-theme="dark"] .dialog-submit,html[data-theme="dark"] .auth-submit{background:var(--lime);color:#34203f}
+    html[data-theme="dark"] .issue-wrap .primary,html[data-theme="dark"] .dialog-submit{background:var(--lime);color:#34203f}
     html[data-theme="dark"] .dialog-close{background:#3b3042;color:var(--ink)}
     html[data-theme="dark"] .mobile-nav{border-color:var(--line)}
     html[data-theme="dark"] .pill{color:#241821}
     html[data-theme="dark"] .avatar{background:#604e68;color:#fff}
     html[data-theme="dark"] .service-filter.active{background:#624478;color:white}
-    html[data-theme="dark"] .auth-tabs button.active{background:#44374b;color:#f0e2f5}
-    html[data-theme="dark"] .auth-card{border-color:var(--line)}
     html[data-theme="dark"] .top-actions .icon-button{border-color:var(--line)}
     html[data-theme="dark"] .service-foot b{color:var(--lime)}
     .account-switch-wrap{position:relative}
@@ -266,20 +246,6 @@
   <section id="launch-screen" class="launch-screen" aria-label="Bigwizz app launch">
     <div class="launch-brand"><div class="launch-mark" aria-hidden="true">b</div><div class="launch-wordmark">bigwizz</div><div class="launch-tagline">Good finds. Better connections.</div><div class="launch-loader" aria-hidden="true"></div></div>
   </section>
-  <section id="auth-screen" class="auth-screen" aria-labelledby="auth-title" hidden>
-    <div class="auth-card">
-      <div class="auth-top"><div class="auth-brand"><span class="brand-mark">b</span> bigwizz</div><button class="icon-button theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" title="Switch between light and dark mode"><span aria-hidden="true">☾</span></button></div>
-      <h1 id="auth-title" tabindex="-1">Welcome to Bigwizz</h1><p class="auth-description">Sign in to discover quality goods, connect with trusted professionals, and keep everything organized.</p>
-      <div class="auth-tabs" role="tablist" aria-label="Account options"><button type="button" class="active" data-auth-mode="signin" role="tab" aria-selected="true">Sign in</button><button type="button" data-auth-mode="signup" role="tab" aria-selected="false">Create account</button></div>
-      <form id="auth-form">
-        <div class="auth-field" id="auth-name-field" hidden><label for="auth-name">Your name</label><input id="auth-name" name="name" autocomplete="name" placeholder="How should we address you?"></div>
-        <div class="auth-field" id="auth-account-type-field"><label id="account-type-label" for="account-type">Open account</label><select id="account-type" name="accountType" required><option value="buyer">Buyer account</option><option value="seller">Seller account — goods or services</option></select></div>
-        <div class="auth-field"><label for="auth-email">Email address</label><input id="auth-email" name="email" type="email" autocomplete="email" placeholder="you@example.com" required></div>
-        <button class="primary auth-submit" id="auth-submit" type="submit">Continue with email</button>
-        <p class="auth-note" id="auth-note" aria-live="polite">Passwordless demo: email sign-in is not connected yet, and no credentials are saved.</p>
-      </form>
-    </div>
-  </section>
   <div id="marketplace-app" hidden>
   <div class="shell">
     <header class="topbar">
@@ -340,7 +306,7 @@
             <div class="field"><label for="seller-type">What will you offer?</label><select id="seller-type" name="sellerType" required><option value="">Choose one</option><option>Quality goods</option><option>Professional services</option><option>Goods and services</option></select></div>
             <button class="primary" type="submit">Create seller studio</button>
           </form>
-          <p class="notice">Prototype setup only. Real seller verification and payout setup would happen before selling.</p>
+          <p class="notice">Seller profile details are saved to your Bigwizz account. Seller verification and payout setup are not connected.</p>
         </div>
         <div id="seller-dashboard" hidden>
           <div class="seller-heading"><div><span class="seller-mode-label">SELLER ACCOUNT</span><h2 id="seller-shop-title">Your seller studio</h2><p id="seller-type-label">Track settled sales, platform fees, and estimated proceeds in one place.</p></div><button class="outline-button" style="width:auto" data-account-option="buyer">Switch to buyer account</button></div>
@@ -384,13 +350,13 @@
             <p class="notice" id="seller-listing-price-preview" aria-live="polite">Enter your price to preview the buyer-facing total with the 2% Bigwizz fee.</p>
             <div class="seller-listing-form-actions"><button class="primary" id="seller-listing-submit" type="submit">Publish listing</button><button class="outline-button" id="seller-listing-cancel" type="button" hidden>Cancel edit</button></div>
           </form>
-          <p class="notice">Prototype only: listings are saved in this browser and do not accept orders or payments.</p>
+          <p class="notice">Listings are shared through Bigwizz. Orders and payments are not connected yet.</p>
           <div class="seller-listings" id="seller-listing-items" aria-live="polite"></div>
         </section>
       </section>
       <section id="messages" class="page"><div class="section-head"><div><h2>Your inbox</h2><p>Prioritized by order and booking questions, so important requests are easier to spot.</p></div></div><div class="side-card" id="inbox"></div></section>
       <section id="orders" class="page"><div class="section-head"><div><h2>Order support</h2><p>What arrived should match what you agreed to buy. Start a report if it doesn't.</p></div></div>
-        <div class="issue-wrap"><h3>Report an order that doesn't match</h3><p>Share the order reference and what went wrong. Keep the packaging and any photos while the seller or support team reviews it. This demo stores your report only in this browser.</p>
+        <div class="issue-wrap"><h3>Report an order that doesn't match</h3><p>Share the order reference and what went wrong. Keep the packaging and any photos while the seller or support team reviews it. Reports are saved to your Bigwizz account; support is not contacted.</p>
           <form id="issue-form"><div class="field"><label for="order-ref">Order reference</label><input id="order-ref" name="order" placeholder="e.g. BW-10482" required></div><div class="field"><label for="issue-type">What was different?</label><select id="issue-type" name="issue" required><option value="">Choose an issue</option><option>Item is damaged</option><option>Item is materially different from the listing</option><option>Something is missing</option><option>Service was not completed as agreed</option><option>Other order concern</option></select></div><div class="field"><label for="issue-notes">A few details</label><input id="issue-notes" name="notes" placeholder="Describe what you expected and what arrived" required></div><button class="primary" type="submit">Save report</button></form>
           <div class="notice">This prototype does not process payments, contact a seller, or open a real support case.</div></div>
       </section>
@@ -411,21 +377,21 @@
         <div class="field"><label for="request-area">Your area</label><input id="request-area" name="area" placeholder="Neighborhood or city" required></div>
         <div class="field"><label for="request-details">Details for the provider</label><textarea id="request-details" name="details" placeholder="Describe the job, questions, or timing that would help the provider respond." required></textarea></div>
         <button class="primary dialog-submit" type="submit">Save request</button>
-        <p class="notice">Prototype only: this saves a request in your browser and does not contact the provider or book a service.</p>
+        <p class="notice">Your request is saved to your Bigwizz account. This does not contact the provider or book a service.</p>
       </form>
     </div>
   </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div>
   <script>
-    const listings=[
+    let listings=[
       {title:"Handwoven everyday tote",category:"Style",kind:"Goods",price:"$38",image:"assets/product-tote.jpg",seller:"Mara Studio",initials:"MS",rating:"4.9",detail:"Small-batch"},
       {title:"Solid oak side table",category:"Home",kind:"Goods",price:"$145",image:"assets/oak-table.jpg",seller:"Northwood Works",initials:"NW",rating:"5.0",detail:"Made to order · Local pickup"},
       {title:"Natural linen cushion set",category:"Home",kind:"Goods",price:"$52",image:"assets/linen-cushion.jpg",seller:"Soft Corner",initials:"SC",rating:"4.8",detail:"Set of 2 · Easy-care fabric"},
       {title:"Custom ceramic breakfast set",category:"Style",kind:"Goods",price:"$64",image:"assets/ceramic-set.jpg",seller:"Clay & Current",initials:"CC",rating:"4.9",detail:"Hand-finished · Made locally"},
       {title:"Hand-dyed cotton scarf",category:"Style",kind:"Goods",price:"$42",image:"assets/cotton-scarf.jpg",seller:"Indigo Day",initials:"ID",rating:"4.7",detail:"Natural dyes · Gift-ready"}
     ];
-    const services=[
+    let services=[
       {category:"Home care",image:"assets/home-cleaning.jpg",title:"Home cleaning",description:"Recurring or one-time cleans with a written checklist and clear scope.",price:"From $45 / visit",rating:"4.9",provider:"Bright Nest Co."},
       {category:"Home care",image:"assets/pest-control.jpg",title:"Pest control",description:"Licensed local specialists explain the treatment, safety steps, and follow-up.",price:"Request an estimate",rating:"4.8",provider:"ClearHome Pest Care"},
       {category:"Repairs",image:"assets/home-repairs.jpg",title:"Home repairs",description:"Book a vetted professional for small repairs, installation, and assembly.",price:"From $35 / hour",rating:"4.8",provider:"Fixwell Services"},
@@ -437,7 +403,7 @@
       goods:[{value:"Home",label:"Home & living"},{value:"Style",label:"Style & craft"}],
       service:[{value:"Home care",label:"Home care"},{value:"Repairs",label:"Repairs"},{value:"Wellness",label:"Wellness"},{value:"Creative",label:"Creative"}]
     };
-    const events=[
+    let events=[
       {day:"14",month:"JUN",title:"From clay to cup: a live studio tour",host:"Clay & Current · Maker demo",time:"Today · 6:00 PM"},
       {day:"16",month:"JUN",title:"Small-space styling Q&A",host:"Northwood Works · Ask a maker",time:"Saturday · 11:30 AM"},
       {day:"19",month:"JUN",title:"Meet your neighborhood home pros",host:"Bigwizz Local · Community meetup",time:"Tuesday · 5:00 PM"}
@@ -447,7 +413,7 @@
       {initials:"KR",name:"Kai Rivera",preview:"Could you share the cleaning checklist?",context:"Question about Bright Nest Co.",priority:"Booking question",color:"#f0d9c9"},
       {initials:"MS",name:"Mara Studio",preview:"Your tote is packed and ready to ship.",context:"Order update",priority:"Seller update",color:"#e5dcf2"}
     ];
-    const conversations=[
+    let conversations=[
       {title:"Any recommendations for a small entryway?",meta:"Jamie T. · Home & living",copy:"Looking for durable, locally made storage ideas. What has worked well for you?",replies:"12 replies",image:"assets/oak-table.jpg"},
       {title:"Behind the scenes: natural fabric dyes",meta:"Ari P. · Makers & craft",copy:"Sharing notes from this week's indigo batch and answering questions about care.",replies:"8 replies",image:"assets/cotton-scarf.jpg"},
       {title:"Reliable home pros in the neighborhood",meta:"Bigwizz Local · Recommendations",copy:"What do you look for when booking a new service provider?",replies:"24 replies",image:"assets/home-repairs.jpg"}
@@ -467,7 +433,6 @@
     ];
     const commissionRate=0.02;
     const currencyFormatter=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
-    const authenticationEnabled=false;
     let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7;
     let accountRoles=["buyer"],activeAccount="buyer",sellerProfileReady=false,sellerShopName="",sellerType="";
     let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true;
@@ -601,7 +566,7 @@
     }
     function addToCart(listingId){
       const index=listingId.startsWith("seed-")?Number(listingId.slice(5)):NaN;
-      const item=Number.isInteger(index)?listings[index]:customListings.find(listing=>listing.id===listingId&&listing.type==="goods"&&listing.status==="published");
+      const item=Number.isInteger(index)?listings[index]:listings.find(listing=>listing.id===listingId)||customListings.find(listing=>listing.id===listingId&&listing.type==="goods"&&listing.status==="published");
       if(!item){showToast("This listing is no longer available.");return}
       const existing=cartItems.find(cartItem=>cartItem.listingId===listingId);
       const nextItems=existing
@@ -656,26 +621,6 @@
     }
     const savedTheme=localStorage.getItem("bigwizz-theme");
     setTheme(savedTheme==="dark"||savedTheme==="light"?savedTheme:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
-    let authMode="signin";
-    function setAuthMode(mode){
-      authMode=mode;
-      const signingUp=mode==="signup";
-      const selectedAccount=document.getElementById("account-type").value;
-      document.getElementById("auth-name-field").hidden=!signingUp;
-      document.getElementById("auth-account-type-field").hidden=false;
-      document.getElementById("auth-name").required=signingUp;
-      document.getElementById("account-type-label").textContent=signingUp?"Account type":"Open account";
-      document.getElementById("account-type").required=true;
-      document.getElementById("auth-submit").textContent=signingUp?"Create account":"Continue with email";
-      document.getElementById("auth-note").textContent="Passwordless demo: email sign-in is not connected yet, and no credentials are saved.";
-      document.querySelectorAll("[data-auth-mode]").forEach(button=>{
-        const active=button.dataset.authMode===mode;
-        button.classList.toggle("active",active);
-        button.setAttribute("aria-selected",String(active));
-      });
-      document.getElementById("auth-form").reset();
-      document.getElementById("account-type").value=selectedAccount;
-    }
     function closeAccountMenu(){document.getElementById("account-switch-menu").hidden=true;document.getElementById("account-switch-trigger").setAttribute("aria-expanded","false")}
     function renderAccountMenu(){
       const currentName=activeAccount==="seller"?"Seller account":"Buyer account";
@@ -811,15 +756,16 @@
     function renderListings(query=""){
       const container=document.getElementById("listing-grid"),normalized=query.trim().toLowerCase();
       const sellerGoods=customListings.filter(item=>item.type==="goods"&&item.status==="published").map(item=>({...item,kind:"Goods",detail:item.description,verified:false,basePrice:item.price}));
-      const allListings=[...listings.map((item,index)=>({...item,id:`seed-${index}`})),...sellerGoods];
+      const allListings=[...listings.map((item,index)=>({...item,id:item.id||`seed-${index}`})),...sellerGoods];
       const results=allListings.filter(item=>item.kind==="Goods"&&(activeCategory==="All"||item.category===activeCategory)&&(!normalized||[item.title,item.category,item.seller,item.detail].join(" ").toLowerCase().includes(normalized)));
       document.getElementById("result-caption").textContent=normalized?`${results.length} result${results.length===1?"":"s"} for “${query.trim()}”.`:activeCategory==="All"?"Quality goods from independent sellers.":`Showing ${activeCategory.toLowerCase()} goods.`;
       if(!results.length){container.innerHTML='<div class="empty">No matches yet. Try another search or choose a different category.</div>';return}
       container.innerHTML=results.map(item=>{
         const basePrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
         const displayedPrice=basePrice?currencyFormatter.format(buyerPrice(basePrice)):item.price;
-        return `<article class="listing"><div class="listing-photo"><img src="${item.image}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async"><span class="tag">QUALITY FIND</span><button class="save" aria-label="Save ${escapeHtml(item.title)}" data-save="${escapeHtml(item.title)}">♡</button></div><div class="listing-body"><div class="listing-title"><h3>${escapeHtml(item.title)}</h3><span class="price">${escapeHtml(displayedPrice)}</span></div><div class="seller-line"><span class="seller-name"><span class="mini-avatar">${escapeHtml(item.initials||item.seller.split(/\s+/).map(part=>part.charAt(0)).slice(0,2).join("").toUpperCase())}</span>${escapeHtml(item.seller)}${item.verified===false?"":' <span class="verified" aria-label="Verified seller">✓</span>'}</span><span class="rating">${item.rating?`★ ${escapeHtml(item.rating)}`:"New listing"}</span></div><div class="seller-line"><span>${escapeHtml(item.detail)}</span></div><button type="button" class="add-to-cart" data-add-to-cart="${escapeHtml(item.id)}">Add to cart</button></div></article>`;
+        return `<article class="listing"><div class="listing-photo"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async"><span class="tag">QUALITY FIND</span><button class="save" aria-label="Save ${escapeHtml(item.title)}" data-save="${escapeHtml(item.id)}">♡</button></div><div class="listing-body"><div class="listing-title"><h3>${escapeHtml(item.title)}</h3><span class="price">${escapeHtml(displayedPrice)}</span></div><div class="seller-line"><span class="seller-name"><span class="mini-avatar">${escapeHtml(item.initials||item.seller.split(/\s+/).map(part=>part.charAt(0)).slice(0,2).join("").toUpperCase())}</span>${escapeHtml(item.seller)}${item.verified===false?"":' <span class="verified" aria-label="Verified seller">✓</span>'}</span><span class="rating">${item.rating?`★ ${escapeHtml(item.rating)}`:"New listing"}</span></div><div class="seller-line"><span>${escapeHtml(item.detail)}</span></div><button type="button" class="add-to-cart" data-add-to-cart="${escapeHtml(item.id)}">Add to cart</button></div></article>`;
       }).join("");
+      if(typeof updateSavedButtons==="function")updateSavedButtons();
     }
     function priceWithBuyerFee(value){
       const basePrice=sellerPriceFrom(value);
@@ -829,16 +775,16 @@
     function renderServices(query=""){
       const normalized=query.trim().toLowerCase();
       const sellerServices=customListings.filter(item=>item.type==="service"&&item.status==="published").map(item=>({...item,provider:item.seller,sellerPrice:item.price,price:`From ${currencyFormatter.format(buyerPrice(item.price))} / service`,rating:"New listing",requestId:`custom-${item.id}`}));
-      const results=[...services.map((item,index)=>({...item,sellerPrice:sellerPriceFrom(item.price),price:priceWithBuyerFee(item.price),requestId:String(index)})),...sellerServices].filter(item=>(activeServiceCategory==="All"||item.category===activeServiceCategory)&&(!normalized||[item.title,item.description,item.provider,item.category].join(" ").toLowerCase().includes(normalized)));
+      const results=[...services.map((item,index)=>({...item,sellerPrice:item.sellerPrice===undefined?sellerPriceFrom(item.price):item.sellerPrice,price:priceWithBuyerFee(item.price),requestId:item.requestId||item.id||String(index)})),...sellerServices].filter(item=>(activeServiceCategory==="All"||item.category===activeServiceCategory)&&(!normalized||[item.title,item.description,item.provider,item.category].join(" ").toLowerCase().includes(normalized)));
       const container=document.getElementById("service-grid");
       if(!results.length){container.innerHTML='<div class="empty">No services match yet. Try another search or category.</div>';return}
-      container.innerHTML=results.map(item=>`<article class="service-card"><img class="service-image" src="${item.image}" alt="" loading="lazy" decoding="async"><div class="service-top"><span class="service-provider">${escapeHtml(item.category)}</span><span class="rating">${item.rating==="New listing"?escapeHtml(item.rating):`★ ${escapeHtml(item.rating)}`}</span></div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="service-foot"><span>${escapeHtml(item.provider)}${item.rating==="New listing"?"":' <span class="verified" aria-label="Verified provider">✓</span>'}</span><span><b>${escapeHtml(item.price)}</b></span></div><button class="outline-button" style="margin-top:13px" data-service-request="${escapeHtml(item.requestId)}">View details & request</button></article>`).join("");
+      container.innerHTML=results.map(item=>`<article class="service-card"><img class="service-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div class="service-top"><span class="service-provider">${escapeHtml(item.category)}</span><span class="rating">${item.rating==="New listing"?escapeHtml(item.rating):`★ ${escapeHtml(item.rating)}`}</span></div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="service-foot"><span>${escapeHtml(item.provider)}${item.rating==="New listing"?"":' <span class="verified" aria-label="Verified provider">✓</span>'}</span><span><b>${escapeHtml(item.price)}</b></span></div><button class="outline-button" style="margin-top:13px" data-service-request="${escapeHtml(item.requestId)}">View details & request</button></article>`).join("");
     }
     function renderNotifications(){
       document.getElementById("notification-list").innerHTML=appNotifications.map(item=>`<article class="notification-card"><span class="notification-icon" aria-hidden="true">${item.icon}</span><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.copy)}</p><small>${escapeHtml(item.time)}</small></div></article>`).join("");
     }
-    function renderEvents(){document.getElementById("event-list").innerHTML=events.map(item=>`<article class="event-card"><div class="event-date"><small>${item.month}</small>${item.day}</div><div><h3>${item.title}</h3><p>${item.host} · ${item.time}</p></div><button class="outline-button" data-rsvp="${item.title}">I'm interested</button></article>`).join("")}
-    function renderCommunity(){document.getElementById("community-list").innerHTML=conversations.map(item=>`<article class="community-card"><img class="community-image" src="${item.image}" alt="" loading="lazy" decoding="async"><div style="flex:1"><h3>${item.title}</h3><p>${item.meta} · ${item.copy}</p></div><button class="text-button" data-reply="${item.title}">${item.replies} →</button></article>`).join("")}
+    function renderEvents(){document.getElementById("event-list").innerHTML=events.map(item=>`<article class="event-card"><div class="event-date"><small>${escapeHtml(item.month)}</small>${escapeHtml(item.day)}</div><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.host)} · ${escapeHtml(item.time)}</p></div><button class="outline-button" data-rsvp="${escapeHtml(item.id||item.title)}">I'm interested</button></article>`).join("")}
+    function renderCommunity(){document.getElementById("community-list").innerHTML=conversations.map(item=>`<article class="community-card"><img class="community-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div style="flex:1"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.meta)} · ${escapeHtml(item.copy)}</p></div><button class="text-button" data-reply="${escapeHtml(item.title)}">${escapeHtml(item.replies)} →</button></article>`).join("")}
     function loadServiceRequests(){
       try{
         const saved=localStorage.getItem("bigwizz-service-requests");
@@ -886,7 +832,6 @@
       }
       const page=event.target.closest("[data-page]");if(page){event.preventDefault();setPage(page.dataset.page,page.dataset.focusTarget||null,page.closest(".mobile-nav")?page:null);return}
       const themeButton=event.target.closest(".theme-toggle");if(themeButton){setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark",true);return}
-      const authButton=event.target.closest("[data-auth-mode]");if(authButton){setAuthMode(authButton.dataset.authMode);return}
       const category=event.target.closest("[data-category]");if(category){activeCategory=category.dataset.category;document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button===category));renderListings(document.getElementById("search-input").value);return}
       const serviceCategory=event.target.closest("[data-service-category]");if(serviceCategory){activeServiceCategory=serviceCategory.dataset.serviceCategory;document.querySelectorAll("[data-service-category]").forEach(button=>button.classList.toggle("active",button===serviceCategory));renderServices(document.getElementById("service-search-input").value);return}
       const save=event.target.closest("[data-save]");if(save){const saved=save.classList.toggle("saved");save.textContent=saved?"♥":"♡";showToast(saved?"Saved to your favorites.":"Removed from your favorites.");return}
@@ -896,8 +841,8 @@
       const requestButton=event.target.closest("[data-service-request]");if(requestButton){
         const requestId=requestButton.dataset.serviceRequest;
         const custom=requestId.startsWith("custom-")?customListings.find(item=>item.id===requestId.slice(7)):null;
-        const original=custom?null:services[Number(requestId)];
-        const service=custom?{title:custom.title,provider:custom.seller,price:`From ${currencyFormatter.format(buyerPrice(custom.price))} / service`,rating:"New listing",sellerPrice:custom.price}:original?{...original,price:priceWithBuyerFee(original.price),sellerPrice:sellerPriceFrom(original.price)}:null;
+        const original=custom?null:services.find(item=>item.id===requestId)||services[Number(requestId)];
+        const service=custom?{title:custom.title,provider:custom.seller,price:`From ${currencyFormatter.format(buyerPrice(custom.price))} / service`,rating:"New listing",sellerPrice:custom.price}:original?{...original,price:priceWithBuyerFee(original.price),sellerPrice:original.sellerPrice===undefined?sellerPriceFrom(original.price):original.sellerPrice}:null;
         if(!service)return;
         const rating=service.rating==="New listing"?"New listing":`★ ${service.rating}`;
         document.getElementById("service-dialog-title").textContent=`Request ${service.title.toLowerCase()}`;
@@ -968,36 +913,12 @@
       setPage("seller-studio");
       showToast("Seller account set up. You can switch accounts from your profile menu.");
     });
-    document.getElementById("auth-form").addEventListener("submit",event=>{
-      event.preventDefault();
-      const form=event.currentTarget;
-      const values=new FormData(form);
-      const accountType=String(values.get("accountType")||"buyer");
-      const email=String(values.get("email")||"");
-      const displayName=String(values.get("name")||email.split("@")[0]||"Member");
-      accountRoles=accountType==="seller"?["buyer","seller"]:["buyer"];
-      activeAccount=accountType==="seller"?"seller":"buyer";
-      updateMobileNavigation();
-      document.getElementById("profile-name").textContent=displayName;
-      document.getElementById("profile-avatar").textContent=displayName.split(/\s+/).slice(0,2).map(part=>part.charAt(0).toUpperCase()).join("");
-      form.reset();
-      document.getElementById("auth-screen").hidden=true;
-      document.getElementById("marketplace-app").hidden=false;
-      renderAccountMenu();
-      setPage(accountType==="seller"?"seller-studio":"discover");
-      showToast("Demo access only. No account was created and no credentials were saved.");
-    });
     document.getElementById("new-post").addEventListener("click",()=>showToast("Community posting is a demo. Sign-in and moderation are needed before launch."));
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});
     setTimeout(()=>{
       const launch=document.getElementById("launch-screen");
-      if(authenticationEnabled){
-        document.getElementById("auth-screen").hidden=false;
-        document.getElementById("auth-title").focus({preventScroll:true});
-      }else{
-        document.getElementById("marketplace-app").hidden=false;
-        setPage("discover");
-      }
+      document.getElementById("marketplace-app").hidden=false;
+      setPage("discover");
       launch.classList.add("leaving");
       setTimeout(()=>{launch.hidden=true},500);
     },matchMedia("(prefers-reduced-motion: reduce)").matches?250:1250);
@@ -1011,5 +932,8 @@
     updateMobileNavigation();
     renderListings();renderServices();renderEvents();renderCommunity();renderInbox();renderAccountMenu();
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase-config.js"></script>
+  <script src="assets/supabase-app.js"></script>
 </body>
 </html>
