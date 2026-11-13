@@ -240,6 +240,14 @@
     @media(max-width:700px){.topnav{display:none}.account-switch-trigger{display:flex;width:39px;min-width:39px;height:39px;padding:0;gap:0;justify-content:center}.account-switch-trigger #profile-name,.switch-caret{display:none}.seller-heading{align-items:flex-start;flex-direction:column}.seller-toolbar{align-items:flex-start;flex-direction:column}.seller-quick-actions{width:100%}.seller-quick-actions .outline-button{flex:1;padding:9px 7px;font-size:10px}.seller-stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.seller-stat{min-height:108px;padding:13px}.seller-stat strong{font-size:20px}.seller-panel{padding:15px}.seller-onboarding{padding:21px}}
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
     @media(max-width:700px){.service-toolbar{align-items:stretch}.service-search{flex-basis:100%}.service-filters{margin-right:-16px;padding-right:16px}.service-intro{padding:15px}.dialog-content{padding:20px}}
+    .shell{padding-bottom:100px}
+    .mobile-nav{position:fixed;z-index:25;right:0;bottom:0;left:0;display:flex;justify-content:center;gap:8px;overflow-x:auto;padding:8px 18px max(8px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fffffff5;backdrop-filter:blur(12px)}
+    .mobile-nav button{display:flex;flex:0 0 auto;align-items:center;gap:6px;padding:8px 10px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap}
+    .mobile-nav button.active{background:var(--canvas);color:var(--deep)}
+    .mobile-nav button span:first-child{font-size:14px;line-height:1}
+    .account-menu{z-index:30}
+    .toast{bottom:76px}
+    @media(max-width:700px){.shell{padding-bottom:100px}.mobile-nav{justify-content:flex-start;gap:3px;padding-right:8px;padding-left:8px}.mobile-nav button{padding:8px 9px;font-size:11px}.account-switch-trigger{display:flex;width:auto;min-width:0;height:39px;padding:0 7px;gap:6px;justify-content:flex-start}.account-switch-trigger #profile-name,.account-switch-trigger .switch-caret{display:inline}.account-switch-trigger #profile-name{font-size:11px;white-space:nowrap}.account-menu{top:auto;bottom:calc(100% + 8px)}}
   </style>
 </head>
 <body>
@@ -250,9 +258,6 @@
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="#" aria-label="Bigwizz home" data-page="discover"><span class="brand-mark">b</span> bigwizz</a>
-      <nav class="topnav" aria-label="Main navigation">
-        <button class="active" data-page="discover">Discover</button><button data-page="services">Services</button><button data-page="events">Live & events</button><button data-page="community">Community</button><button data-page="messages">Messages</button><button data-page="orders">Orders</button>
-      </nav>
       <div class="top-actions"><button class="icon-button theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" title="Switch between light and dark mode"><span aria-hidden="true">☾</span></button>
         <div class="account-switch-wrap">
           <button class="profile account-switch-trigger" id="account-switch-trigger" type="button" aria-label="Switch account" aria-expanded="false" aria-controls="account-switch-menu" data-account-menu-toggle><span class="avatar" id="profile-avatar">JD</span><span id="profile-name">Jamie</span><span class="switch-caret" aria-hidden="true">⌄</span></button>
@@ -306,7 +311,7 @@
             <div class="field"><label for="seller-type">What will you offer?</label><select id="seller-type" name="sellerType" required><option value="">Choose one</option><option>Quality goods</option><option>Professional services</option><option>Goods and services</option></select></div>
             <button class="primary" type="submit">Create seller studio</button>
           </form>
-          <p class="notice">Seller profile details are saved to your Bigwizz account. Seller verification and payout setup are not connected.</p>
+          <p class="notice">Preview seller setup here. Saving your seller profile requires sign-in, which is currently unavailable.</p>
         </div>
         <div id="seller-dashboard" hidden>
           <div class="seller-heading"><div><span class="seller-mode-label">SELLER ACCOUNT</span><h2 id="seller-shop-title">Your seller studio</h2><p id="seller-type-label">Track settled sales, platform fees, and estimated proceeds in one place.</p></div><button class="outline-button" style="width:auto" data-account-option="buyer">Switch to buyer account</button></div>
@@ -363,8 +368,8 @@
     </main>
     <footer class="footer">Bigwizz is a marketplace prototype. Verify the provider, scope, price, and local requirements before booking.</footer>
   </div>
-  <nav class="mobile-nav" aria-label="Mobile navigation">
-    <button class="active" data-audience="buyer" data-page="discover"><span>⌂</span>Discover</button><button data-audience="buyer" data-page="services"><span>✦</span>Services</button><button data-audience="buyer" data-page="events"><span>◷</span>Live</button><button data-audience="buyer" data-page="notifications"><span>🔔</span>Notifications</button><button data-audience="buyer" data-page="cart"><span>🛒</span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
+  <nav class="mobile-nav" aria-label="Main navigation">
+    <button class="active" data-audience="buyer" data-page="discover"><span aria-hidden="true">🏠</span>Discover</button><button data-audience="buyer" data-page="services"><span aria-hidden="true">✨</span>Services</button><button data-audience="buyer" data-page="events"><span aria-hidden="true">🎥</span>Live</button><button data-audience="buyer" data-page="community"><span aria-hidden="true">💬</span>Community</button><button data-audience="buyer" data-page="messages"><span aria-hidden="true">✉️</span>Messages</button><button data-audience="buyer" data-page="orders"><span aria-hidden="true">📦</span>Orders</button><button data-audience="buyer" data-page="notifications"><span aria-hidden="true">🔔</span>Alerts</button><button data-audience="buyer" data-page="cart"><span aria-hidden="true">🛒</span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
     <button data-audience="seller" data-page="seller-studio" hidden><span>▤</span>Studio</button><button data-audience="seller" data-page="messages" hidden><span>✉</span>Inbox</button><button data-audience="seller" data-page="seller-listings" hidden><span>▣</span>Listings</button><button data-audience="seller" data-page="seller-progress" hidden><span>▥</span>Progress</button>
   </nav>
   <dialog id="service-dialog" aria-labelledby="service-dialog-title">
