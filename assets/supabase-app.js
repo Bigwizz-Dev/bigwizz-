@@ -36,12 +36,14 @@
   }
 
   function setProfileDisplay(name) {
-    document.getElementById("profile-name").textContent = name || "Guest";
+    document.getElementById("profile-name").textContent = user ? name || "Guest" : "Switch account";
     document.getElementById("profile-avatar").textContent = initials(name);
     document.getElementById("account-switch-trigger").setAttribute(
       "aria-label",
-      user ? `Switch account. Current account: ${activeAccount === "seller" ? "Seller" : "Buyer"}` : "Guest account"
+      user ? `Switch account. Current account: ${activeAccount === "seller" ? "Seller" : "Buyer"}` : "Switch account"
     );
+    const signOut = document.querySelector("[data-supabase-signout]");
+    if (signOut) signOut.hidden = !user;
     if (!user) {
       document.getElementById("account-switch-menu").hidden = true;
       document.getElementById("account-switch-trigger").setAttribute("aria-expanded", "false");
@@ -85,7 +87,8 @@
   function updateAccountState() {
     const roleButtons = document.querySelectorAll(".mobile-nav [data-audience]");
     roleButtons.forEach(button => {
-      button.hidden = button.dataset.audience !== activeAccount;
+      button.hidden = button.dataset.audience !== activeAccount ||
+        (!user && button.dataset.audience === "seller" && button.dataset.page !== "seller-studio");
     });
     renderAccountMenu();
     setProfileDisplay(profile ? profile.display_name : user ? user.email : "Guest");
@@ -643,17 +646,17 @@
       });
       return;
     }
-    const accountToggle = event.target.closest("[data-account-menu-toggle]");
-    if (accountToggle && !user) {
-      stop(event);
-      showAuth();
-      return;
-    }
     const accountChoice = event.target.closest("[data-account-option]");
     if (accountChoice) {
       if (!user) {
-        stop(event);
-        showAuth();
+        if (accountChoice.dataset.accountOption === "seller") {
+          stop(event);
+          activeAccount = "seller";
+          updateAccountState();
+          activatePage("seller-studio");
+          notify("Seller setup is available to preview. Sign-in is required to save it.");
+          return;
+        }
         return;
       }
       if (accountChoice.dataset.accountOption === "seller" && !sellerProfileReady) return;
@@ -734,7 +737,7 @@
     }
     const pageButton = event.target.closest("[data-page]");
     if (pageButton && ["seller-studio", "seller-listings", "seller-progress", "cart", "messages", "notifications"].includes(pageButton.dataset.page)) {
-      if (!user) {
+      if (!user && pageButton.dataset.page !== "seller-studio") {
         stop(event);
         showAuth();
         return;
