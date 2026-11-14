@@ -4,24 +4,24 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#23152f">
-  <title>Bigwizz — good finds, better connections</title>
+  <title>Bigwizz â€” good finds, better connections</title>
   <style>
     :root{--ink:#1d2925;--muted:#78827c;--line:#e8ebe5;--green:#245c45;--deep:#184532;--lime:#d7ed83;--paper:#fff;--canvas:#f6f7f3;--shadow:0 12px 35px #25372d12;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
     *{box-sizing:border-box}body{margin:0;background:var(--canvas);color:var(--ink)}button,input,select{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid #93bd55;outline-offset:3px}
     .shell{max-width:1440px;margin:auto;min-height:100vh;padding:0 44px 48px}.topbar{height:82px;display:flex;align-items:center;justify-content:space-between;gap:28px}.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-size:21px;font-weight:850;letter-spacing:-.8px}.brand-mark{width:34px;height:34px;display:grid;place-items:center;background:var(--green);color:white;border-radius:12px 12px 12px 4px;font-size:19px}.topnav{display:flex;align-items:center;gap:28px;margin-right:auto;margin-left:32px}.topnav button,.mobile-nav button{border:0;background:transparent;color:#647069;padding:9px 0;font-weight:650}.topnav button.active,.mobile-nav button.active{color:var(--deep)}.top-actions{display:flex;align-items:center;gap:11px}.icon-button{min-width:41px;height:41px;padding:0 11px;border:1px solid var(--line);background:white;border-radius:13px;color:var(--ink)}.profile{display:flex;gap:10px;align-items:center;margin-left:6px;font-size:13px;font-weight:700}.avatar{width:37px;height:37px;display:grid;place-items:center;border-radius:50%;background:#e8c5a5;color:#664a35;font-weight:800}
     .page{display:none}.page.active{display:block}.hero{display:grid;grid-template-columns:1.1fr .9fr;min-height:350px;overflow:hidden;border-radius:27px;background:var(--green);color:white}.hero-copy{padding:46px 0 42px 48px;position:relative;z-index:1}.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:1.65px;font-weight:800;opacity:.76}.hero h1{max-width:540px;margin:13px 0 14px;font-size:clamp(36px,4vw,55px);line-height:1.04;letter-spacing:-2.6px}.hero p{max-width:460px;color:#d6e5dc;line-height:1.65;margin:0;font-size:15px}.searchbar{max-width:560px;margin-top:24px;padding:6px;display:flex;gap:7px;background:white;border-radius:14px}.searchbar input{min-width:0;flex:1;padding:0 12px;border:0;outline:0;color:var(--ink);background:transparent}.searchbar button,.primary{border:0;border-radius:10px;padding:12px 17px;color:var(--deep);background:var(--lime);font-weight:800}
-    .hero-art{min-height:350px;position:relative;display:flex;align-items:center;justify-content:center}.hero-art:before{content:"";position:absolute;width:360px;height:360px;border-radius:50%;background:#397656;right:7%;top:-38px}.hero-art:after{content:"";position:absolute;width:225px;height:225px;border:1px solid #ffffff33;border-radius:50%;right:23%;top:24px}.art-card{position:absolute;z-index:1;border-radius:18px;box-shadow:0 15px 34px #0a201533}.art-main{width:195px;height:218px;top:63px;right:26%;padding:12px;background:#f4dfbe;transform:rotate(5deg)}.product-hero-image{width:100%;height:143px;display:block;border-radius:12px;object-fit:cover;background:#e9c997}.art-main strong{display:block;margin-top:10px;color:#383b30;font-size:12px}.art-main span{display:block;margin-top:3px;color:#717365;font-size:10px}.art-note{right:8%;bottom:60px;padding:13px 16px;background:white;color:var(--ink);transform:rotate(-5deg);position:absolute;z-index:1;border-radius:14px;box-shadow:var(--shadow)}.art-note b{display:block;font-size:12px}.art-note span{color:var(--muted);font-size:10px}.art-badge{position:absolute;left:8%;bottom:52px;z-index:2;padding:12px 14px;border-radius:14px;background:var(--lime);color:var(--deep);font-size:11px;font-weight:850;transform:rotate(-7deg)}
+    .hero-art{min-height:350px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:24px;background:var(--hero-slide-bg,#e8eee7);transition:background-color .6s ease}.hero-art:before{content:"";position:absolute;width:360px;height:360px;border-radius:50%;background:var(--hero-slide-orbit,#397656);right:7%;top:-38px;transition:background-color .6s ease}.hero-art:after{content:"";position:absolute;width:225px;height:225px;border:1px solid #ffffff33;border-radius:50%;right:23%;top:24px}.art-card{position:absolute;z-index:1;border-radius:18px;box-shadow:0 15px 34px #0a201533}.art-main{width:195px;height:218px;top:63px;right:26%;padding:12px;background:var(--hero-slide-card,#f4dfbe);transform:rotate(5deg);transition:background-color .6s ease}.product-hero-image{width:100%;height:143px;display:block;border-radius:12px;object-fit:cover;background:#e9c997;opacity:1;transition:opacity .45s ease}.product-hero-image.is-changing{opacity:0}.art-main strong{display:block;margin-top:10px;color:#383b30;font-size:12px}.art-main span{display:block;margin-top:3px;color:#717365;font-size:10px}.art-note{right:8%;bottom:60px;padding:13px 16px;background:white;color:var(--ink);transform:rotate(-5deg);position:absolute;z-index:1;border-radius:14px;box-shadow:var(--shadow)}.art-note b{display:block;font-size:12px}.art-note span{color:var(--muted);font-size:10px}.art-badge{position:absolute;left:8%;bottom:52px;z-index:2;padding:12px 14px;border-radius:14px;background:var(--lime);color:var(--deep);font-size:11px;font-weight:850;transform:rotate(-7deg)}
     .section{margin-top:37px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:17px}.section-head h2{margin:0;font-size:22px;letter-spacing:-.65px}.section-head p{margin:5px 0 0;color:var(--muted);font-size:13px}.text-button{border:0;background:transparent;color:var(--green);padding:7px 0;font-weight:800}.category-row{display:grid;grid-template-columns:repeat(6,1fr);gap:13px}.category{border:1px solid var(--line);border-radius:16px;padding:17px 14px;background:white;text-align:left;transition:.18s ease}.category:hover,.category.selected{border-color:#93bd55;transform:translateY(-2px);box-shadow:var(--shadow)}.category-image{width:42px;height:42px;display:block;border-radius:13px;object-fit:cover;background:#f3f5ef}.category strong{display:block;margin-top:13px;font-size:13px}.category small{color:var(--muted);display:block;margin-top:4px;font-size:11px}
-    .content-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22px;align-items:start}.listing-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.listing{overflow:hidden;background:white;border:1px solid var(--line);border-radius:17px;transition:.2s ease}.listing:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.listing-photo{height:155px;position:relative;overflow:hidden;background:#e8eee1}.listing-photo img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .35s ease}.listing:hover .listing-photo img{transform:scale(1.04)}.listing:nth-child(3n+2) .listing-photo{background:#f4e5d8}.listing:nth-child(3n) .listing-photo{background:#e3eaf0}.tag{position:absolute;z-index:1;left:11px;top:11px;padding:5px 8px;background:white;border-radius:99px;color:var(--green);font-size:9px;font-weight:850}.save{position:absolute;z-index:1;right:10px;top:9px;width:30px;height:30px;border:0;border-radius:50%;background:white;color:#68736b;font-size:17px}.save.saved{color:#e06752}.listing-body{padding:13px}.listing-title{display:flex;justify-content:space-between;gap:8px;align-items:start}.listing-title h3{margin:0;font-size:13px;line-height:1.4}.price{color:var(--deep);font-size:14px;font-weight:850;white-space:nowrap}.seller-line{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:11px;color:var(--muted);font-size:10px}.seller-name{display:flex;align-items:center;gap:6px}.mini-avatar{width:21px;height:21px;display:grid;place-items:center;background:#ece5d7;color:#695443;border-radius:50%;font-size:9px;font-weight:800}.verified{color:var(--green);font-weight:800}.rating{color:#96702d;font-weight:750;white-space:nowrap}
+    .content-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22px;align-items:start}.listing-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.listing{overflow:hidden;background:white;border:1px solid var(--line);border-radius:17px;transition:.2s ease;cursor:pointer}.listing:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.listing-photo{height:155px;position:relative;overflow:hidden;background:#e8eee1}.listing-photo img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .35s ease}.listing:hover .listing-photo img{transform:scale(1.04)}.listing:nth-child(3n+2) .listing-photo{background:#f4e5d8}.listing:nth-child(3n) .listing-photo{background:#e3eaf0}.tag{position:absolute;z-index:1;left:11px;top:11px;padding:5px 8px;background:white;border-radius:99px;color:var(--green);font-size:9px;font-weight:850}.save{position:absolute;z-index:1;right:10px;top:9px;width:30px;height:30px;border:0;border-radius:50%;background:white;color:#68736b;font-size:17px}.save.saved{color:#e06752}.listing-body{padding:13px}.listing-title{display:flex;justify-content:space-between;gap:8px;align-items:start}.listing-title h3{margin:0;font-size:13px;line-height:1.4}.price{color:var(--deep);font-size:14px;font-weight:850;white-space:nowrap}.seller-line{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:11px;color:var(--muted);font-size:10px}.seller-name{display:flex;align-items:center;gap:6px}.mini-avatar{width:21px;height:21px;display:grid;place-items:center;background:#ece5d7;color:#695443;border-radius:50%;font-size:9px;font-weight:800}.verified{display:inline-flex;width:15px;height:15px;align-items:center;justify-content:center;color:var(--green)}.verified svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.inline-status-icon{display:inline-block;width:15px;height:15px;margin-left:4px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.rating{color:#96702d;font-weight:750;white-space:nowrap}
     .side-stack{display:grid;gap:14px}.side-card{padding:19px;border:1px solid var(--line);border-radius:17px;background:white}.side-card h3{margin:0;font-size:15px;letter-spacing:-.3px}.side-card p{color:var(--muted);font-size:12px;line-height:1.55;margin:8px 0 13px}.trust-card{background:#edf4e9;border:0}.trust-icon,.service-icon{width:42px;height:42px;display:grid;place-items:center;margin-bottom:13px;background:white;border-radius:13px;font-size:20px}.outline-button{width:100%;border:1px solid #dfe5da;border-radius:10px;padding:10px;background:white;color:var(--green);font-size:12px;font-weight:800}.message-card{border:0;background:#fbf0e9}.message-row{display:flex;gap:9px;align-items:center;margin-top:13px}.message-row div:last-child{min-width:0;flex:1}.message-row b{display:block;font-size:11px}.message-row small{display:block;overflow:hidden;color:var(--muted);font-size:10px;white-space:nowrap;text-overflow:ellipsis}.pill{float:right;padding:3px 6px;border-radius:99px;background:#ff866a;color:white;font-size:9px;font-weight:850}
     .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.service-card{padding:17px;border:1px solid var(--line);background:white;border-radius:17px}.service-image{width:100%;height:125px;display:block;margin-bottom:14px;border-radius:12px;object-fit:cover;background:#f1eaf4}.service-top{display:flex;justify-content:space-between;align-items:start}.service-card h3{margin:14px 0 5px;font-size:14px}.service-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.5;min-height:34px}.service-foot{display:flex;justify-content:space-between;align-items:center;gap:5px;margin-top:15px;padding-top:12px;border-top:1px solid var(--line);font-size:11px}.service-foot b{color:var(--deep);white-space:nowrap}.event-list,.community-list{display:grid;gap:12px}.event-card,.community-card{display:flex;gap:16px;align-items:center;padding:17px;border:1px solid var(--line);border-radius:16px;background:white}.community-image{width:48px;height:48px;flex:0 0 48px;border-radius:12px;object-fit:cover;background:#f1eaf4}.event-date{flex:0 0 55px;padding:10px 5px;border-radius:12px;background:#eff4e8;text-align:center;color:var(--green);font-weight:850}.event-date small{display:block;font-size:9px;text-transform:uppercase}.event-card h3,.community-card h3{margin:0;font-size:14px}.event-card p,.community-card p{margin:5px 0 0;color:var(--muted);font-size:11px}.event-card .outline-button{width:auto;margin-left:auto;padding:9px 13px}
-    .issue-wrap{max-width:720px;padding:28px;border:1px solid var(--line);border-radius:18px;background:white}.issue-wrap h3{margin:0;font-size:18px}.issue-wrap>p{color:var(--muted);font-size:13px;line-height:1.6}.field{display:grid;gap:7px;margin-top:17px}.field label{font-size:12px;font-weight:750}.field input,.field select{width:100%;min-height:43px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink)}.issue-wrap .primary{margin-top:18px;background:var(--green);color:white}.notice{margin-top:13px;color:var(--muted);font-size:11px}.empty{grid-column:1/-1;padding:38px;border:1px dashed #cbd4c8;border-radius:16px;background:white;color:var(--muted);text-align:center}.toast{position:fixed;z-index:10;right:24px;bottom:24px;max-width:min(390px,calc(100vw - 32px));padding:13px 17px;border-radius:13px;background:var(--deep);color:white;box-shadow:var(--shadow);font-size:13px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s ease}.toast.show{opacity:1;transform:translateY(0)}.mobile-nav{display:none}.footer{margin-top:42px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
+    .issue-wrap{max-width:720px;padding:28px;border:1px solid var(--line);border-radius:18px;background:white}.issue-wrap h3{margin:0;font-size:18px}.issue-wrap>p{color:var(--muted);font-size:13px;line-height:1.6}    .field{display:grid;gap:7px;margin-top:17px}.field label{font-size:12px;font-weight:750}.field input,.field select,.field textarea{width:100%;min-height:43px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink)}.field textarea{min-height:88px;resize:vertical}.offering-group{min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px}.offering-group legend{padding:0 6px;font-size:12px;font-weight:750}.offering-group .field{margin-top:8px}.issue-wrap .primary{margin-top:18px;background:var(--green);color:white}.notice{margin-top:13px;color:var(--muted);font-size:11px}.empty{grid-column:1/-1;padding:38px;border:1px dashed #cbd4c8;border-radius:16px;background:white;color:var(--muted);text-align:center}.toast{position:fixed;z-index:10;right:24px;bottom:24px;max-width:min(390px,calc(100vw - 32px));padding:13px 17px;border-radius:13px;background:var(--deep);color:white;box-shadow:var(--shadow);font-size:13px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s ease}.toast.show{opacity:1;transform:translateY(0)}.mobile-nav{display:none}.footer{margin-top:42px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
     @media(max-width:1020px){.shell{padding:0 25px 40px}.topnav{gap:16px;margin-left:10px}.content-grid{grid-template-columns:minmax(0,1fr) 265px}.listing-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-row{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:700px){.shell{padding:0 16px 87px}.topbar{height:66px}.topnav,.profile{display:none}.brand{font-size:19px}.top-actions{gap:7px}.hero{grid-template-columns:1fr;min-height:auto}.hero-copy{padding:32px 22px 18px}.hero h1{font-size:40px;letter-spacing:-1.7px}.hero p{font-size:13px}.searchbar{margin-top:19px}.searchbar button{padding:11px 13px}.hero-art{min-height:210px}.hero-art:before{width:230px;height:230px;right:16%;top:-5px}.hero-art:after{width:170px;height:170px;right:25%;top:25px}.art-main{width:137px;height:158px;top:19px;right:33%;padding:8px}.product-hero-image{height:99px}.art-main strong{margin-top:6px;font-size:10px}.art-main span{font-size:9px}.art-note{right:7%;bottom:28px;padding:10px 12px}.art-badge{left:7%;bottom:32px;padding:9px 10px;font-size:9px}.section{margin-top:29px}.section-head h2{font-size:19px}.category-row{display:flex;overflow:auto;margin-right:-16px;padding:0 16px 6px 0;scrollbar-width:none}.category{min-width:137px}.content-grid{grid-template-columns:1fr}.side-stack{grid-template-columns:repeat(2,1fr)}.listing-grid,.service-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.listing-photo{height:126px}.service-image{height:100px}.listing-body{padding:10px}.listing-title h3{font-size:11px}.price{font-size:12px}.seller-line{font-size:9px}.side-card{padding:15px}.event-card,.community-card{gap:11px;padding:13px}.event-card .outline-button{padding:8px;font-size:10px}.issue-wrap{padding:20px}.mobile-nav{position:fixed;z-index:5;right:0;bottom:0;left:0;display:flex;justify-content:space-around;padding:9px 8px max(9px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fffffff5;backdrop-filter:blur(12px)}.mobile-nav button{display:grid;justify-items:center;gap:3px;padding:4px 10px;font-size:9px}.mobile-nav span:first-child{font-size:17px}.footer{margin-top:30px}}
     @media(max-width:390px){.listing-grid,.service-grid{grid-template-columns:1fr}.listing-photo{height:170px}.side-stack{grid-template-columns:1fr}.hero h1{font-size:36px}}
     :root{color-scheme:light;--ink:#251a2d;--muted:#796f7d;--line:#e9e1eb;--green:#684180;--deep:#34203f;--lime:#e8c27d;--paper:#fff;--canvas:#f7f4f8;--shadow:0 14px 36px #2c183219}
     button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline-color:#bf9753}
-    .hero-art:before{background:#79588c}
+    .hero-art:before{background:var(--hero-slide-orbit,#79588c)}
     .hero-copy p{color:#e8deec}
     .art-badge{color:#34203f}
     .category:hover,.category.selected{border-color:#b78a4d}
@@ -66,7 +66,7 @@
     .launch-loader:after{content:"";display:block;width:45%;height:100%;border-radius:5px;background:var(--lime);animation:loading 1.1s ease-in-out infinite alternate}
     @keyframes brand-arrive{from{opacity:0;transform:translateY(9px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
     @keyframes loading{to{transform:translateX(120%)}}
-    .icon-button,.searchbar,.category,.listing,.side-card:not(.trust-card):not(.message-card),.service-card,.event-card,.community-card,.issue-wrap,.service-search,.service-filter:not(.active),.field input,.field select,.dialog-content textarea,.art-note,.mobile-nav,.save,.tag{background-color:var(--paper)}
+    .icon-button,.searchbar,.category,.listing,.side-card:not(.trust-card):not(.message-card),.service-card,.event-card,.community-card,.issue-wrap,.service-search,.service-filter:not(.active),.field input,.field select,.field textarea,.offering-group,.dialog-content textarea,.art-note,.mobile-nav,.save,.tag{background-color:var(--paper)}
     .service-filter.active{background-color:var(--deep);color:white}
     .trust-card{background-color:#eee7f2}.message-card{background-color:#f5ece5}.service-intro{background-color:#eee7f2}
     .theme-toggle{font-size:18px}
@@ -76,7 +76,7 @@
     html[data-theme="dark"] .topnav button.active,html[data-theme="dark"] .mobile-nav button.active{color:var(--lime)}
     html[data-theme="dark"] .hero{background:#302238}
     html[data-theme="dark"] .brand-mark{background:#79588c;color:white}
-    html[data-theme="dark"] .hero-art:before{background:#644774}
+    html[data-theme="dark"] .hero-art:before{background:var(--hero-slide-orbit,#644774)}
     html[data-theme="dark"] .hero-art:after{border-color:#ffffff30}
     html[data-theme="dark"] .hero-copy p{color:#e8deec}
     html[data-theme="dark"] .searchbar{background:var(--paper)}
@@ -99,7 +99,7 @@
     html[data-theme="dark"] .price,html[data-theme="dark"] .rating{color:var(--lime)}
     html[data-theme="dark"] .verified,html[data-theme="dark"] .text-button{color:#d4b8e3}
     html[data-theme="dark"] .mini-avatar{background:#44374b;color:#f0e2f5}
-    html[data-theme="dark"] .field input,html[data-theme="dark"] .field select,html[data-theme="dark"] .dialog-content textarea{border-color:var(--line);background:#211b28;color:var(--ink)}
+    html[data-theme="dark"] .field input,html[data-theme="dark"] .field select,html[data-theme="dark"] .field textarea,html[data-theme="dark"] .dialog-content textarea{border-color:var(--line);background:#211b28;color:var(--ink)}
     html[data-theme="dark"] .issue-wrap .primary,html[data-theme="dark"] .dialog-submit{background:var(--lime);color:#34203f}
     html[data-theme="dark"] .dialog-close{background:#3b3042;color:var(--ink)}
     html[data-theme="dark"] .mobile-nav{border-color:var(--line)}
@@ -110,8 +110,10 @@
     html[data-theme="dark"] .service-foot b{color:var(--lime)}
     .account-switch-wrap{position:relative}
     .account-switch-trigger{border:0;background:transparent;color:var(--ink);font:inherit}
-    .switch-caret{color:var(--muted);font-size:12px}
-    .account-menu{position:absolute;z-index:20;top:calc(100% + 10px);right:0;width:min(290px,calc(100vw - 32px));padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow)}
+    .switch-caret{color:var(--muted);font-size:12px;transition:transform .18s ease}
+    .account-switch-wrap.is-open .switch-caret{transform:rotate(180deg)}
+    .account-menu{position:absolute;z-index:20;top:calc(100% + 10px);right:0;width:min(290px,calc(100vw - 32px));padding:10px;border:1px solid var(--line);border-radius:16px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);opacity:1;transform:translateY(0);transition:opacity .18s ease,transform .18s ease}
+    .account-switch-wrap:not(.is-open) .account-menu{opacity:0;transform:translateY(-6px);pointer-events:none}
     .account-menu-title{padding:9px 10px 11px;font-size:13px;font-weight:850}
     .account-menu button{display:grid;width:100%;grid-template-columns:30px 1fr 16px;gap:9px;align-items:center;padding:10px;border:0;border-radius:11px;background:transparent;color:var(--ink);text-align:left}
     .account-menu button:hover,.account-menu button[aria-pressed="true"]{background:var(--canvas)}
@@ -119,8 +121,37 @@
     .account-menu button b,.account-menu button small{display:block}
     .account-menu button b{font-size:12px}
     .account-menu button small{margin-top:3px;color:var(--muted);font-size:10px}
-    .account-check{color:var(--green);font-weight:900}
+    .account-check{display:inline-flex;width:20px;height:20px;align-items:center;justify-content:center;color:var(--green)}.account-check svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .account-menu>p{margin:8px 10px 5px;padding-top:10px;border-top:1px solid var(--line);color:var(--muted);font-size:10px;line-height:1.45}
+    .listing-seller-description{margin:8px 0 0;color:var(--muted);font-size:10px;line-height:1.45}
+    .listing-review-button{margin-top:7px;padding:4px 0;font-size:10px}
+    .listing-title-button{padding:0;border:0;background:transparent;color:inherit;text-align:left;font:inherit;font-weight:inherit}
+    .product-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:26px;padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
+    .product-detail-image{width:100%;height:min(440px,55vw);min-height:260px;object-fit:cover;border-radius:15px;background:var(--canvas)}
+    .product-detail-info h2{margin:8px 0;font-size:28px;letter-spacing:-.7px}
+    .product-detail-price{margin:12px 0;color:var(--deep);font-size:22px;font-weight:850}
+    .product-detail-description{color:var(--muted);font-size:13px;line-height:1.6}
+    .product-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .product-detail-actions{display:flex;gap:9px;margin-top:18px}
+    .product-detail-actions button{flex:1}
+    .product-reviews,.related-products{margin-top:26px}
+    .product-reviews h3{margin:0 0 12px;font-size:18px}
+    .product-review-list{display:grid;gap:12px}
+    .product-review{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+    .product-review-head{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:11px}
+    .review-author{display:flex;align-items:center;gap:9px;color:var(--ink)}
+    .review-avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#eee7f2;color:var(--deep);font-size:10px;font-weight:850}
+    .product-review-comment{margin:10px 0 0 43px;padding:11px 13px;border-radius:4px 13px 13px 13px;background:var(--canvas)}
+    .product-review-stars{display:flex;gap:2px;color:#b77914}
+    .product-review p{margin:7px 0 0;font-size:12px;line-height:1.55}
+    .product-review-stars svg{width:14px;height:14px;fill:currentColor;stroke:currentColor}
+    .review-stars button.rating-pop svg{animation:star-rate-pop .42s cubic-bezier(.2,.8,.25,1) both;animation-delay:var(--star-delay,0ms)}
+    @keyframes star-rate-pop{0%{transform:scale(.55) rotate(-18deg)}65%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
+    @media(prefers-reduced-motion:reduce){.review-stars button.rating-pop svg{animation:none}}
+    .review-stars{display:flex;gap:5px;margin-top:8px}
+    .review-stars button{padding:3px;border:0;background:transparent;color:var(--muted);font-size:28px;line-height:1}
+    .review-stars button[aria-pressed="true"]{color:#b77914}
+    .field>.field-label{font-size:12px;font-weight:750}
     .seller-onboarding{max-width:620px;padding:28px;border:1px solid var(--line);border-radius:20px;background:var(--paper);box-shadow:var(--shadow)}
     .seller-onboarding-mark{width:48px;height:48px;display:grid;place-items:center;margin-bottom:16px;border-radius:15px;background:#f1eaf4;color:var(--green);font-size:24px}
     .seller-onboarding h2{margin:0;font-size:23px}
@@ -168,6 +199,7 @@
     .seller-chart-label{overflow:hidden;color:var(--muted);font-size:9px;white-space:nowrap;text-overflow:clip}
     .seller-listings-panel{margin-bottom:16px}
     .seller-listing-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+    @media(max-width:700px){.product-detail{grid-template-columns:1fr;padding:14px;gap:12px}.product-detail-image{height:270px;min-height:0}.product-detail-info h2{font-size:23px}.related-products-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .seller-listing-form textarea{width:100%;min-height:84px;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
     .seller-listing-form-actions{display:flex;gap:9px;align-items:center;margin-top:16px}
     .seller-listing-form-actions .primary{background:var(--deep);color:white}
@@ -244,10 +276,19 @@
     .mobile-nav{position:fixed;z-index:25;right:0;bottom:0;left:0;display:flex;justify-content:center;gap:8px;overflow-x:auto;padding:8px 18px max(8px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fffffff5;backdrop-filter:blur(12px)}
     .mobile-nav button{display:flex;flex:0 0 auto;align-items:center;gap:6px;padding:8px 10px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-size:12px;font-weight:700;white-space:nowrap}
     .mobile-nav button.active{background:var(--canvas);color:var(--deep)}
-    .mobile-nav button span:first-child{font-size:14px;line-height:1}
+    .mobile-nav .nav-icon{display:inline-flex;width:16px;height:16px;flex:0 0 16px;align-items:center;justify-content:center}.mobile-nav .nav-icon svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.mobile-nav .nav-icon svg rect{fill:none}
     .account-menu{z-index:30}
     .toast{bottom:76px}
-    @media(max-width:700px){.shell{padding-bottom:100px}.mobile-nav{justify-content:flex-start;gap:3px;padding-right:8px;padding-left:8px}.mobile-nav button{padding:8px 9px;font-size:11px}.account-switch-trigger{display:flex;width:auto;min-width:0;height:39px;padding:0 7px;gap:6px;justify-content:flex-start}.account-switch-trigger #profile-name,.account-switch-trigger .switch-caret{display:inline}.account-switch-trigger #profile-name{font-size:11px;white-space:nowrap}.account-menu{top:auto;bottom:calc(100% + 8px)}}
+    @media(max-width:700px){.shell{padding-bottom:100px}.mobile-nav{justify-content:flex-start;gap:3px;padding-right:8px;padding-left:8px}.mobile-nav button{padding:8px 9px;font-size:11px}.account-switch-trigger{display:flex;width:auto;min-width:0;height:39px;padding:0 7px;gap:6px;justify-content:flex-start}.account-switch-trigger #profile-name,.account-switch-trigger .switch-caret{display:inline}.account-switch-trigger #profile-name{font-size:11px;white-space:nowrap}.account-menu{top:calc(100% + 8px);bottom:auto}}
+    .ui-icon{width:19px;height:19px;display:inline-block;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .switch-caret{display:inline-flex;width:14px;height:14px;transition:transform .18s ease}.switch-caret svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+    .account-option-icon{color:var(--green)}.account-option-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .trust-icon svg,.seller-onboarding-mark svg,.notification-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .review-stars button{font-size:0}.review-stars button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}.rating svg,.product-review-stars svg{width:14px;height:14px;vertical-align:-2px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
+    .account-option-icon{color:var(--green)}.account-option-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .save svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.review-stars button[aria-pressed="true"] svg{fill:#b77914}.product-review-stars svg{fill:currentColor}
+    @media(max-width:700px){.product-review-comment{margin-left:0}.product-review-head{align-items:flex-start}}
+    .footer{color:#000}.searchbar button{display:grid;place-items:center;min-width:44px}.search-icon{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   </style>
 </head>
 <body>
@@ -258,13 +299,13 @@
   <div class="shell">
     <header class="topbar">
       <a class="brand" href="#" aria-label="Bigwizz home" data-page="discover"><span class="brand-mark">b</span> bigwizz</a>
-      <div class="top-actions"><button class="icon-button theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" title="Switch between light and dark mode"><span aria-hidden="true">☾</span></button>
+      <div class="top-actions"><button class="icon-button theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" title="Switch between light and dark mode"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.5 8.5 0 1 0 20.5 15.2Z"/></svg></button>
         <div class="account-switch-wrap">
-          <button class="profile account-switch-trigger" id="account-switch-trigger" type="button" aria-label="Switch account" aria-expanded="false" aria-controls="account-switch-menu" data-account-menu-toggle><span class="avatar" id="profile-avatar">JD</span><span id="profile-name">Jamie</span><span class="switch-caret" aria-hidden="true">⌄</span></button>
+          <button class="profile account-switch-trigger" id="account-switch-trigger" type="button" aria-label="Switch account" aria-expanded="false" aria-controls="account-switch-menu" data-account-menu-toggle><span class="avatar" id="profile-avatar">JD</span><span id="profile-name">Jamie</span><span class="switch-caret" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></button>
           <div class="account-menu" id="account-switch-menu" hidden>
             <div class="account-menu-title">Switch account</div>
-            <button type="button" data-account-option="buyer" aria-pressed="true"><span class="account-option-icon">🛍️</span><span><b>Buyer account</b><small>Discover goods and manage purchases</small></span><span class="account-check" id="buyer-account-check">✓</span></button>
-            <button type="button" data-account-option="seller" aria-pressed="false"><span class="account-option-icon">▤</span><span><b>Seller account</b><small id="seller-account-description">Set up your shop or services</small></span><span class="account-check" id="seller-account-check"></span></button>
+            <button type="button" data-account-option="buyer" aria-pressed="true"><span class="account-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10 12 3l9 7v10H3zM9 20v-6h6v6"/></svg></span><span><b>Buyer account</b><small>Discover goods and manage purchases</small></span><span class="account-check" id="buyer-account-check"></span></button>
+            <button type="button" data-account-option="seller" aria-pressed="false"><span class="account-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10h18l-2-6H5zM5 10v10h14V10M9 20v-6h6v6"/></svg></span><span><b>Seller account</b><small id="seller-account-description">Set up your shop or services</small></span><span class="account-check" id="seller-account-check"></span></button>
             <p>One sign-in can include both buyer and seller accounts.</p>
           </div>
         </div>
@@ -272,24 +313,35 @@
     </header>
     <main>
       <section id="discover" class="page active">
-        <div class="hero"><div class="hero-copy"><div class="eyebrow">Good finds. Better connections.</div><h1>Find what suits<br>your style.</h1><p>Discover quality goods from thoughtful sellers, with clear details, real reviews, and support if something isn't right.</p><form class="searchbar" id="search-form"><input id="search-input" type="search" placeholder="Try “handmade bags” or “linen cushion”" aria-label="Search quality goods"><button type="submit">Search →</button></form></div>
-          <div class="hero-art" aria-hidden="true"><div class="art-main"><img class="product-hero-image" src="assets/product-tote.jpg" alt=""><strong>Made with intention</strong><span>Small makers, thoughtful goods</span></div><div class="art-note"><b>Trusted, not guessed</b><span>Verified shops & reviews</span></div><div class="art-badge">A better kind of marketplace ✳</div></div>
+        <div class="hero"><div class="hero-copy"><div class="eyebrow">Good finds. Better connections.</div><h1>Find what suits<br>your style.</h1><p>Discover quality goods from thoughtful sellers, with clear details, real reviews, and support if something isn't right.</p><form class="searchbar" id="search-form"><input id="search-input" type="search" aria-label="Search quality goods"><button type="submit" aria-label="Search goods"><svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button></form></div>
+          <div class="hero-art" aria-hidden="true"><div class="art-main"><img class="product-hero-image" src="assets/product-tote.jpg" alt=""><strong>Made with intention</strong><span>Small makers, thoughtful goods</span></div><div class="art-note"><b>Trusted, not guessed</b><span>Verified shops & reviews</span></div><div class="art-badge">A better kind of marketplace <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.6 7.4L21 12l-7.4 1.6L12 21l-1.6-7.4L3 12l7.4-2.6z"/></svg></div></div>
         </div>
         <section class="section"><div class="section-head"><div><h2>Explore by category</h2><p>Thoughtful finds from trusted independent sellers.</p></div></div>
           <div class="category-row" id="categories">
             <button class="category selected" data-category="All"><img class="category-image" src="assets/ceramic-set.jpg" alt=""><strong>All goods</strong><small>Quality finds</small></button><button class="category" data-category="Home"><img class="category-image" src="assets/oak-table.jpg" alt=""><strong>Home & living</strong><small>Made for your space</small></button><button class="category" data-category="Style"><img class="category-image" src="assets/cotton-scarf.jpg" alt=""><strong>Style & craft</strong><small>Wear it your way</small></button>
           </div>
         </section>
-        <section class="section"><div class="section-head"><div><h2>Picked for you</h2><p id="result-caption">Quality goods from independent sellers.</p></div><button class="text-button" id="clear-filter">See all →</button></div>
+        <section class="section"><div class="section-head"><div><h2>Picked for you</h2><p id="result-caption">Quality goods from independent sellers.</p></div><button class="text-button" id="clear-filter">See all â†’</button></div>
           <div class="content-grid"><div class="listing-grid" id="listing-grid"></div><aside class="side-stack">
-            <div class="side-card trust-card"><div class="trust-icon">🛡️</div><h3>Shop with more confidence</h3><p>Seller verification, clear listing details, and a straightforward way to flag an order that doesn't match what arrived.</p><button class="outline-button" data-page="orders">How order support works</button></div>
-            <div class="side-card message-card"><span class="pill">2 need a reply</span><h3>Messages, made manageable</h3><p>See what needs attention first. Start with questions about an order or booking.</p><div class="message-row"><span class="avatar" style="background:#d7e5d7;color:#33563d">AM</span><div><b>Alex Morgan</b><small>Is the table available this week?</small></div></div><button class="text-button" data-page="messages">Open inbox →</button></div>
+            <div class="side-card trust-card"><div class="trust-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 3v5c0 5-3 8-8 10-5-2-8-5-8-10V6zM8.5 12l2.2 2.2 4.8-5"/></svg></div><h3>Shop with more confidence</h3><p>Seller verification, clear listing details, and a straightforward way to flag an order that doesn't match what arrived.</p><button class="outline-button" data-page="orders">How order support works</button></div>
+            <div class="side-card message-card"><span class="pill">2 need a reply</span><h3>Messages, made manageable</h3><p>See what needs attention first. Start with questions about an order or booking.</p><div class="message-row"><span class="avatar" style="background:#d7e5d7;color:#33563d">AM</span><div><b>Alex Morgan</b><small>Is the table available this week?</small></div></div><button class="text-button" data-page="messages">Open inbox â†’</button></div>
           </aside></div>
         </section>
       </section>
+      <section id="search-results" class="page">
+        <div class="section-head">
+          <div><h2 id="search-results-title">Search results</h2><p id="search-results-caption"></p></div>
+          <button class="outline-button" type="button" style="width:auto" data-page="discover">Back to goods</button>
+        </div>
+        <div class="listing-grid" id="search-results-grid"></div>
+      </section>
+      <section id="product-details" class="page">
+        <div class="section-head"><div><h2>Product details</h2><p>More about this item and its seller.</p></div><button class="outline-button" type="button" style="width:auto" data-page="discover">â† Back to goods</button></div>
+        <div id="product-detail-content"></div>
+      </section>
       <section id="services" class="page">
         <div class="section-head"><div><h2>Services for your home, work & daily life</h2><p>Find a professional, compare the details, then send a clear request.</p></div></div>
-        <div class="service-intro"><strong>Dedicated service space</strong><br>Explore and request services here. Purchases and “ordered vs. received” reports are managed separately in <strong>Orders</strong>.</div>
+        <div class="service-intro"><strong>Dedicated service space</strong><br>Explore and request services here. Purchases and â€œordered vs. receivedâ€ reports are managed separately in <strong>Orders</strong>.</div>
         <div class="service-toolbar">
           <form class="service-search" id="service-search-form"><input id="service-search-input" type="search" placeholder="Search a service or provider" aria-label="Search services"><button type="submit">Search</button></form>
           <div class="service-filters" aria-label="Filter services">
@@ -299,22 +351,25 @@
         <div class="service-grid" id="service-grid"></div>
       </section>
       <section id="events" class="page"><div class="section-head"><div><h2>Live & happening</h2><p>Meet makers, see how things are made, and ask questions in real time.</p></div></div><div class="event-list" id="event-list"></div></section>
-      <section id="community" class="page"><div class="section-head"><div><h2>Community conversations</h2><p>Ask for recommendations, share ideas, and learn from your local community.</p></div><button class="primary" id="new-post">＋ Start a conversation</button></div><div class="community-list" id="community-list"></div></section>
+      <section id="community" class="page"><div class="section-head"><div><h2>Community conversations</h2><p>Ask for recommendations, share ideas, and learn from your local community.</p></div><button class="primary" id="new-post">ï¼‹ Start a conversation</button></div><div class="community-list" id="community-list"></div></section>
       <section id="notifications" class="page"><div class="section-head"><div><h2>App notifications</h2><p>Updates about orders, messages, and the community.</p></div></div><div class="notification-list" id="notification-list"></div></section>
       <section id="cart" class="page"><div class="section-head"><div><h2>Your cart</h2><p>Review your goods and the Bigwizz fee before checkout.</p></div></div><div class="cart-layout"><div class="cart-items" id="cart-items"></div><aside class="cart-summary" id="cart-summary"></aside></div></section>
       <section id="seller-studio" class="page">
         <div id="seller-onboarding" class="seller-onboarding">
-          <div class="seller-onboarding-mark">✦</div><h2>Set up your seller studio</h2>
+          <div class="seller-onboarding-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 1.6 7.4L21 12l-7.4 1.6L12 21l-1.6-7.4L3 12l7.4-2.6zM19 2v4m-2-2h4"/></svg></div><h2>Set up your seller studio</h2>
           <p>Keep your buyer account and add a shop or professional profile. Your seller tools, sales, and fees will live in this separate workspace.</p>
           <form id="seller-setup-form">
             <div class="field"><label for="shop-name">Shop or business name</label><input id="shop-name" name="shopName" placeholder="e.g. Northwood Works" required></div>
-            <div class="field"><label for="seller-type">What will you offer?</label><select id="seller-type" name="sellerType" required><option value="">Choose one</option><option>Quality goods</option><option>Professional services</option><option>Goods and services</option></select></div>
+            <fieldset class="offering-group">
+              <legend>What do you offer?</legend>
+              <div class="field"><label for="seller-offering">Describe your goods or services</label><textarea id="seller-offering" name="offeringDescription" maxlength="500" placeholder="Include specific items or services, especially anything not listed above." required></textarea></div>
+            </fieldset>
             <button class="primary" type="submit">Create seller studio</button>
           </form>
           <p class="notice">Preview seller setup here. Saving your seller profile requires sign-in, which is currently unavailable.</p>
         </div>
         <div id="seller-dashboard" hidden>
-          <div class="seller-heading"><div><span class="seller-mode-label">SELLER ACCOUNT</span><h2 id="seller-shop-title">Your seller studio</h2><p id="seller-type-label">Track settled sales, platform fees, and estimated proceeds in one place.</p></div><button class="outline-button" style="width:auto" data-account-option="buyer">Switch to buyer account</button></div>
+          <div class="seller-heading"><div><span class="seller-mode-label">SELLER ACCOUNT</span><h2 id="seller-shop-title">Your seller studio</h2><p id="seller-type-label">Track settled sales, platform fees, and estimated proceeds in one place.</p><p id="seller-offering-label"></p></div><button class="outline-button" style="width:auto" data-account-option="buyer">Switch to buyer account</button></div>
           <div class="seller-fee-note"><strong>Bigwizz fee: 2% added to the buyer-facing price.</strong> For a $100 seller price, the buyer pays $102 and you receive $100 before payment processing, tax, shipping, refunds, and your own costs. Estimated proceeds are not the same as profit.</div>
           <div class="seller-studio-actions"><button class="outline-button" data-page="seller-listings">Manage listings</button><button class="outline-button" data-page="messages">Seller inbox</button><button class="outline-button" data-page="seller-progress">Sales progress</button><button class="outline-button" data-page="orders">Order support</button></div>
         </div>
@@ -324,13 +379,13 @@
         <div class="seller-toolbar"><div class="seller-ranges" aria-label="Sales date range"><button class="active" data-sales-range="7">7 days</button><button data-sales-range="30">30 days</button><button data-sales-range="90">90 days</button></div></div>
         <div class="seller-stats">
           <article class="seller-stat"><span>Seller prices</span><strong id="seller-gross">$0</strong><small>Completed sale amounts before buyer fee</small></article>
-          <article class="seller-stat"><span>Buyer fees · 2%</span><strong id="seller-fees">$0</strong><small>Added to the buyer-facing price</small></article>
+          <article class="seller-stat"><span>Buyer fees Â· 2%</span><strong id="seller-fees">$0</strong><small>Added to the buyer-facing price</small></article>
           <article class="seller-stat featured"><span>Estimated seller proceeds</span><strong id="seller-net">$0</strong><small>Your listed price before other costs</small></article>
           <article class="seller-stat"><span>Orders to complete</span><strong id="seller-open-orders">0</strong><small>Payment received, work in progress</small></article>
         </div>
         <section class="seller-panel">
           <div class="seller-panel-heading"><div><h3>Sales activity</h3><p id="sales-range-label">Last 7 days</p></div><span class="seller-settled-label">Settled sales only</span></div>
-          <div class="seller-table-wrap"><table class="seller-table"><thead><tr><th>Order / buyer</th><th>Item or service</th><th>Seller price</th><th>Buyer fee · 2%</th><th>Est. proceeds</th><th>Status</th></tr></thead><tbody id="seller-sales-rows"></tbody></table></div>
+          <div class="seller-table-wrap"><table class="seller-table"><thead><tr><th>Order / buyer</th><th>Item or service</th><th>Seller price</th><th>Buyer fee Â· 2%</th><th>Est. proceeds</th><th>Status</th></tr></thead><tbody id="seller-sales-rows"></tbody></table></div>
           <p class="notice">Processing orders appear in the table but aren't included in seller prices, buyer fees, or estimated proceeds until completed.</p>
         </section>
         <section id="seller-chart-panel" class="seller-panel seller-chart-panel">
@@ -350,6 +405,10 @@
               <div class="field"><label for="seller-listing-price">Your price before the 2% fee (USD)</label><input id="seller-listing-price" name="price" type="number" min="0.01" step="0.01" placeholder="25.00" required></div>
               <div class="field"><label for="seller-listing-image">Upload a listing photo</label><input id="seller-listing-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="seller-listing-image-note"></div>
             </div>
+              <div id="seller-variant-fields" class="seller-listing-form-grid">
+                <div class="field"><label for="seller-listing-sizes">Available sizes (optional)</label><input id="seller-listing-sizes" name="sizes" maxlength="200" placeholder="e.g. S, M, L, XL"></div>
+                <div class="field"><label for="seller-listing-colors">Available colors (optional)</label><input id="seller-listing-colors" name="colors" maxlength="200" placeholder="e.g. Natural, Navy, Sage"></div>
+              </div>
             <div class="field"><label for="seller-listing-description">Description</label><textarea id="seller-listing-description" name="description" maxlength="240" placeholder="Share useful details buyers should know." required></textarea></div>
             <p class="notice" id="seller-listing-image-note">Use a JPG, PNG, or WebP image up to 5 MB. New listings need a photo; when editing, leave this blank to keep the current one.</p>
             <p class="notice" id="seller-listing-price-preview" aria-live="polite">Enter your price to preview the buyer-facing total with the 2% Bigwizz fee.</p>
@@ -369,12 +428,12 @@
     <footer class="footer">Bigwizz is a marketplace prototype. Verify the provider, scope, price, and local requirements before booking.</footer>
   </div>
   <nav class="mobile-nav" aria-label="Main navigation">
-    <button class="active" data-audience="buyer" data-page="discover"><span aria-hidden="true">🏠</span>Discover</button><button data-audience="buyer" data-page="services"><span aria-hidden="true">✨</span>Services</button><button data-audience="buyer" data-page="events"><span aria-hidden="true">🎥</span>Live</button><button data-audience="buyer" data-page="community"><span aria-hidden="true">💬</span>Community</button><button data-audience="buyer" data-page="messages"><span aria-hidden="true">✉️</span>Messages</button><button data-audience="buyer" data-page="orders"><span aria-hidden="true">📦</span>Orders</button><button data-audience="buyer" data-page="notifications"><span aria-hidden="true">🔔</span>Alerts</button><button data-audience="buyer" data-page="cart"><span aria-hidden="true">🛒</span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
-    <button data-audience="seller" data-page="seller-studio" hidden><span>▤</span>Studio</button><button data-audience="seller" data-page="messages" hidden><span>✉</span>Inbox</button><button data-audience="seller" data-page="seller-listings" hidden><span>▣</span>Listings</button><button data-audience="seller" data-page="seller-progress" hidden><span>▥</span>Progress</button>
+    <button class="active" data-audience="buyer" data-page="discover"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg></span>Discover</button><button data-audience="buyer" data-page="services"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2zM19 16v5m-2.5-2.5h5"/></svg></span>Services</button><button data-audience="buyer" data-page="events"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="m10 10 5 3-5 3zM8 3v3m8-3v3"/></svg></span>Live</button><button data-audience="buyer" data-page="community"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.3-3.7A7 7 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7zM8 12h.01M12 12h.01M16 12h.01"/></svg></span>Community</button><button data-audience="buyer" data-page="notifications"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg></span>Notifications</button><button data-audience="buyer" data-page="cart"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 8H6M10 21h.01M18 21h.01"/></svg></span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
+    <button data-audience="seller" data-page="seller-studio" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 17V9l7-6 7 6v8M9 20v-6h6v6"/></svg></span>Studio</button><button data-audience="seller" data-page="messages" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 3zM8 9h8m-8 4h5"/></svg></span>Inbox</button><button data-audience="seller" data-page="seller-listings" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8m-8 4h8m-8 4h5"/></svg></span>Listings</button><button data-audience="seller" data-page="seller-progress" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V4m0 16h17M8 16l4-5 3 2 5-7"/></svg></span>Progress</button>
   </nav>
   <dialog id="service-dialog" aria-labelledby="service-dialog-title">
     <div class="dialog-content">
-      <div class="dialog-head"><div><h2 id="service-dialog-title">Request a service</h2><p id="service-dialog-summary"></p></div><button class="dialog-close" type="button" aria-label="Close service request">×</button></div>
+      <div class="dialog-head"><div><h2 id="service-dialog-title">Request a service</h2><p id="service-dialog-summary"></p></div><button class="dialog-close" type="button" aria-label="Close service request">Ã—</button></div>
       <form id="service-request-form">
         <input type="hidden" name="service" id="service-request-name">
         <div class="field"><label for="request-type">What do you need?</label><select id="request-type" name="requestType" required><option value="Request a quote">Request a quote</option><option value="Ask a question">Ask a question</option><option value="Request a time">Request a time</option></select></div>
@@ -386,16 +445,43 @@
       </form>
     </div>
   </dialog>
+  <dialog id="review-dialog" aria-labelledby="review-dialog-title">
+    <div class="dialog-content">
+      <div class="dialog-head"><div><h2 id="review-dialog-title">Write a review</h2><p id="review-dialog-summary"></p></div><button class="dialog-close" id="review-dialog-close" type="button" aria-label="Close review form">Ã—</button></div>
+      <form id="item-review-form">
+        <input type="hidden" name="listingId" id="review-listing-id">
+        <p class="field-hint">Choose a rating in the Rating section on the product page, then add your comment.</p>
+        <div class="field"><label for="review-author">Display name (optional)</label><input id="review-author" name="reviewer" maxlength="50" placeholder="Buyer"></div>
+        <div class="field"><label for="review-text">Your comment</label><textarea id="review-text" name="review" maxlength="500" placeholder="Write a comment about quality, fit, or your experience." required></textarea></div>
+        <button class="primary dialog-submit" type="submit">Post review</button>
+        <p class="notice">Reviews are saved in this browser for this prototype and are not verified or shared with the seller.</p>
+      </form>
+    </div>
+  </dialog>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </div>
   <script>
     let listings=[
       {title:"Handwoven everyday tote",category:"Style",kind:"Goods",price:"$38",image:"assets/product-tote.jpg",seller:"Mara Studio",initials:"MS",rating:"4.9",detail:"Small-batch"},
-      {title:"Solid oak side table",category:"Home",kind:"Goods",price:"$145",image:"assets/oak-table.jpg",seller:"Northwood Works",initials:"NW",rating:"5.0",detail:"Made to order · Local pickup"},
-      {title:"Natural linen cushion set",category:"Home",kind:"Goods",price:"$52",image:"assets/linen-cushion.jpg",seller:"Soft Corner",initials:"SC",rating:"4.8",detail:"Set of 2 · Easy-care fabric"},
-      {title:"Custom ceramic breakfast set",category:"Style",kind:"Goods",price:"$64",image:"assets/ceramic-set.jpg",seller:"Clay & Current",initials:"CC",rating:"4.9",detail:"Hand-finished · Made locally"},
-      {title:"Hand-dyed cotton scarf",category:"Style",kind:"Goods",price:"$42",image:"assets/cotton-scarf.jpg",seller:"Indigo Day",initials:"ID",rating:"4.7",detail:"Natural dyes · Gift-ready"}
+      {title:"Solid oak side table",category:"Home",kind:"Goods",price:"$145",image:"assets/oak-table.jpg",seller:"Northwood Works",initials:"NW",rating:"5.0",detail:"Made to order Â· Local pickup"},
+      {title:"Natural linen cushion set",category:"Home",kind:"Goods",price:"$52",image:"assets/linen-cushion.jpg",seller:"Soft Corner",initials:"SC",rating:"4.8",detail:"Set of 2 Â· Easy-care fabric"},
+      {title:"Custom ceramic breakfast set",category:"Style",kind:"Goods",price:"$64",image:"assets/ceramic-set.jpg",seller:"Clay & Current",initials:"CC",rating:"4.9",detail:"Hand-finished Â· Made locally"},
+      {title:"Hand-dyed cotton scarf",category:"Style",kind:"Goods",price:"$42",image:"assets/cotton-scarf.jpg",seller:"Indigo Day",initials:"ID",rating:"4.7",detail:"Natural dyes Â· Gift-ready"}
     ];
+    const sampleReviewsByListing={
+      "seed-0":[
+        {reviewer:"Nina C.",rating:5,text:"Beautiful stitching and a lovely everyday size. It arrived just as pictured.",createdAt:"2026-11-12T10:00:00.000Z"},
+        {reviewer:"Omar K.",rating:5,text:"The fabric feels sturdy and the seller packed it with care.",createdAt:"2026-11-09T10:00:00.000Z"}
+      ],
+      "seed-1":[
+        {reviewer:"Avery L.",rating:5,text:"Solid craftsmanship and the oak finish looks great in our living room.",createdAt:"2026-11-11T10:00:00.000Z"},
+        {reviewer:"Mina R.",rating:4,text:"A beautiful table with clear updates while it was being made.",createdAt:"2026-11-07T10:00:00.000Z"}
+      ],
+      "seed-2":[
+        {reviewer:"Sofia P.",rating:5,text:"Soft, comfortable linen and easy to care for. I would order again.",createdAt:"2026-11-10T10:00:00.000Z"},
+        {reviewer:"Jordan W.",rating:4,text:"The colors are true to the photos and the set fits perfectly.",createdAt:"2026-11-06T10:00:00.000Z"}
+      ]
+    };
     let services=[
       {category:"Home care",image:"assets/home-cleaning.jpg",title:"Home cleaning",description:"Recurring or one-time cleans with a written checklist and clear scope.",price:"From $45 / visit",rating:"4.9",provider:"Bright Nest Co."},
       {category:"Home care",image:"assets/pest-control.jpg",title:"Pest control",description:"Licensed local specialists explain the treatment, safety steps, and follow-up.",price:"Request an estimate",rating:"4.8",provider:"ClearHome Pest Care"},
@@ -409,9 +495,9 @@
       service:[{value:"Home care",label:"Home care"},{value:"Repairs",label:"Repairs"},{value:"Wellness",label:"Wellness"},{value:"Creative",label:"Creative"}]
     };
     let events=[
-      {day:"14",month:"JUN",title:"From clay to cup: a live studio tour",host:"Clay & Current · Maker demo",time:"Today · 6:00 PM"},
-      {day:"16",month:"JUN",title:"Small-space styling Q&A",host:"Northwood Works · Ask a maker",time:"Saturday · 11:30 AM"},
-      {day:"19",month:"JUN",title:"Meet your neighborhood home pros",host:"Bigwizz Local · Community meetup",time:"Tuesday · 5:00 PM"}
+      {day:"14",month:"JUN",title:"From clay to cup: a live studio tour",host:"Clay & Current Â· Maker demo",time:"Today Â· 6:00 PM"},
+      {day:"16",month:"JUN",title:"Small-space styling Q&A",host:"Northwood Works Â· Ask a maker",time:"Saturday Â· 11:30 AM"},
+      {day:"19",month:"JUN",title:"Meet your neighborhood home pros",host:"Bigwizz Local Â· Community meetup",time:"Tuesday Â· 5:00 PM"}
     ];
     const threads=[
       {initials:"AM",name:"Alex Morgan",preview:"Is the oak table available this week?",context:"Question about Northwood Works",priority:"Order question",color:"#d7e5d7"},
@@ -419,34 +505,41 @@
       {initials:"MS",name:"Mara Studio",preview:"Your tote is packed and ready to ship.",context:"Order update",priority:"Seller update",color:"#e5dcf2"}
     ];
     let conversations=[
-      {title:"Any recommendations for a small entryway?",meta:"Jamie T. · Home & living",copy:"Looking for durable, locally made storage ideas. What has worked well for you?",replies:"12 replies",image:"assets/oak-table.jpg"},
-      {title:"Behind the scenes: natural fabric dyes",meta:"Ari P. · Makers & craft",copy:"Sharing notes from this week's indigo batch and answering questions about care.",replies:"8 replies",image:"assets/cotton-scarf.jpg"},
-      {title:"Reliable home pros in the neighborhood",meta:"Bigwizz Local · Recommendations",copy:"What do you look for when booking a new service provider?",replies:"24 replies",image:"assets/home-repairs.jpg"}
+      {title:"Any recommendations for a small entryway?",meta:"Jamie T. Â· Home & living",copy:"Looking for durable, locally made storage ideas. What has worked well for you?",replies:"12 replies",image:"assets/oak-table.jpg"},
+      {title:"Behind the scenes: natural fabric dyes",meta:"Ari P. Â· Makers & craft",copy:"Sharing notes from this week's indigo batch and answering questions about care.",replies:"8 replies",image:"assets/cotton-scarf.jpg"},
+      {title:"Reliable home pros in the neighborhood",meta:"Bigwizz Local Â· Recommendations",copy:"What do you look for when booking a new service provider?",replies:"24 replies",image:"assets/home-repairs.jpg"}
     ];
     const sellerSales=[
-      {order:"BW-3108",buyer:"Tariq M.",item:"Handwoven tote · 2 items",amount:84,status:"Completed",daysAgo:1},
+      {order:"BW-3108",buyer:"Tariq M.",item:"Handwoven tote Â· 2 items",amount:84,status:"Completed",daysAgo:1},
       {order:"BW-3102",buyer:"Lina K.",item:"Ceramic breakfast set",amount:64,status:"Completed",daysAgo:3},
-      {order:"BW-3098",buyer:"Noah R.",item:"Home cleaning · 2 hours",amount:120,status:"Completed",daysAgo:5},
+      {order:"BW-3098",buyer:"Noah R.",item:"Home cleaning Â· 2 hours",amount:120,status:"Completed",daysAgo:5},
       {order:"BW-3094",buyer:"Ava P.",item:"Linen cushion set",amount:52,status:"Processing",daysAgo:4},
       {order:"BW-3054",buyer:"Ella S.",item:"Oak side table",amount:145,status:"Completed",daysAgo:16},
       {order:"BW-3012",buyer:"Sam D.",item:"Product photography",amount:90,status:"Completed",daysAgo:48}
     ];
     const appNotifications=[
-      {icon:"📦",title:"Order update",copy:"Your oak side table order is being prepared by Northwood Works.",time:"Today · 10:24 AM"},
-      {icon:"✉",title:"A seller sent you a message",copy:"Mara Studio shared an update about your handwoven tote.",time:"Yesterday · 4:18 PM"},
-      {icon:"◷",title:"Live event coming up",copy:"Join the small-space styling Q&A and ask a maker your questions.",time:"Yesterday · 9:05 AM"}
+      {icon:'<svg viewBox="0 0 24 24"><path d="M3 7h18v13H3zM3 7l9 7 9-7M7 4h10"/></svg>',title:"Order update",copy:"Your oak side table order is being prepared by Northwood Works.",time:"Today Â· 10:24 AM"},
+      {icon:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>',title:"A seller sent you a message",copy:"Mara Studio shared an update about your handwoven tote.",time:"Yesterday Â· 4:18 PM"},
+      {icon:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3"/></svg>',title:"Live event coming up",copy:"Join the small-space styling Q&A and ask a maker your questions.",time:"Yesterday Â· 9:05 AM"}
     ];
     const commissionRate=0.02;
     const currencyFormatter=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
-    let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7;
-    let accountRoles=["buyer"],activeAccount="buyer",sellerProfileReady=false,sellerShopName="",sellerType="";
-    let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true;
+    let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7,selectedReviewRating=0,selectedRatingProductId=null,currentProductId=null;
+    let accountRoles=["buyer"],activeAccount="buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
+    let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true,reviewsByListing={},reviewStorageAvailable=true;
     function showToast(message){const toast=document.getElementById("toast");toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2800)}
+    const starIcon=filled=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"${filled?' fill="currentColor"':''}/></svg>`;
+    const heartIcon=filled=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5-8.8 11-8.8 11s-8.8-6-8.8-11A4.8 4.8 0 0 1 12 6.2a4.8 4.8 0 0 1 8.8 2.6Z"${filled?' fill="currentColor"':''}/></svg>`;
+    function renderProductRatingStars(){
+      return `<div class="review-stars product-rating-stars" id="product-review-rating" role="group" aria-label="Rate this item">${[1,2,3,4,5].map(rating=>`<button type="button" data-review-rating="${rating}" aria-label="${rating} star${rating===1?"":"s"}" aria-pressed="${rating<=selectedReviewRating}">${starIcon(false)}</button>`).join("")}</div>`;
+    }
     function escapeHtml(value){return String(value).replace(/[&<>"']/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[char]))}
     function isCustomListing(item){
       return item&&typeof item.id==="string"&&typeof item.title==="string"&&(item.type==="goods"||item.type==="service")&&
         listingCategories[item.type].some(category=>category.value===item.category)&&Number.isFinite(item.price)&&item.price>0&&
         typeof item.description==="string"&&typeof item.image==="string"&&/^data:image\/(?:webp|png|jpeg);base64,/.test(item.image)&&
+        (item.sizes===undefined||Array.isArray(item.sizes)&&item.sizes.every(value=>typeof value==="string"))&&
+        (item.colors===undefined||Array.isArray(item.colors)&&item.colors.every(value=>typeof value==="string"))&&
         typeof item.seller==="string"&&(item.status==="published"||item.status==="paused");
     }
     function loadCustomListings(){
@@ -474,18 +567,66 @@
         return false;
       }
     }
+    function isListingReview(review){
+      return review&&Number.isInteger(review.rating)&&review.rating>=1&&review.rating<=5&&
+        typeof review.text==="string"&&typeof review.createdAt==="string"&&(review.reviewer===undefined||typeof review.reviewer==="string");
+    }
+    function loadReviews(){
+      try{
+        const saved=localStorage.getItem("bigwizz-listing-reviews");
+        if(!saved)return;
+        const parsed=JSON.parse(saved);
+        if(!parsed||typeof parsed!=="object"||Array.isArray(parsed)||Object.values(parsed).some(reviews=>!Array.isArray(reviews)||!reviews.every(isListingReview)))throw new Error("Saved reviews have an unexpected format.");
+        reviewsByListing=parsed;
+      }catch(error){
+        reviewStorageAvailable=false;
+        console.error("Could not load listing reviews.",error);
+        showToast("Saved reviews couldn't be loaded. New reviews are disabled.");
+      }
+    }
+    function seedSampleReviews(){
+      Object.entries(sampleReviewsByListing).forEach(([listingId,reviews])=>{
+        if(!Array.isArray(reviewsByListing[listingId])||!reviewsByListing[listingId].length)reviewsByListing[listingId]=reviews;
+      });
+    }
+    function saveListingReview(listingId,review){
+      if(!reviewStorageAvailable){showToast("Reviews are disabled because saved reviews couldn't be loaded.");return false}
+      const nextReviews={...reviewsByListing,[listingId]:[...(reviewsByListing[listingId]||[]),review]};
+      try{
+        localStorage.setItem("bigwizz-listing-reviews",JSON.stringify(nextReviews));
+        reviewsByListing=nextReviews;
+        return true;
+      }catch(error){
+        console.error("Could not save listing review.",error);
+        showToast("Review couldn't be saved. Check browser storage and try again.");
+        return false;
+      }
+    }
+    function listingRating(item){
+      const reviews=reviewsByListing[item.id]||[];
+      const baseRating=Number(item.rating),baseCount=Number(item.ratingCount)||0;
+      if(!reviews.length)return item.rating?`${starIcon(true)} ${escapeHtml(item.rating)}${baseCount?` (${baseCount})`:""}`:"New listing";
+      const reviewTotal=reviews.reduce((sum,review)=>sum+review.rating,0);
+      const totalCount=baseCount+reviews.length;
+      const average=baseCount&&Number.isFinite(baseRating)
+        ?(baseRating*baseCount+reviewTotal)/totalCount
+        :reviewTotal/reviews.length;
+      return `${starIcon(true)} ${average.toFixed(1)} (${totalCount})`;
+    }
     function loadSellerProfile(){
       try{
         const saved=localStorage.getItem("bigwizz-seller-profile");
         if(!saved)return;
         const profile=JSON.parse(saved);
-        const sellerTypes=["Quality goods","Professional services","Goods and services"];
-        if(!profile||typeof profile.shopName!=="string"||!profile.shopName.trim()||!sellerTypes.includes(profile.sellerType))throw new Error("Saved seller profile has an unexpected format.");
+        const sellerTypes=["Quality goods","Professional services","Goods and services","Other (describe below)"];
+        if(!profile||typeof profile.shopName!=="string"||!profile.shopName.trim()||(profile.sellerType&&!sellerTypes.includes(profile.sellerType)))throw new Error("Saved seller profile has an unexpected format.");
         sellerShopName=profile.shopName;
-        sellerType=profile.sellerType;
+        sellerType=sellerTypes.includes(profile.sellerType)?profile.sellerType:"Goods and services";
+        sellerOfferingDescription=typeof profile.offeringDescription==="string"?profile.offeringDescription:"";
         sellerProfileReady=true;
         document.getElementById("seller-shop-title").textContent=sellerShopName;
-        document.getElementById("seller-type-label").textContent=`${sellerType} · Manage listings, customer orders, and earnings.`;
+        document.getElementById("seller-type-label").textContent=`${sellerType} Â· Manage listings, customer orders, and earnings.`;
+        document.getElementById("seller-offering-label").textContent=sellerOfferingDescription;
       }catch(error){
         console.error("Could not load the saved seller profile.",error);
         showToast("The saved seller profile couldn't be loaded. Set it up again to continue.");
@@ -504,6 +645,16 @@
     function updateSellerListingOptions(type,categoryValue){
       document.getElementById("seller-listing-category").innerHTML=listingCategories[type].map(item=>`<option value="${item.value}">${item.label}</option>`).join("");
       if(categoryValue&&listingCategories[type].some(item=>item.value===categoryValue))document.getElementById("seller-listing-category").value=categoryValue;
+      document.getElementById("seller-variant-fields").hidden=type!=="goods";
+    }
+    function parseVariantOptions(value){
+      const options=[],seen=new Set();
+      String(value||"").split(",").map(option=>option.trim()).filter(Boolean).forEach(option=>{
+        const key=option.toLowerCase();
+        if(!seen.has(key)){seen.add(key);options.push(option)}
+      });
+      if(options.length>20)throw new Error("Use at most 20 sizes and 20 colors per item.");
+      return options;
     }
     function buyerPrice(sellerPrice){
       return Math.round((sellerPrice*(1+commissionRate)+Number.EPSILON)*100)/100;
@@ -521,7 +672,11 @@
     }
     function isCartItem(item){
       return item&&typeof item.listingId==="string"&&typeof item.title==="string"&&typeof item.seller==="string"&&
-        isSafeListingImage(item.image)&&Number.isFinite(item.sellerPrice)&&item.sellerPrice>0&&Number.isInteger(item.quantity)&&item.quantity>0;
+        isSafeListingImage(item.image)&&Number.isFinite(item.sellerPrice)&&item.sellerPrice>0&&Number.isInteger(item.quantity)&&item.quantity>0&&
+        (item.size===undefined||typeof item.size==="string")&&(item.color===undefined||typeof item.color==="string");
+    }
+    function cartItemKey(item){
+      return `${item.listingId}::${item.size||""}::${item.color||""}`;
     }
     function loadCart(){
       try{
@@ -558,30 +713,32 @@
       const itemsContainer=document.getElementById("cart-items"),summary=document.getElementById("cart-summary");
       updateCartCount();
       if(!cartItems.length){
-        itemsContainer.innerHTML='<div class="empty">Your cart is empty. Find something you like and add it here.<br><button class="text-button" type="button" data-page="discover">Explore goods →</button></div>';
+        itemsContainer.innerHTML='<div class="empty">Your cart is empty. Find something you like and add it here.<br><button class="text-button" type="button" data-page="discover">Explore goods â†’</button></div>';
         summary.hidden=true;
         return;
       }
-      itemsContainer.innerHTML=cartItems.map(item=>`<article class="cart-item"><img src="${item.image}" alt=""><div class="cart-item-info"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.seller)}</p><strong>${currencyFormatter.format(buyerPrice(item.sellerPrice))} each</strong><small>Includes ${currencyFormatter.format(platformFee(item.sellerPrice))} Bigwizz fee</small></div><div class="cart-item-actions"><button type="button" aria-label="Decrease quantity of ${escapeHtml(item.title)}" data-cart-action="decrease" data-cart-id="${escapeHtml(item.listingId)}">−</button><span>${item.quantity}</span><button type="button" aria-label="Increase quantity of ${escapeHtml(item.title)}" data-cart-action="increase" data-cart-id="${escapeHtml(item.listingId)}">+</button><button type="button" class="cart-remove" data-cart-action="remove" data-cart-id="${escapeHtml(item.listingId)}">Remove</button></div></article>`).join("");
+      itemsContainer.innerHTML=cartItems.map(item=>`<article class="cart-item"><img src="${escapeHtml(item.image)}" alt=""><div class="cart-item-info"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.seller)}</p>${item.size||item.color?`<small>${item.size?`Size: ${escapeHtml(item.size)}`:""}${item.size&&item.color?" Â· ":""}${item.color?`Color: ${escapeHtml(item.color)}`:""}</small>`:""}<strong>${currencyFormatter.format(buyerPrice(item.sellerPrice))} each</strong><small>Includes ${currencyFormatter.format(platformFee(item.sellerPrice))} Bigwizz fee</small></div><div class="cart-item-actions"><button type="button" aria-label="Decrease quantity of ${escapeHtml(item.title)}" data-cart-action="decrease" data-cart-id="${escapeHtml(cartItemKey(item))}">âˆ’</button><span>${item.quantity}</span><button type="button" aria-label="Increase quantity of ${escapeHtml(item.title)}" data-cart-action="increase" data-cart-id="${escapeHtml(cartItemKey(item))}">+</button><button type="button" class="cart-remove" data-cart-action="remove" data-cart-id="${escapeHtml(cartItemKey(item))}">Remove</button></div></article>`).join("");
       const subtotal=cartItems.reduce((sum,item)=>sum+item.sellerPrice*item.quantity,0);
       const fee=cartItems.reduce((sum,item)=>sum+platformFee(item.sellerPrice)*item.quantity,0);
       const total=cartItems.reduce((sum,item)=>sum+buyerPrice(item.sellerPrice)*item.quantity,0);
       summary.hidden=false;
-      summary.innerHTML=`<h3>Order summary</h3><div class="cart-total-row"><span>Seller prices</span><strong>${currencyFormatter.format(subtotal)}</strong></div><div class="cart-total-row"><span>Bigwizz fee · 2%</span><strong>${currencyFormatter.format(fee)}</strong></div><div class="cart-total-row total"><span>Buyer total</span><strong>${currencyFormatter.format(total)}</strong></div><button class="primary" type="button" data-checkout-demo>Continue to checkout</button><p class="notice">Checkout and payments aren't connected in this prototype.</p>`;
+      summary.innerHTML=`<h3>Order summary</h3><div class="cart-total-row"><span>Seller prices</span><strong>${currencyFormatter.format(subtotal)}</strong></div><div class="cart-total-row"><span>Bigwizz fee Â· 2%</span><strong>${currencyFormatter.format(fee)}</strong></div><div class="cart-total-row total"><span>Buyer total</span><strong>${currencyFormatter.format(total)}</strong></div><button class="primary" type="button" data-checkout-demo>Continue to checkout</button><p class="notice">Checkout and payments aren't connected in this prototype.</p>`;
     }
-    function addToCart(listingId){
-      const index=listingId.startsWith("seed-")?Number(listingId.slice(5)):NaN;
-      const item=Number.isInteger(index)?listings[index]:listings.find(listing=>listing.id===listingId)||customListings.find(listing=>listing.id===listingId&&listing.type==="goods"&&listing.status==="published");
+    function addToCart(listingId,options={}){
+      const item=getGoodsListing(listingId);
       if(!item){showToast("This listing is no longer available.");return}
-      const existing=cartItems.find(cartItem=>cartItem.listingId===listingId);
+      const sizes=Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
+      if(sizes.length&&!options.size||colors.length&&!options.color){showToast("Choose the available options before adding this item.");return}
+      const selectedItem={listingId,title:item.title,seller:item.seller,image:item.image,sellerPrice:sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice||item.price),size:options.size||"",color:options.color||""};
+      const key=cartItemKey(selectedItem),existing=cartItems.find(cartItem=>cartItemKey(cartItem)===key);
       const nextItems=existing
-        ?cartItems.map(cartItem=>cartItem.listingId===listingId?{...cartItem,quantity:cartItem.quantity+1}:cartItem)
-        :[...cartItems,{listingId,title:item.title,seller:item.seller,image:item.image,sellerPrice:sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice||item.price),quantity:1}];
+        ?cartItems.map(cartItem=>cartItemKey(cartItem)===key?{...cartItem,quantity:cartItem.quantity+1}:cartItem)
+        :[...cartItems,{...selectedItem,quantity:1}];
       if(saveCart(nextItems)){renderCart();showToast("Added to your cart.");}
     }
-    function updateCartItem(listingId,action){
-      const nextItems=action==="remove"?cartItems.filter(item=>item.listingId!==listingId):cartItems.map(item=>{
-        if(item.listingId!==listingId)return item;
+    function updateCartItem(itemKey,action){
+      const nextItems=action==="remove"?cartItems.filter(item=>cartItemKey(item)!==itemKey):cartItems.map(item=>{
+        if(cartItemKey(item)!==itemKey)return item;
         return {...item,quantity:action==="increase"?item.quantity+1:item.quantity-1};
       }).filter(item=>item.quantity>0);
       if(saveCart(nextItems))renderCart();
@@ -619,21 +776,28 @@
         button.setAttribute("aria-label",isDark?"Light mode":"Dark mode");
         button.setAttribute("aria-pressed",String(isDark));
         button.title=isDark?"Switch to light mode":"Switch to dark mode";
-        button.firstElementChild.textContent=isDark?"☀":"☾";
+        button.innerHTML=`<svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true">${isDark?'<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/':'<path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.5 8.5 0 1 0 20.5 15.2Z"/>'}</svg>`;
       });
       document.querySelector('meta[name="theme-color"]').content=isDark?"#19151e":"#f7f4f8";
       if(persist)localStorage.setItem("bigwizz-theme",isDark?"dark":"light");
     }
     const savedTheme=localStorage.getItem("bigwizz-theme");
     setTheme(savedTheme==="dark"||savedTheme==="light"?savedTheme:(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"));
-    function closeAccountMenu(){document.getElementById("account-switch-menu").hidden=true;document.getElementById("account-switch-trigger").setAttribute("aria-expanded","false")}
+    function closeAccountMenu(){
+      const menu=document.getElementById("account-switch-menu");
+      const trigger=document.getElementById("account-switch-trigger");
+      const wrap=document.querySelector(".account-switch-wrap");
+      menu.hidden=true;
+      trigger.setAttribute("aria-expanded","false");
+      if(wrap)wrap.classList.remove("is-open");
+    }
     function renderAccountMenu(){
       const currentName=activeAccount==="seller"?"Seller account":"Buyer account";
       document.getElementById("account-switch-trigger").setAttribute("aria-label",`Switch account. Current account: ${currentName}`);
-      document.getElementById("buyer-account-check").textContent=activeAccount==="buyer"?"✓":"";
-      document.getElementById("seller-account-check").textContent=activeAccount==="seller"?"✓":"";
+      document.getElementById("buyer-account-check").innerHTML=activeAccount==="buyer"?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 13H4zM9 8V6a3 3 0 0 1 6 0v2"/></svg>`:"";
+      document.getElementById("seller-account-check").innerHTML=activeAccount==="seller"?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v10H3zM2 10l2-6h16l2 6M8 20v-6h8v6"/></svg>`:"";
       document.querySelectorAll("#account-switch-menu [data-account-option]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.accountOption===activeAccount)));
-      document.getElementById("seller-account-description").textContent=sellerProfileReady?`${sellerShopName} · Sales and requests`:accountRoles.includes("seller")?"Finish seller setup":"Create seller profile";
+      document.getElementById("seller-account-description").textContent=sellerProfileReady?`${sellerShopName} Â· Sales and requests`:accountRoles.includes("seller")?"Finish seller setup":"Create seller profile";
     }
     function updateMobileNavigation(){
       document.querySelectorAll(".mobile-nav [data-audience]").forEach(button=>{button.hidden=button.dataset.audience!==activeAccount});
@@ -649,23 +813,15 @@
         return;
       }
       if(account==="seller"){
-        if(!sellerProfileReady){
-          activeAccount=accountRoles.includes("seller")?"seller":"buyer";
-          renderAccountMenu();
-          setPage("seller-studio");
-          showToast(accountRoles.includes("seller")?"Finish setting up your seller account.":"Create a seller profile to start selling.");
-          return;
-        }
         activeAccount="seller";
         updateMobileNavigation();
         renderAccountMenu();
         setPage("seller-studio");
-        showToast("Switched to your Seller account.");
+        showToast(sellerProfileReady?"Switched to your Seller account.":"Seller demo mode enabled. Complete the profile to publish listings.");
       }
     }
     function setPage(page,focusTarget=null,mobileNavButton=null){
       if(!document.getElementById(page))return;
-      if((page==="seller-listings"||page==="seller-progress")&&(!sellerProfileReady||activeAccount!=="seller")){showToast("Switch to your Seller account to continue.");return}
       document.querySelectorAll(".page").forEach(section=>section.classList.toggle("active",section.id===page));
       if(!mobileNavButton)mobileNavButton=Array.from(document.querySelectorAll(".mobile-nav [data-page]")).find(button=>!button.hidden&&button.dataset.page===page)||null;
       document.querySelectorAll("[data-page]").forEach(button=>{
@@ -686,8 +842,8 @@
     }
     function renderSellerListings(){
       const container=document.getElementById("seller-listing-items");
-      if(!customListings.length){container.innerHTML='<div class="empty">You haven’t created any listings yet.</div>';return}
-      container.innerHTML=customListings.map(item=>`<article class="seller-listing-item"><img src="${item.image}" alt=""><div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong><small>${item.type==="goods"?"Goods":"Service"} · ${escapeHtml(item.category)} · ${currencyFormatter.format(item.price)} · ${item.status==="published"?"Published":"Paused"}</small></div><div class="seller-listing-actions"><button type="button" data-seller-listing-action="edit" data-listing-id="${escapeHtml(item.id)}">Edit</button><button type="button" data-seller-listing-action="toggle" data-listing-id="${escapeHtml(item.id)}">${item.status==="published"?"Pause":"Publish"}</button><button type="button" data-seller-listing-action="delete" data-listing-id="${escapeHtml(item.id)}">Delete</button></div></article>`).join("");
+      if(!customListings.length){container.innerHTML='<div class="empty">You havenâ€™t created any listings yet.</div>';return}
+      container.innerHTML=customListings.map(item=>`<article class="seller-listing-item"><img src="${item.image}" alt=""><div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong><small>${item.type==="goods"?"Goods":"Service"} Â· ${escapeHtml(item.category)} Â· ${currencyFormatter.format(item.price)} Â· ${item.status==="published"?"Published":"Paused"}</small></div><div class="seller-listing-actions"><button type="button" data-seller-listing-action="edit" data-listing-id="${escapeHtml(item.id)}">Edit</button><button type="button" data-seller-listing-action="toggle" data-listing-id="${escapeHtml(item.id)}">${item.status==="published"?"Pause":"Publish"}</button><button type="button" data-seller-listing-action="delete" data-listing-id="${escapeHtml(item.id)}">Delete</button></div></article>`).join("");
     }
     function resetSellerListingForm(){
       const form=document.getElementById("seller-listing-form");
@@ -705,6 +861,8 @@
       updateSellerListingOptions(item.type,item.category);
       document.getElementById("seller-listing-price").value=String(item.price);
       document.getElementById("seller-listing-description").value=item.description;
+      document.getElementById("seller-listing-sizes").value=(item.sizes||[]).join(", ");
+      document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
       document.getElementById("seller-listing-submit").textContent="Save changes";
       document.getElementById("seller-listing-cancel").hidden=false;
       updateSellerListingPricePreview();
@@ -727,7 +885,7 @@
       document.getElementById("seller-fees").textContent=currencyFormatter.format(fee);
       document.getElementById("seller-net").textContent=currencyFormatter.format(gross);
       document.getElementById("seller-open-orders").textContent=sellerSales.filter(sale=>sale.status==="Processing").length;
-      document.getElementById("sales-range-label").textContent=`Last ${salesRangeDays} days · ${settledSales.length} completed sale${settledSales.length===1?"":"s"}`;
+      document.getElementById("sales-range-label").textContent=`Last ${salesRangeDays} days Â· ${settledSales.length} completed sale${settledSales.length===1?"":"s"}`;
       const bucketSize=salesRangeDays/7;
       const buckets=Array.from({length:7},()=>0);
       settledSales.forEach(sale=>{
@@ -754,21 +912,112 @@
         const date=new Date();
         date.setDate(date.getDate()-sale.daysAgo);
         const dateLabel=date.toLocaleDateString("en-US",{month:"short",day:"numeric"});
-        return `<tr><td>${sale.order}<small>${sale.buyer} · ${dateLabel}</small></td><td>${sale.item}</td><td>${currencyFormatter.format(sale.amount)}</td><td>${completed?currencyFormatter.format(saleFee):"Pending"}</td><td>${completed?currencyFormatter.format(sale.amount):"Pending"}</td><td><span class="seller-status${completed?"":" processing"}">${sale.status}</span></td></tr>`;
+        return `<tr><td>${sale.order}<small>${sale.buyer} Â· ${dateLabel}</small></td><td>${sale.item}</td><td>${currencyFormatter.format(sale.amount)}</td><td>${completed?currencyFormatter.format(saleFee):"Pending"}</td><td>${completed?currencyFormatter.format(sale.amount):"Pending"}</td><td><span class="seller-status${completed?"":" processing"}">${sale.status}</span></td></tr>`;
       });
       document.getElementById("seller-sales-rows").innerHTML=rows.length?rows.join(""):'<tr><td colspan="6">No sales in this period.</td></tr>';
     }
+    function getGoodsListings(){
+      const sellerGoods=customListings.filter(item=>item.type==="goods"&&item.status==="published").map(item=>({...item,kind:"Goods",detail:item.description,sellerDescription:sellerOfferingDescription,verified:false,basePrice:item.price}));
+      return [...listings.map((item,index)=>({...item,id:item.id||`seed-${index}`})),...sellerGoods].filter(item=>item.kind==="Goods");
+    }
+    function getGoodsListing(listingId){
+      return getGoodsListings().find(item=>String(item.id)===String(listingId));
+    }
+    function renderGoodsCard(item){
+      const basePrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
+      const displayedPrice=basePrice?currencyFormatter.format(buyerPrice(basePrice)):item.price;
+      const reviews=reviewsByListing[item.id]||[],latestReview=reviews[reviews.length-1];
+      const initials=item.initials||item.seller.split(/\s+/).map(part=>part.charAt(0)).slice(0,2).join("").toUpperCase();
+      return `
+        <article class="listing" data-product-card="${escapeHtml(item.id)}">
+          <div class="listing-photo">
+            <img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async">
+            <span class="tag">QUALITY FIND</span>
+            <button class="save" aria-label="Save ${escapeHtml(item.title)}" data-save="${escapeHtml(item.id)}">${heartIcon(false)}</button>
+          </div>
+          <div class="listing-body">
+            <div class="listing-title">
+              <h3><button type="button" class="listing-title-button" data-open-product="${escapeHtml(item.id)}">${escapeHtml(item.title)}</button></h3>
+              <span class="price">${escapeHtml(displayedPrice)}</span>
+            </div>
+            <div class="seller-line">
+              <span class="seller-name"><span class="mini-avatar">${escapeHtml(initials)}</span>${escapeHtml(item.seller)}${item.verified===false?"":' <span class="verified" aria-label="Verified seller"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3 8-8 10-5-2-8-5-8-10V6zM8 12h8m-4-4v8"/></svg></span>'}</span>
+              <span class="rating">${listingRating(item)}</span>
+            </div>
+            <div class="seller-line"><span>${escapeHtml(item.detail||"")}</span></div>
+            ${item.sellerDescription?`<p class="listing-seller-description"><strong>About the seller:</strong> ${escapeHtml(item.sellerDescription)}</p>`:""}
+            ${latestReview?`<p class="listing-seller-description"><strong>Customer review:</strong> ${escapeHtml(latestReview.text)}</p>`:""}
+            <button type="button" class="outline-button" style="margin-top:10px" data-open-product="${escapeHtml(item.id)}">View details</button>
+          </div>
+        </article>`;
+    }
+    function renderSearchResults(query){
+      const normalized=query.trim().toLowerCase();
+      const terms=normalized.split(/\s+/).filter(Boolean);
+      const results=getGoodsListings().filter(item=>{
+        const searchable=[item.title,item.category,item.seller,item.detail,item.description,item.sellerDescription].filter(Boolean).join(" ").toLowerCase();
+        return terms.every(term=>searchable.includes(term));
+      });
+      document.getElementById("search-results-title").textContent=`Results for: ${query.trim()}`;
+      document.getElementById("search-results-caption").textContent=`${results.length} ${results.length===1?"good":"goods"} found`;
+      const grid=document.getElementById("search-results-grid");
+      grid.innerHTML=results.length?results.map(renderGoodsCard).join(""):'<div class="empty">No goods matched that search. Try a different product, seller, or category.</div>';
+      if(typeof updateSavedButtons==="function")updateSavedButtons();
+    }
+    function renderProductDetails(listingId){
+      const item=getGoodsListing(listingId);
+      if(!item){setPage("discover");showToast("This item is no longer available.");return}
+      if(selectedRatingProductId!==String(item.id)){selectedRatingProductId=String(item.id);selectedReviewRating=0}
+      const sizes=Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
+      const reviews=reviewsByListing[item.id]||[];
+      const allRelated=getGoodsListings().filter(other=>other.id!==item.id);
+      const sellerPrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
+      const displayedPrice=sellerPrice?currencyFormatter.format(buyerPrice(sellerPrice)):item.price;
+      const variantFields=[
+        sizes.length?`<div class="field"><label for="product-size">Size</label><select id="product-size" required><option value="">Choose a size</option>${sizes.map(size=>`<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`).join("")}</select></div>`:"",
+        colors.length?`<div class="field"><label for="product-color">Color</label><select id="product-color" required><option value="">Choose a color</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select></div>`:""
+      ].filter(Boolean).join("");
+      const reviewRows=reviews.slice().reverse().map(review=>{
+        const date=Date.parse(review.createdAt),dateLabel=Number.isFinite(date)?new Date(date).toLocaleDateString():"Date unavailable";
+        const reviewer=review.reviewer||"Buyer";
+        const initials=reviewer.trim().split(/\s+/).map(part=>part[0]).slice(0,2).join("").toUpperCase()||"B";
+        return `<article class="product-review"><div class="product-review-head"><span class="review-author"><span class="review-avatar" aria-hidden="true">${escapeHtml(initials)}</span><strong>${escapeHtml(reviewer)}</strong></span><time datetime="${escapeHtml(review.createdAt)}">${escapeHtml(dateLabel)}</time></div><div class="product-review-comment"><div class="product-review-stars" role="img" aria-label="${review.rating} out of 5 stars">${starIcon(true).repeat(review.rating)}</div><p>${escapeHtml(review.text)}</p></div></article>`;
+      }).join("");
+      document.getElementById("product-detail-content").innerHTML=`
+        <article class="product-detail">
+          <img class="product-detail-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}">
+          <div class="product-detail-info">
+            <div class="seller-line"><span>${escapeHtml(item.seller)}</span><span class="rating">${listingRating(item)}</span></div>
+            <h2>${escapeHtml(item.title)}</h2>
+            <div class="product-detail-price">${escapeHtml(displayedPrice)}</div>
+            <p class="product-detail-description">${escapeHtml(item.detail||"")}</p>
+            ${variantFields?`<div class="product-option-grid">${variantFields}</div>`:'<p class="notice">No size or color selection is needed for this item.</p>'}
+            <div class="product-detail-actions"><button class="primary" type="button" data-product-add="${escapeHtml(item.id)}">Add to cart</button></div>
+          </div>
+        </article>
+        <section class="product-reviews">
+          <div class="section-head"><div><h3>Rating</h3>${renderProductRatingStars()}</div><button type="button" class="outline-button" style="width:auto" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
+          <div class="product-review-list">${reviewRows||'<p class="notice">No written reviews yet. Be the first to share your experience.</p>'}</div>
+          <p class="notice">Sample reviews are demo content. New reviews are saved only in this browser.</p>
+        </section>
+        <section class="related-products">
+          <div class="listing-grid">${allRelated.length?allRelated.map(renderGoodsCard).join(""):'<p class="notice">No other goods are available yet.</p>'}</div>
+        </section>`;
+      if(typeof updateSavedButtons==="function")updateSavedButtons();
+      currentProductId=item.id;
+      setPage("product-details");
+    }
     function renderListings(query=""){
       const container=document.getElementById("listing-grid"),normalized=query.trim().toLowerCase();
-      const sellerGoods=customListings.filter(item=>item.type==="goods"&&item.status==="published").map(item=>({...item,kind:"Goods",detail:item.description,verified:false,basePrice:item.price}));
-      const allListings=[...listings.map((item,index)=>({...item,id:item.id||`seed-${index}`})),...sellerGoods];
-      const results=allListings.filter(item=>item.kind==="Goods"&&(activeCategory==="All"||item.category===activeCategory)&&(!normalized||[item.title,item.category,item.seller,item.detail].join(" ").toLowerCase().includes(normalized)));
-      document.getElementById("result-caption").textContent=normalized?`${results.length} result${results.length===1?"":"s"} for “${query.trim()}”.`:activeCategory==="All"?"Quality goods from independent sellers.":`Showing ${activeCategory.toLowerCase()} goods.`;
+      const allListings=getGoodsListings();
+      const results=allListings.filter(item=>(activeCategory==="All"||item.category===activeCategory)&&(!normalized||[item.title,item.category,item.seller,item.detail].join(" ").toLowerCase().includes(normalized)));
+      document.getElementById("result-caption").textContent=normalized?`${results.length} result${results.length===1?"":"s"} for â€œ${query.trim()}â€.`:activeCategory==="All"?"Quality goods from independent sellers.":`Showing ${activeCategory.toLowerCase()} goods.`;
       if(!results.length){container.innerHTML='<div class="empty">No matches yet. Try another search or choose a different category.</div>';return}
       container.innerHTML=results.map(item=>{
         const basePrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
         const displayedPrice=basePrice?currencyFormatter.format(buyerPrice(basePrice)):item.price;
-        return `<article class="listing"><div class="listing-photo"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async"><span class="tag">QUALITY FIND</span><button class="save" aria-label="Save ${escapeHtml(item.title)}" data-save="${escapeHtml(item.id)}">♡</button></div><div class="listing-body"><div class="listing-title"><h3>${escapeHtml(item.title)}</h3><span class="price">${escapeHtml(displayedPrice)}</span></div><div class="seller-line"><span class="seller-name"><span class="mini-avatar">${escapeHtml(item.initials||item.seller.split(/\s+/).map(part=>part.charAt(0)).slice(0,2).join("").toUpperCase())}</span>${escapeHtml(item.seller)}${item.verified===false?"":' <span class="verified" aria-label="Verified seller">✓</span>'}</span><span class="rating">${item.rating?`★ ${escapeHtml(item.rating)}`:"New listing"}</span></div><div class="seller-line"><span>${escapeHtml(item.detail)}</span></div><button type="button" class="add-to-cart" data-add-to-cart="${escapeHtml(item.id)}">Add to cart</button></div></article>`;
+        const reviews=reviewsByListing[item.id]||[],latestReview=reviews[reviews.length-1];
+        return `<article class="listing" data-product-card="${escapeHtml(item.id)}"><div class="listing-photo"><img src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}" loading="lazy" decoding="async"><span class="tag">QUALITY FIND</span><button class="save" aria-label="Save ${escapeHtml(item.title)}" data-save="${escapeHtml(item.id)}">${heartIcon(false)}</button></div><div class="listing-body"><div class="listing-title"><h3><button type="button" class="listing-title-button" data-open-product="${escapeHtml(item.id)}">${escapeHtml(item.title)}</button></h3><span class="price">${escapeHtml(displayedPrice)}</span></div><div class="seller-line"><span class="seller-name"><span class="mini-avatar">${escapeHtml(item.initials||item.seller.split(/\s+/).map(part=>part.charAt(0)).slice(0,2).join("").toUpperCase())}</span>${escapeHtml(item.seller)}${item.verified===false?"":' <span class="verified" aria-label="Verified seller"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 20 6v5c0 5-3 8-8 10-5-2-8-5-8-10V6zM8 12h8m-4-4v8"/></svg></span>'}</span><span class="rating">${listingRating(item)}</span></div><div class="seller-line"><span>${escapeHtml(item.detail)}</span></div>${item.sellerDescription?`<p class="listing-seller-description"><strong>About the seller:</strong> ${escapeHtml(item.sellerDescription)}</p>`:""}${latestReview?`<p class="listing-seller-description"><strong>Customer review:</strong> ${escapeHtml(latestReview.text)}</p>`:""}<button type="button" class="outline-button" style="margin-top:10px" data-open-product="${escapeHtml(item.id)}">View details</button></div></article>`;
       }).join("");
       if(typeof updateSavedButtons==="function")updateSavedButtons();
     }
@@ -783,13 +1032,13 @@
       const results=[...services.map((item,index)=>({...item,sellerPrice:item.sellerPrice===undefined?sellerPriceFrom(item.price):item.sellerPrice,price:priceWithBuyerFee(item.price),requestId:item.requestId||item.id||String(index)})),...sellerServices].filter(item=>(activeServiceCategory==="All"||item.category===activeServiceCategory)&&(!normalized||[item.title,item.description,item.provider,item.category].join(" ").toLowerCase().includes(normalized)));
       const container=document.getElementById("service-grid");
       if(!results.length){container.innerHTML='<div class="empty">No services match yet. Try another search or category.</div>';return}
-      container.innerHTML=results.map(item=>`<article class="service-card"><img class="service-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div class="service-top"><span class="service-provider">${escapeHtml(item.category)}</span><span class="rating">${item.rating==="New listing"?escapeHtml(item.rating):`★ ${escapeHtml(item.rating)}`}</span></div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="service-foot"><span>${escapeHtml(item.provider)}${item.rating==="New listing"?"":' <span class="verified" aria-label="Verified provider">✓</span>'}</span><span><b>${escapeHtml(item.price)}</b></span></div><button class="outline-button" style="margin-top:13px" data-service-request="${escapeHtml(item.requestId)}">View details & request</button></article>`).join("");
+      container.innerHTML=results.map(item=>`<article class="service-card"><img class="service-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div class="service-top"><span class="service-provider">${escapeHtml(item.category)}</span><span class="rating">${item.rating==="New listing"?escapeHtml(item.rating):`${starIcon(true)} ${escapeHtml(item.rating)}`}</span></div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="service-foot"><span>${escapeHtml(item.provider)}${item.rating==="New listing"?"":' <span class="verified" aria-label="Verified provider"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v16H5zM9 5V3h6v2m-6 6h8m-8 4h5"/></svg></span>'}</span><span><b>${escapeHtml(item.price)}</b></span></div><button class="outline-button" style="margin-top:13px" data-service-request="${escapeHtml(item.requestId)}">View details & request</button></article>`).join("");
     }
     function renderNotifications(){
       document.getElementById("notification-list").innerHTML=appNotifications.map(item=>`<article class="notification-card"><span class="notification-icon" aria-hidden="true">${item.icon}</span><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.copy)}</p><small>${escapeHtml(item.time)}</small></div></article>`).join("");
     }
-    function renderEvents(){document.getElementById("event-list").innerHTML=events.map(item=>`<article class="event-card"><div class="event-date"><small>${escapeHtml(item.month)}</small>${escapeHtml(item.day)}</div><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.host)} · ${escapeHtml(item.time)}</p></div><button class="outline-button" data-rsvp="${escapeHtml(item.id||item.title)}">I'm interested</button></article>`).join("")}
-    function renderCommunity(){document.getElementById("community-list").innerHTML=conversations.map(item=>`<article class="community-card"><img class="community-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div style="flex:1"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.meta)} · ${escapeHtml(item.copy)}</p></div><button class="text-button" data-reply="${escapeHtml(item.title)}">${escapeHtml(item.replies)} →</button></article>`).join("")}
+    function renderEvents(){document.getElementById("event-list").innerHTML=events.map(item=>`<article class="event-card"><div class="event-date"><small>${escapeHtml(item.month)}</small>${escapeHtml(item.day)}</div><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.host)} Â· ${escapeHtml(item.time)}</p></div><button class="outline-button" data-rsvp="${escapeHtml(item.id||item.title)}">I'm interested</button></article>`).join("")}
+    function renderCommunity(){document.getElementById("community-list").innerHTML=conversations.map(item=>`<article class="community-card"><img class="community-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div style="flex:1"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.meta)} Â· ${escapeHtml(item.copy)}</p></div><button class="text-button" data-reply="${escapeHtml(item.title)}">${escapeHtml(item.replies)} â†’</button></article>`).join("")}
     function loadServiceRequests(){
       try{
         const saved=localStorage.getItem("bigwizz-service-requests");
@@ -814,7 +1063,7 @@
         if(!requests.length)return '<section class="service-request-section"><h3>Service requests</h3><p class="notice">No service requests yet. New requests from this browser will appear here.</p></section>';
         return `<section class="service-request-section"><h3>Service requests</h3><div class="service-request-list">${requests.slice().reverse().map(item=>{
           const created=Date.parse(item.createdAt),received=Number.isFinite(created)?new Date(created).toLocaleString():"Date unavailable";
-          return `<article class="service-request-card"><div><h4>${escapeHtml(item.service)} · ${escapeHtml(item.requestType)}</h4><p>${escapeHtml(item.details)}</p><small>${escapeHtml(item.area)}${item.preferredDate?` · Preferred date: ${escapeHtml(item.preferredDate)}`:""} · ${escapeHtml(received)}</small></div><button class="outline-button" type="button" data-reply-to="${escapeHtml(item.service)}">Respond</button></article>`;
+          return `<article class="service-request-card"><div><h4>${escapeHtml(item.service)} Â· ${escapeHtml(item.requestType)}</h4><p>${escapeHtml(item.details)}</p><small>${escapeHtml(item.area)}${item.preferredDate?` Â· Preferred date: ${escapeHtml(item.preferredDate)}`:""} Â· ${escapeHtml(received)}</small></div><button class="outline-button" type="button" data-reply-to="${escapeHtml(item.service)}">Respond</button></article>`;
         }).join("")}</div></section>`;
       })():"";
       const messageSection=`<section class="seller-message-section"><h3>${sellerInbox?"Buyer messages":"Recent messages"}</h3>${threads.map((item,index)=>`<div class="message-row" style="padding:12px 4px;border-bottom:1px solid var(--line)"><span class="avatar" style="background:${item.color}">${item.initials}</span><div><span class="pill" style="${index===2?"background:#c9d3ca;color:#45574a":""}">${item.priority}</span><b>${item.name}</b><small>${item.context}</small><small>${item.preview}</small></div><button class="outline-button" style="width:auto" data-reply-to="${item.name}">Reply</button></div>`).join("")}</section>`;
@@ -822,13 +1071,17 @@
     }
     document.addEventListener("click",event=>{
       if(!event.target.closest(".account-switch-wrap"))closeAccountMenu();
-      const accountMenuToggle=event.target.closest("[data-account-menu-toggle]");if(accountMenuToggle){const menu=document.getElementById("account-switch-menu");menu.hidden=!menu.hidden;accountMenuToggle.setAttribute("aria-expanded",String(!menu.hidden));return}
+      const accountMenuToggle=event.target.closest("[data-account-menu-toggle]");if(accountMenuToggle){const menu=document.getElementById("account-switch-menu");const wrap=document.querySelector(".account-switch-wrap");const isOpen=!menu.hidden;menu.hidden=isOpen;accountMenuToggle.setAttribute("aria-expanded",String(!isOpen));if(wrap){wrap.classList.toggle("is-open",!isOpen)};return}
       const accountOption=event.target.closest("[data-account-option]");if(accountOption){switchAccount(accountOption.dataset.accountOption);return}
+      const openProduct=event.target.closest("[data-open-product]");if(openProduct){renderProductDetails(openProduct.dataset.openProduct);return}
+      const productCard=event.target.closest("[data-product-card]");if(productCard&&!event.target.closest("[data-save]")){renderProductDetails(productCard.dataset.productCard);return}
+      const reviewRating=event.target.closest("[data-review-rating]");if(reviewRating){selectedReviewRating=Number(reviewRating.dataset.reviewRating);document.querySelectorAll("#product-review-rating [data-review-rating]").forEach(button=>{const selected=Number(button.dataset.reviewRating)<=selectedReviewRating;button.setAttribute("aria-pressed",String(selected));button.classList.remove("rating-pop");if(selected){button.style.setProperty("--star-delay",`${(Number(button.dataset.reviewRating)-1)*55}ms`);void button.offsetWidth;button.classList.add("rating-pop")}});return}
+      const writeReview=event.target.closest("[data-write-review]");if(writeReview){document.getElementById("item-review-form").reset();document.getElementById("review-listing-id").value=writeReview.dataset.writeReview;document.getElementById("review-dialog-title").textContent=`Review ${writeReview.dataset.reviewTitle}`;document.getElementById("review-dialog-summary").textContent="How was this item?";document.getElementById("review-dialog").showModal();return}
       const salesRange=event.target.closest("[data-sales-range]");if(salesRange){salesRangeDays=Number(salesRange.dataset.salesRange);document.querySelectorAll("[data-sales-range]").forEach(button=>button.classList.toggle("active",button===salesRange));renderSellerSales();return}
       const listingAction=event.target.closest("[data-seller-listing-action]");if(listingAction){
         const item=customListings.find(listing=>listing.id===listingAction.dataset.listingId);if(!item)return;
         if(listingAction.dataset.sellerListingAction==="edit"){editSellerListing(item);return}
-        if(listingAction.dataset.sellerListingAction==="delete"&&!window.confirm(`Delete “${item.title}”?`))return;
+        if(listingAction.dataset.sellerListingAction==="delete"&&!window.confirm(`Delete â€œ${item.title}â€?`))return;
         const nextListings=listingAction.dataset.sellerListingAction==="delete"
           ?customListings.filter(listing=>listing.id!==item.id)
           :customListings.map(listing=>listing.id===item.id?{...listing,status:listing.status==="published"?"paused":"published"}:listing);
@@ -839,7 +1092,7 @@
       const themeButton=event.target.closest(".theme-toggle");if(themeButton){setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark",true);return}
       const category=event.target.closest("[data-category]");if(category){activeCategory=category.dataset.category;document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button===category));renderListings(document.getElementById("search-input").value);return}
       const serviceCategory=event.target.closest("[data-service-category]");if(serviceCategory){activeServiceCategory=serviceCategory.dataset.serviceCategory;document.querySelectorAll("[data-service-category]").forEach(button=>button.classList.toggle("active",button===serviceCategory));renderServices(document.getElementById("service-search-input").value);return}
-      const save=event.target.closest("[data-save]");if(save){const saved=save.classList.toggle("saved");save.textContent=saved?"♥":"♡";showToast(saved?"Saved to your favorites.":"Removed from your favorites.");return}
+      const save=event.target.closest("[data-save]");if(save){const saved=save.classList.toggle("saved");save.innerHTML=heartIcon(saved);showToast(saved?"Saved to your favorites.":"Removed from your favorites.");return}
       const addCartButton=event.target.closest("[data-add-to-cart]");if(addCartButton){addToCart(addCartButton.dataset.addToCart);return}
       const cartAction=event.target.closest("[data-cart-action]");if(cartAction){updateCartItem(cartAction.dataset.cartId,cartAction.dataset.cartAction);return}
       if(event.target.closest("[data-checkout-demo]")){showToast("Checkout and payments aren't connected in this prototype.");return}
@@ -849,17 +1102,31 @@
         const original=custom?null:services.find(item=>item.id===requestId)||services[Number(requestId)];
         const service=custom?{title:custom.title,provider:custom.seller,price:`From ${currencyFormatter.format(buyerPrice(custom.price))} / service`,rating:"New listing",sellerPrice:custom.price}:original?{...original,price:priceWithBuyerFee(original.price),sellerPrice:original.sellerPrice===undefined?sellerPriceFrom(original.price):original.sellerPrice}:null;
         if(!service)return;
-        const rating=service.rating==="New listing"?"New listing":`★ ${service.rating}`;
+        const rating=service.rating==="New listing"?"New listing":`${starIcon(true)} ${service.rating}`;
         document.getElementById("service-dialog-title").textContent=`Request ${service.title.toLowerCase()}`;
-        document.getElementById("service-dialog-summary").textContent=`${service.provider} · ${service.price} · ${rating}`;
+        document.getElementById("service-dialog-summary").innerHTML=`${escapeHtml(service.provider)} &middot; ${escapeHtml(service.price)} &middot; ${service.rating==="New listing"?"New listing":rating}`;
         document.getElementById("service-request-name").value=service.title;
         document.getElementById("request-date").min=new Date().toISOString().slice(0,10);
         document.getElementById("service-dialog").showModal();return
       }
-      const rsvp=event.target.closest("[data-rsvp]");if(rsvp){rsvp.textContent="Interested ✓";rsvp.disabled=true;showToast("You're on the list. Event registration is a demo.");return}
+      const rsvp=event.target.closest("[data-rsvp]");if(rsvp){rsvp.innerHTML="Interested <svg class='inline-status-icon' viewBox='0 0 24 24' aria-hidden='true'><path d='M7 3v4m10-4v4M4 9h16M5 5h14v16H5zM8 14h3m2 0h3'/></svg>";rsvp.disabled=true;showToast("You're on the list. Event registration is a demo.");return}
       if(event.target.closest("[data-reply], [data-reply-to]"))showToast("Replying is a demo; connect an inbox to send real messages.");
     });
     document.getElementById("service-search-form").addEventListener("submit",event=>{event.preventDefault();activeServiceCategory="All";document.querySelectorAll("[data-service-category]").forEach(button=>button.classList.toggle("active",button.dataset.serviceCategory==="All"));renderServices(document.getElementById("service-search-input").value)});
+    document.getElementById("review-dialog-close").addEventListener("click",()=>document.getElementById("review-dialog").close());
+    document.getElementById("item-review-form").addEventListener("submit",event=>{
+      event.preventDefault();
+      const form=event.currentTarget,values=new FormData(form),listingId=document.getElementById("review-listing-id").value,text=String(values.get("review")||"").trim(),reviewer=String(values.get("reviewer")||"").trim();
+      if(!selectedReviewRating){showToast("Choose a rating under Rating on the product page before posting your review.");return}
+      if(!text){showToast("Write a few words about the item before posting.");return}
+      if(!saveListingReview(listingId,{reviewer,rating:selectedReviewRating,text,createdAt:new Date().toISOString()}))return;
+      form.reset();
+      document.getElementById("review-dialog").close();
+      selectedReviewRating=0;
+      renderListings(document.getElementById("search-input").value);
+      if(currentProductId)renderProductDetails(currentProductId);
+      showToast("Review saved in this browser.");
+    });
     document.getElementById("seller-listing-type").addEventListener("change",event=>updateSellerListingOptions(event.currentTarget.value));
     document.getElementById("seller-listing-price").addEventListener("input",updateSellerListingPricePreview);
     document.getElementById("seller-listing-cancel").addEventListener("click",resetSellerListingForm);
@@ -878,6 +1145,8 @@
         const item={
           id:existing?existing.id:`listing-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,
           title,description,type,category,price:Math.round((price+Number.EPSILON)*100)/100,image,
+          sizes:type==="goods"?parseVariantOptions(values.get("sizes")):[],
+          colors:type==="goods"?parseVariantOptions(values.get("colors")):[],
           seller:existing?existing.seller:sellerShopName||document.getElementById("profile-name").textContent,
           status:existing?existing.status:"published"
         };
@@ -899,20 +1168,22 @@
     });
     document.querySelector(".dialog-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
     document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");requests.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();document.getElementById("service-dialog").close();showToast("Request saved in this browser. The provider was not contacted.")});
-    document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderListings(document.getElementById("search-input").value);setPage("discover")});
+    document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
     document.getElementById("seller-setup-form").addEventListener("submit",event=>{
       event.preventDefault();
       const profile=Object.fromEntries(new FormData(event.currentTarget).entries());
-      const savedProfile={shopName:String(profile.shopName).trim(),sellerType:String(profile.sellerType)};
+      const savedProfile={shopName:String(profile.shopName).trim(),sellerType:String(profile.sellerType)||"Goods and services",offeringDescription:String(profile.offeringDescription).trim()};
       if(!saveSellerProfile(savedProfile))return;
       sellerShopName=savedProfile.shopName;
       sellerType=savedProfile.sellerType;
+      sellerOfferingDescription=savedProfile.offeringDescription;
       sellerProfileReady=true;
       if(!accountRoles.includes("seller"))accountRoles.push("seller");
       activeAccount="seller";
       updateMobileNavigation();
       document.getElementById("seller-shop-title").textContent=sellerShopName;
-      document.getElementById("seller-type-label").textContent=`${sellerType} · Manage listings, customer orders, and earnings.`;
+      document.getElementById("seller-type-label").textContent=`${sellerType} Â· Manage listings, customer orders, and earnings.`;
+      document.getElementById("seller-offering-label").textContent=sellerOfferingDescription;
       event.currentTarget.reset();
       renderAccountMenu();
       setPage("seller-studio");
@@ -933,8 +1204,15 @@
     loadCustomListings();
     loadSellerProfile();
     loadCart();
+    loadReviews();
+    seedSampleReviews();
     updateCartCount();
     updateMobileNavigation();
+    const heroGoodsSlides=[{image:"assets/product-tote.jpg",bg:"#e8eee7",orbit:"#397656",card:"#f4dfbe"},{image:"assets/ceramic-set.jpg",bg:"#f2e7df",orbit:"#ad7058",card:"#f1d6bd"},{image:"assets/cotton-scarf.jpg",bg:"#e7eaf2",orbit:"#66779c",card:"#e2d8ee"},{image:"assets/oak-table.jpg",bg:"#eee9dc",orbit:"#8b7751",card:"#e5d7b9"},{image:"assets/linen-cushion.jpg",bg:"#e9e5ee",orbit:"#79588c",card:"#e9dff0"}];
+    const heroGoodsImage=document.querySelector(".product-hero-image");
+    const heroGoodsArea=document.querySelector(".hero-art");
+    let heroGoodsIndex=0;
+    if(heroGoodsImage&&heroGoodsArea&&!matchMedia("(prefers-reduced-motion: reduce)").matches){setInterval(()=>{heroGoodsImage.classList.add("is-changing");setTimeout(()=>{heroGoodsIndex=(heroGoodsIndex+1)%heroGoodsSlides.length;const slide=heroGoodsSlides[heroGoodsIndex];heroGoodsImage.src=slide.image;heroGoodsArea.style.setProperty("--hero-slide-bg",slide.bg);heroGoodsArea.style.setProperty("--hero-slide-orbit",slide.orbit);heroGoodsArea.style.setProperty("--hero-slide-card",slide.card);heroGoodsImage.classList.remove("is-changing")},450)},3500)}
     renderListings();renderServices();renderEvents();renderCommunity();renderInbox();renderAccountMenu();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
