@@ -55,6 +55,7 @@
     .dialog-close{width:34px;height:34px;border:0;border-radius:50%;background:#f1eaf4;color:var(--deep);font-size:19px}
     .dialog-content textarea{width:100%;min-height:94px;resize:vertical;padding:11px 12px;border:1px solid var(--line);border-radius:10px;color:var(--ink)}
     .dialog-submit{width:100%;margin-top:18px;background:var(--deep);color:white}
+    .auth-links{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:14px}.auth-links button{padding:0;border:0;background:transparent;color:var(--green);font-size:12px;font-weight:750;text-decoration:underline}.auth-feedback{padding:10px 12px;border-radius:10px;background:#fff3e8;color:#7a4b22}.auth-feedback[hidden],.field[hidden]{display:none}
     [hidden]{display:none!important}
     .launch-screen{position:fixed;inset:0;z-index:30;display:grid;place-items:center;overflow:hidden;background:radial-gradient(circle at 50% 42%,#624478 0,#392442 34%,#21152f 76%);color:white;transition:opacity .45s ease,visibility .45s ease}
     .launch-screen.leaving{opacity:0;visibility:hidden;pointer-events:none}
@@ -127,7 +128,7 @@
     .listing-review-button{margin-top:7px;padding:4px 0;font-size:10px}
     .listing-title-button{padding:0;border:0;background:transparent;color:inherit;text-align:left;font:inherit;font-weight:inherit}
     .product-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:26px;padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
-    .product-detail-image{width:100%;height:min(440px,55vw);min-height:260px;object-fit:cover;border-radius:15px;background:var(--canvas)}
+    .product-image-frame{position:relative;overflow:hidden;height:min(440px,55vw);min-height:260px;border-radius:15px;background:var(--canvas)}.product-detail-image{width:100%;height:100%;display:block;object-fit:cover}.product-size-chart{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}.product-size-chart summary{cursor:pointer;color:var(--deep);font-size:12px;font-weight:750}.size-chart-table{width:100%;margin-top:10px;border-collapse:collapse;font-size:11px}.size-chart-table th,.size-chart-table td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}.size-chart-table th{color:var(--muted);font-weight:750}.variant-photo-field{display:grid;grid-template-columns:64px 1fr;gap:11px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.variant-photo-field img{width:64px;height:64px;object-fit:cover;border-radius:8px;background:var(--canvas)}.variant-photo-list{display:grid;gap:8px;margin-top:8px}
     .product-detail-info h2{margin:8px 0;font-size:28px;letter-spacing:-.7px}
     .product-detail-price{margin:12px 0;color:var(--deep);font-size:22px;font-weight:850}
     .product-detail-description{color:var(--muted);font-size:13px;line-height:1.6}
@@ -199,7 +200,7 @@
     .seller-chart-label{overflow:hidden;color:var(--muted);font-size:9px;white-space:nowrap;text-overflow:clip}
     .seller-listings-panel{margin-bottom:16px}
     .seller-listing-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
-    @media(max-width:700px){.product-detail{grid-template-columns:1fr;padding:14px;gap:12px}.product-detail-image{height:270px;min-height:0}.product-detail-info h2{font-size:23px}.related-products-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:700px){.product-detail{grid-template-columns:1fr;padding:14px;gap:12px}.product-image-frame{height:270px;min-height:0}.product-detail-info h2{font-size:23px}.related-products-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     .seller-listing-form textarea{width:100%;min-height:84px;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
     .seller-listing-form-actions{display:flex;gap:9px;align-items:center;margin-top:16px}
     .seller-listing-form-actions .primary{background:var(--deep);color:white}
@@ -350,7 +351,6 @@
         </div>
         <div class="service-grid" id="service-grid"></div>
       </section>
-      <section id="events" class="page"><div class="section-head"><div><h2>Live & happening</h2><p>Meet makers, see how things are made, and ask questions in real time.</p></div></div><div class="event-list" id="event-list"></div></section>
       <section id="community" class="page"><div class="section-head"><div><h2>Community conversations</h2><p>Ask for recommendations, share ideas, and learn from your local community.</p></div><button class="primary" id="new-post">ï¼‹ Start a conversation</button></div><div class="community-list" id="community-list"></div></section>
       <section id="notifications" class="page"><div class="section-head"><div><h2>App notifications</h2><p>Updates about orders, messages, and the community.</p></div></div><div class="notification-list" id="notification-list"></div></section>
       <section id="cart" class="page"><div class="section-head"><div><h2>Your cart</h2><p>Review your goods and the Bigwizz fee before checkout.</p></div></div><div class="cart-layout"><div class="cart-items" id="cart-items"></div><aside class="cart-summary" id="cart-summary"></aside></div></section>
@@ -360,13 +360,14 @@
           <p>Keep your buyer account and add a shop or professional profile. Your seller tools, sales, and fees will live in this separate workspace.</p>
           <form id="seller-setup-form">
             <div class="field"><label for="shop-name">Shop or business name</label><input id="shop-name" name="shopName" placeholder="e.g. Northwood Works" required></div>
+            <div class="field"><label for="seller-type">Seller type</label><select id="seller-type" name="sellerType" required><option value="Goods and services">Goods and services</option><option value="Quality goods">Quality goods</option><option value="Professional services">Professional services</option><option value="Other (describe below)">Other (describe below)</option></select></div>
             <fieldset class="offering-group">
               <legend>What do you offer?</legend>
               <div class="field"><label for="seller-offering">Describe your goods or services</label><textarea id="seller-offering" name="offeringDescription" maxlength="500" placeholder="Include specific items or services, especially anything not listed above." required></textarea></div>
             </fieldset>
             <button class="primary" type="submit">Create seller studio</button>
           </form>
-          <p class="notice">Preview seller setup here. Saving your seller profile requires sign-in, which is currently unavailable.</p>
+          <p class="notice">Sign in or create a Bigwizz account to save your seller profile and manage listings.</p>
         </div>
         <div id="seller-dashboard" hidden>
           <div class="seller-heading"><div><span class="seller-mode-label">SELLER ACCOUNT</span><h2 id="seller-shop-title">Your seller studio</h2><p id="seller-type-label">Track settled sales, platform fees, and estimated proceeds in one place.</p><p id="seller-offering-label"></p></div><button class="outline-button" style="width:auto" data-account-option="buyer">Switch to buyer account</button></div>
@@ -401,14 +402,16 @@
             <div class="seller-listing-form-grid">
               <div class="field"><label for="seller-listing-title">Listing title</label><input id="seller-listing-title" name="title" maxlength="80" placeholder="e.g. Handcrafted oak shelf" required></div>
               <div class="field"><label for="seller-listing-type">What are you listing?</label><select id="seller-listing-type" name="type"><option value="goods">Goods</option><option value="service">Service</option></select></div>
+              <div class="field" id="seller-product-sizing-field"><label for="seller-listing-size-type">Product sizing</label><select id="seller-listing-size-type" name="sizeType"><option value="other">No apparel size chart</option><option value="clothing">Clothing</option><option value="shoes">Shoes</option><option value="caps">Caps / hats</option></select></div>
               <div class="field"><label for="seller-listing-category">Category</label><select id="seller-listing-category" name="category" required></select></div>
               <div class="field"><label for="seller-listing-price">Your price before the 2% fee (USD)</label><input id="seller-listing-price" name="price" type="number" min="0.01" step="0.01" placeholder="25.00" required></div>
               <div class="field"><label for="seller-listing-image">Upload a listing photo</label><input id="seller-listing-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="seller-listing-image-note"></div>
             </div>
               <div id="seller-variant-fields" class="seller-listing-form-grid">
-                <div class="field"><label for="seller-listing-sizes">Available sizes (optional)</label><input id="seller-listing-sizes" name="sizes" maxlength="200" placeholder="e.g. S, M, L, XL"></div>
-                <div class="field"><label for="seller-listing-colors">Available colors (optional)</label><input id="seller-listing-colors" name="colors" maxlength="200" placeholder="e.g. Natural, Navy, Sage"></div>
+                <div class="field"><label for="seller-listing-sizes">Available sizes (optional)</label><input id="seller-listing-sizes" name="sizes" maxlength="200" placeholder="Choose a product sizing type first"><small class="notice" id="seller-size-guidance">Size charts are shown only for clothing, shoes, and caps.</small></div>
+                <div class="field"><label for="seller-listing-colors">Available colors (optional)</label><input id="seller-listing-colors" name="colors" maxlength="200" placeholder="e.g. Natural, Navy, Sage"><small class="notice">Add one clear product photo for every color.</small></div>
               </div>
+            <div id="seller-color-photo-fields" class="variant-photo-list" aria-live="polite"></div>
             <div class="field"><label for="seller-listing-description">Description</label><textarea id="seller-listing-description" name="description" maxlength="240" placeholder="Share useful details buyers should know." required></textarea></div>
             <p class="notice" id="seller-listing-image-note">Use a JPG, PNG, or WebP image up to 5 MB. New listings need a photo; when editing, leave this blank to keep the current one.</p>
             <p class="notice" id="seller-listing-price-preview" aria-live="polite">Enter your price to preview the buyer-facing total with the 2% Bigwizz fee.</p>
@@ -428,9 +431,21 @@
     <footer class="footer">Bigwizz is a marketplace prototype. Verify the provider, scope, price, and local requirements before booking.</footer>
   </div>
   <nav class="mobile-nav" aria-label="Main navigation">
-    <button class="active" data-audience="buyer" data-page="discover"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg></span>Discover</button><button data-audience="buyer" data-page="services"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2zM19 16v5m-2.5-2.5h5"/></svg></span>Services</button><button data-audience="buyer" data-page="events"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="m10 10 5 3-5 3zM8 3v3m8-3v3"/></svg></span>Live</button><button data-audience="buyer" data-page="community"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.3-3.7A7 7 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7zM8 12h.01M12 12h.01M16 12h.01"/></svg></span>Community</button><button data-audience="buyer" data-page="notifications"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg></span>Notifications</button><button data-audience="buyer" data-page="cart"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 8H6M10 21h.01M18 21h.01"/></svg></span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
+    <button class="active" data-audience="buyer" data-page="discover"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg></span>Discover</button><button data-audience="buyer" data-page="services"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2zM19 16v5m-2.5-2.5h5"/></svg></span>Services</button><button data-audience="buyer" data-page="community"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.3-3.7A7 7 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7zM8 12h.01M12 12h.01M16 12h.01"/></svg></span>Community</button><button data-audience="buyer" data-page="notifications"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg></span>Notifications</button><button data-audience="buyer" data-page="cart"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 8H6M10 21h.01M18 21h.01"/></svg></span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
     <button data-audience="seller" data-page="seller-studio" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 17V9l7-6 7 6v8M9 20v-6h6v6"/></svg></span>Studio</button><button data-audience="seller" data-page="messages" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 3zM8 9h8m-8 4h5"/></svg></span>Inbox</button><button data-audience="seller" data-page="seller-listings" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8m-8 4h8m-8 4h5"/></svg></span>Listings</button><button data-audience="seller" data-page="seller-progress" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V4m0 16h17M8 16l4-5 3 2 5-7"/></svg></span>Progress</button>
   </nav>
+  <dialog id="auth-dialog" aria-labelledby="auth-title">
+    <div class="dialog-content">
+      <div class="dialog-head"><div><h2 id="auth-title">Sign in to Bigwizz</h2><p id="auth-summary">Use your Bigwizz account to continue to Seller Studio.</p></div><button class="dialog-close" type="button" data-auth-close aria-label="Close sign-in">×</button></div>
+      <form id="auth-form">
+        <div class="field" id="auth-email-field"><label for="auth-email">Email address</label><input id="auth-email" name="email" type="email" autocomplete="email" required></div>
+        <div class="field" id="auth-password-field"><label id="auth-password-label" for="auth-password">Password</label><input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="8" required></div>
+        <p class="notice auth-feedback" id="auth-feedback" role="status" aria-live="polite" hidden></p>
+        <button class="primary dialog-submit" id="auth-submit" type="submit">Sign in</button>
+        <div class="auth-links"><button type="button" data-auth-mode="signup">Create an account</button><button type="button" data-auth-mode="reset">Forgot password?</button><button type="button" data-auth-mode="signin" hidden>Back to sign in</button></div>
+      </form>
+    </div>
+  </dialog>
   <dialog id="service-dialog" aria-labelledby="service-dialog-title">
     <div class="dialog-content">
       <div class="dialog-head"><div><h2 id="service-dialog-title">Request a service</h2><p id="service-dialog-summary"></p></div><button class="dialog-close" type="button" aria-label="Close service request">Ã—</button></div>
@@ -526,7 +541,7 @@
     const currencyFormatter=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
     let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7,selectedReviewRating=0,selectedRatingProductId=null,currentProductId=null;
     let accountRoles=["buyer"],activeAccount="buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
-    let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true,reviewsByListing={},reviewStorageAvailable=true;
+    let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true,reviewsByListing={},reviewStorageAvailable=true,productBaseImage="",productColorImages={};
     function showToast(message){const toast=document.getElementById("toast");toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2800)}
     const starIcon=filled=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"${filled?' fill="currentColor"':''}/></svg>`;
     const heartIcon=filled=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.8c0 5-8.8 11-8.8 11s-8.8-6-8.8-11A4.8 4.8 0 0 1 12 6.2a4.8 4.8 0 0 1 8.8 2.6Z"${filled?' fill="currentColor"':''}/></svg>`;
@@ -540,6 +555,8 @@
         typeof item.description==="string"&&typeof item.image==="string"&&/^data:image\/(?:webp|png|jpeg);base64,/.test(item.image)&&
         (item.sizes===undefined||Array.isArray(item.sizes)&&item.sizes.every(value=>typeof value==="string"))&&
         (item.colors===undefined||Array.isArray(item.colors)&&item.colors.every(value=>typeof value==="string"))&&
+        (item.sizeType===undefined||["other","clothing","shoes","caps"].includes(item.sizeType))&&
+        (item.colorImages===undefined||item.colorImages&&typeof item.colorImages==="object"&&!Array.isArray(item.colorImages)&&Object.values(item.colorImages).every(value=>typeof value==="string"&&/^data:image\/(?:webp|png|jpeg);base64,/.test(value)))&&
         typeof item.seller==="string"&&(item.status==="published"||item.status==="paused");
     }
     function loadCustomListings(){
@@ -642,10 +659,26 @@
         return false;
       }
     }
-    function updateSellerListingOptions(type,categoryValue){
+    const suggestedSizes={clothing:"XS, S, M, L, XL, XXL",shoes:"36, 37, 38, 39, 40, 41, 42, 43, 44",caps:"S, M, L, XL"};
+    function updateSellerListingOptions(type,categoryValue,sizeTypeValue,applySuggested=false){
       document.getElementById("seller-listing-category").innerHTML=listingCategories[type].map(item=>`<option value="${item.value}">${item.label}</option>`).join("");
       if(categoryValue&&listingCategories[type].some(item=>item.value===categoryValue))document.getElementById("seller-listing-category").value=categoryValue;
       document.getElementById("seller-variant-fields").hidden=type!=="goods";
+      document.getElementById("seller-product-sizing-field").hidden=type!=="goods";
+      const sizeType=document.getElementById("seller-listing-size-type");if(sizeTypeValue)sizeType.value=sizeTypeValue;
+      const input=document.getElementById("seller-listing-sizes"),activeType=sizeType.value;
+      input.disabled=type!=="goods"||activeType==="other";
+      input.placeholder=activeType==="other"?"Only clothing, shoes, and caps use size choices.":suggestedSizes[activeType]||"Choose a product sizing type first";
+      document.querySelector('label[for="seller-listing-sizes"]').textContent=activeType==="shoes"?"Available EU shoe sizes (comma-separated)":activeType==="caps"?"Available cap sizes (comma-separated)":activeType==="clothing"?"Available clothing sizes (comma-separated)":"Available sizes (optional)";
+      document.getElementById("seller-size-guidance").textContent=activeType==="other"?"No size selector or size chart will be shown for this item.":`Suggested ${activeType} sizes: ${suggestedSizes[activeType]}. Adjust to match the product label.`;
+      if(applySuggested&&activeType!=="other")input.value=suggestedSizes[activeType]||"";
+    }
+    function renderSellerColorPhotoFields(colors,colorImages={}){
+      const container=document.getElementById("seller-color-photo-fields");
+      container.innerHTML=colors.map(color=>{
+        const image=colorImages[color];
+        return `<div class="variant-photo-field"><img src="${image?escapeHtml(image):"assets/product-photography.jpg"}" alt="${image?`Current ${escapeHtml(color)} product photo preview`:"Preview placeholder"}"><div class="field"><label>Photo for ${escapeHtml(color)}</label><input type="file" accept="image/jpeg,image/png,image/webp" data-color-image="${escapeHtml(color)}" aria-label="Upload ${escapeHtml(color)} product photo"><small class="notice">${image?"Choose a new photo to replace this one.":"Required to show this color option to buyers."}</small></div></div>`;
+      }).join("");
     }
     function parseVariantOptions(value){
       const options=[],seen=new Set();
@@ -729,7 +762,7 @@
       if(!item){showToast("This listing is no longer available.");return}
       const sizes=Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
       if(sizes.length&&!options.size||colors.length&&!options.color){showToast("Choose the available options before adding this item.");return}
-      const selectedItem={listingId,title:item.title,seller:item.seller,image:item.image,sellerPrice:sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice||item.price),size:options.size||"",color:options.color||""};
+      const selectedItem={listingId,title:item.title,seller:item.seller,image:(item.colorImages&&item.colorImages[options.color])||item.image,sellerPrice:sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice||item.price),size:options.size||"",color:options.color||""};
       const key=cartItemKey(selectedItem),existing=cartItems.find(cartItem=>cartItemKey(cartItem)===key);
       const nextItems=existing
         ?cartItems.map(cartItem=>cartItemKey(cartItem)===key?{...cartItem,quantity:cartItem.quantity+1}:cartItem)
@@ -850,6 +883,7 @@
       form.reset();
       editingListingId=null;
       updateSellerListingOptions("goods");
+      renderSellerColorPhotoFields([]);
       document.getElementById("seller-listing-submit").textContent="Publish listing";
       document.getElementById("seller-listing-cancel").hidden=true;
       updateSellerListingPricePreview();
@@ -858,11 +892,12 @@
       editingListingId=item.id;
       document.getElementById("seller-listing-title").value=item.title;
       document.getElementById("seller-listing-type").value=item.type;
-      updateSellerListingOptions(item.type,item.category);
+      updateSellerListingOptions(item.type,item.category,item.sizeType||"other");
       document.getElementById("seller-listing-price").value=String(item.price);
       document.getElementById("seller-listing-description").value=item.description;
       document.getElementById("seller-listing-sizes").value=(item.sizes||[]).join(", ");
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
+      renderSellerColorPhotoFields(item.colors||[],item.colorImages||{});
       document.getElementById("seller-listing-submit").textContent="Save changes";
       document.getElementById("seller-listing-cancel").hidden=false;
       updateSellerListingPricePreview();
@@ -964,18 +999,37 @@
       grid.innerHTML=results.length?results.map(renderGoodsCard).join(""):'<div class="empty">No goods matched that search. Try a different product, seller, or category.</div>';
       if(typeof updateSavedButtons==="function")updateSavedButtons();
     }
+    function updateProductColorImage(color){
+      const image=document.querySelector(".product-detail-image");if(!image)return;
+      const value=String(color||"").trim(),key=Object.keys(productColorImages).find(name=>name.toLowerCase()===value.toLowerCase());
+      image.src=key?productColorImages[key]:productBaseImage;
+      const title=document.querySelector(".product-detail-info h2")?.textContent||"Product";image.alt=value?`${title} in ${value}`:title;
+      const label=document.getElementById("product-color-preview-label");
+      if(label)label.textContent=!value?"Choose a color to view its product photo.":key?`Showing the ${key} product photo.`:`A separate photo for ${value} has not been added yet.`;
+    }
+    function renderSizeChart(type,listedSizes=[]){
+      const guides={
+        clothing:{title:"Clothing size guide · approximate body measurements",headers:["Size","Chest / bust (cm)","Waist (cm)"],rows:[["XS","76–84","60–68"],["S","84–92","68–76"],["M","92–100","76–84"],["L","100–108","84–92"],["XL","108–116","92–100"],["XXL","116–124","100–108"]]},
+        shoes:{title:"Shoe size guide · EU sizes and foot length",headers:["EU size","Foot length (cm)"],rows:[["36","22.5–23"],["37","23–23.5"],["38","23.5–24"],["39","24–25"],["40","25–25.5"],["41","25.5–26"],["42","26–27"],["43","27–27.5"],["44","27.5–28"]]},
+        caps:{title:"Cap size guide · head circumference",headers:["Size","Head circumference (cm)"],rows:[["S","54–56"],["M","56–58"],["L","58–60"],["XL","60–62"],["One size","54–60"]]}
+      };
+      const guide=guides[type];if(!guide)return "";
+      const available=new Set(listedSizes.map(value=>String(value).trim().toLowerCase()));
+      return `<details class="product-size-chart"><summary>${guide.title}</summary><table class="size-chart-table"><thead><tr>${guide.headers.map(value=>`<th scope="col">${value}</th>`).join("")}<th scope="col">Listing</th></tr></thead><tbody>${guide.rows.map(row=>`<tr>${row.map(value=>`<td>${value}</td>`).join("")}<td>${available.has(row[0].toLowerCase())?"Available":"Not listed"}</td></tr>`).join("")}</tbody></table><p class="notice">Measure your body, foot, or head and compare it with the available sizes shown. Fit can vary by brand; ask the seller if you are between sizes.</p></details>`;
+    }
     function renderProductDetails(listingId){
       const item=getGoodsListing(listingId);
       if(!item){setPage("discover");showToast("This item is no longer available.");return}
       if(selectedRatingProductId!==String(item.id)){selectedRatingProductId=String(item.id);selectedReviewRating=0}
       const sizes=Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
+      productBaseImage=item.image;productColorImages=item.colorImages&&typeof item.colorImages==="object"?item.colorImages:{};
       const reviews=reviewsByListing[item.id]||[];
       const allRelated=getGoodsListings().filter(other=>other.id!==item.id);
       const sellerPrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
       const displayedPrice=sellerPrice?currencyFormatter.format(buyerPrice(sellerPrice)):item.price;
       const variantFields=[
         sizes.length?`<div class="field"><label for="product-size">Size</label><select id="product-size" required><option value="">Choose a size</option>${sizes.map(size=>`<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`).join("")}</select></div>`:"",
-        colors.length?`<div class="field"><label for="product-color">Color</label><select id="product-color" required><option value="">Choose a color</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select></div>`:""
+        colors.length?`<div class="field"><label for="product-color">Color</label><select id="product-color" required><option value="">Choose a color</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select><small id="product-color-preview-label" class="notice">Choose a color to view its product photo.</small></div>`:""
       ].filter(Boolean).join("");
       const reviewRows=reviews.slice().reverse().map(review=>{
         const date=Date.parse(review.createdAt),dateLabel=Number.isFinite(date)?new Date(date).toLocaleDateString():"Date unavailable";
@@ -985,18 +1039,19 @@
       }).join("");
       document.getElementById("product-detail-content").innerHTML=`
         <article class="product-detail">
-          <img class="product-detail-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}">
+          <div class="product-image-frame"><img class="product-detail-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}"></div>
           <div class="product-detail-info">
             <div class="seller-line"><span>${escapeHtml(item.seller)}</span><span class="rating">${listingRating(item)}</span></div>
             <h2>${escapeHtml(item.title)}</h2>
             <div class="product-detail-price">${escapeHtml(displayedPrice)}</div>
             <p class="product-detail-description">${escapeHtml(item.detail||"")}</p>
-            ${variantFields?`<div class="product-option-grid">${variantFields}</div>`:'<p class="notice">No size or color selection is needed for this item.</p>'}
-            <div class="product-detail-actions"><button class="primary" type="button" data-product-add="${escapeHtml(item.id)}">Add to cart</button></div>
+            <div class="product-detail-actions"><button class="primary" type="button" data-add-to-cart="${escapeHtml(item.id)}">Add to cart</button></div>
           </div>
         </article>
         <section class="product-reviews">
           <div class="section-head"><div><h3>Rating</h3>${renderProductRatingStars()}</div><button type="button" class="outline-button" style="width:auto" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
+          <div class="product-option-grid">${variantFields}</div>
+          ${renderSizeChart(item.sizeType||"other",sizes)}
           <div class="product-review-list">${reviewRows||'<p class="notice">No written reviews yet. Be the first to share your experience.</p>'}</div>
           <p class="notice">Sample reviews are demo content. New reviews are saved only in this browser.</p>
         </section>
@@ -1037,7 +1092,7 @@
     function renderNotifications(){
       document.getElementById("notification-list").innerHTML=appNotifications.map(item=>`<article class="notification-card"><span class="notification-icon" aria-hidden="true">${item.icon}</span><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.copy)}</p><small>${escapeHtml(item.time)}</small></div></article>`).join("");
     }
-    function renderEvents(){document.getElementById("event-list").innerHTML=events.map(item=>`<article class="event-card"><div class="event-date"><small>${escapeHtml(item.month)}</small>${escapeHtml(item.day)}</div><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.host)} Â· ${escapeHtml(item.time)}</p></div><button class="outline-button" data-rsvp="${escapeHtml(item.id||item.title)}">I'm interested</button></article>`).join("")}
+    function renderEvents(){const list=document.getElementById("event-list");if(!list)return;list.innerHTML=events.map(item=>`<article class="event-card"><div class="event-date"><small>${escapeHtml(item.month)}</small>${escapeHtml(item.day)}</div><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.host)} Â· ${escapeHtml(item.time)}</p></div><button class="outline-button" data-rsvp="${escapeHtml(item.id||item.title)}">I'm interested</button></article>`).join("")}
     function renderCommunity(){document.getElementById("community-list").innerHTML=conversations.map(item=>`<article class="community-card"><img class="community-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div style="flex:1"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.meta)} Â· ${escapeHtml(item.copy)}</p></div><button class="text-button" data-reply="${escapeHtml(item.title)}">${escapeHtml(item.replies)} â†’</button></article>`).join("")}
     function loadServiceRequests(){
       try{
@@ -1093,7 +1148,7 @@
       const category=event.target.closest("[data-category]");if(category){activeCategory=category.dataset.category;document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button===category));renderListings(document.getElementById("search-input").value);return}
       const serviceCategory=event.target.closest("[data-service-category]");if(serviceCategory){activeServiceCategory=serviceCategory.dataset.serviceCategory;document.querySelectorAll("[data-service-category]").forEach(button=>button.classList.toggle("active",button===serviceCategory));renderServices(document.getElementById("service-search-input").value);return}
       const save=event.target.closest("[data-save]");if(save){const saved=save.classList.toggle("saved");save.innerHTML=heartIcon(saved);showToast(saved?"Saved to your favorites.":"Removed from your favorites.");return}
-      const addCartButton=event.target.closest("[data-add-to-cart]");if(addCartButton){addToCart(addCartButton.dataset.addToCart);return}
+      const addCartButton=event.target.closest("[data-add-to-cart]");if(addCartButton){addToCart(addCartButton.dataset.addToCart,{size:document.getElementById("product-size")?.value||"",color:document.getElementById("product-color")?.value||""});return}
       const cartAction=event.target.closest("[data-cart-action]");if(cartAction){updateCartItem(cartAction.dataset.cartId,cartAction.dataset.cartAction);return}
       if(event.target.closest("[data-checkout-demo]")){showToast("Checkout and payments aren't connected in this prototype.");return}
       const requestButton=event.target.closest("[data-service-request]");if(requestButton){
@@ -1109,8 +1164,15 @@
         document.getElementById("request-date").min=new Date().toISOString().slice(0,10);
         document.getElementById("service-dialog").showModal();return
       }
-      const rsvp=event.target.closest("[data-rsvp]");if(rsvp){rsvp.innerHTML="Interested <svg class='inline-status-icon' viewBox='0 0 24 24' aria-hidden='true'><path d='M7 3v4m10-4v4M4 9h16M5 5h14v16H5zM8 14h3m2 0h3'/></svg>";rsvp.disabled=true;showToast("You're on the list. Event registration is a demo.");return}
       if(event.target.closest("[data-reply], [data-reply-to]"))showToast("Replying is a demo; connect an inbox to send real messages.");
+    });
+    document.addEventListener("change",event=>{
+      if(event.target.id==="product-color")updateProductColorImage(event.target.value);
+      if(event.target.matches("[data-color-image]")&&event.target.files&&event.target.files[0]){
+        const photo=event.target.closest(".variant-photo-field").querySelector("img");
+        if(photo.dataset.previewUrl)URL.revokeObjectURL(photo.dataset.previewUrl);
+        photo.dataset.previewUrl=URL.createObjectURL(event.target.files[0]);photo.src=photo.dataset.previewUrl;
+      }
     });
     document.getElementById("service-search-form").addEventListener("submit",event=>{event.preventDefault();activeServiceCategory="All";document.querySelectorAll("[data-service-category]").forEach(button=>button.classList.toggle("active",button.dataset.serviceCategory==="All"));renderServices(document.getElementById("service-search-input").value)});
     document.getElementById("review-dialog-close").addEventListener("click",()=>document.getElementById("review-dialog").close());
@@ -1128,6 +1190,8 @@
       showToast("Review saved in this browser.");
     });
     document.getElementById("seller-listing-type").addEventListener("change",event=>updateSellerListingOptions(event.currentTarget.value));
+    document.getElementById("seller-listing-size-type").addEventListener("change",event=>updateSellerListingOptions("goods",document.getElementById("seller-listing-category").value,event.currentTarget.value,true));
+    document.getElementById("seller-listing-colors").addEventListener("change",event=>renderSellerColorPhotoFields(parseVariantOptions(event.currentTarget.value),customListings.find(item=>item.id===editingListingId)?.colorImages||{}));
     document.getElementById("seller-listing-price").addEventListener("input",updateSellerListingPricePreview);
     document.getElementById("seller-listing-cancel").addEventListener("click",resetSellerListingForm);
     document.getElementById("seller-listing-form").addEventListener("submit",async event=>{
@@ -1137,16 +1201,24 @@
       try{
         const values=new FormData(form),existing=customListings.find(item=>item.id===editingListingId);
         const title=String(values.get("title")||"").trim(),description=String(values.get("description")||"").trim();
-        const price=Number(values.get("price")),type=String(values.get("type")),category=String(values.get("category"));
+        const price=Number(values.get("price")),type=String(values.get("type")),category=String(values.get("category")),sizeType=type==="goods"?String(values.get("sizeType")||"other"):"other";
         if(!title||!description||!Number.isFinite(price)||price<=0){showToast("Enter a title, description, and a valid price.");return}
+        const sizes=type==="goods"&&sizeType!=="other"?parseVariantOptions(values.get("sizes")):[],colors=type==="goods"?parseVariantOptions(values.get("colors")):[];
+        if(sizeType!=="other"&&!sizes.length)throw new Error("Add the sizes buyers can choose for this clothing, shoe, or cap listing.");
         const selectedFile=document.getElementById("seller-listing-image").files[0];
         const image=selectedFile?await prepareListingImage(selectedFile):existing&&existing.image;
         if(!image){showToast("Upload a product photo before publishing.");return}
+        const colorImages={...(existing&&existing.colorImages||{})};
+        Object.keys(colorImages).forEach(color=>{if(!colors.includes(color))delete colorImages[color]});
+        for(const input of document.querySelectorAll("[data-color-image]")){
+          const file=input.files&&input.files[0];if(file)colorImages[input.dataset.colorImage]=await prepareListingImage(file);
+        }
+        const missingColorPhoto=colors.find(color=>!colorImages[color]);
+        if(missingColorPhoto)throw new Error(`Upload a product photo for the ${missingColorPhoto} color.`);
         const item={
           id:existing?existing.id:`listing-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,
           title,description,type,category,price:Math.round((price+Number.EPSILON)*100)/100,image,
-          sizes:type==="goods"?parseVariantOptions(values.get("sizes")):[],
-          colors:type==="goods"?parseVariantOptions(values.get("colors")):[],
+          sizeType,sizes,colors,colorImages,
           seller:existing?existing.seller:sellerShopName||document.getElementById("profile-name").textContent,
           status:existing?existing.status:"published"
         };
@@ -1213,7 +1285,7 @@
     const heroGoodsArea=document.querySelector(".hero-art");
     let heroGoodsIndex=0;
     if(heroGoodsImage&&heroGoodsArea&&!matchMedia("(prefers-reduced-motion: reduce)").matches){setInterval(()=>{heroGoodsImage.classList.add("is-changing");setTimeout(()=>{heroGoodsIndex=(heroGoodsIndex+1)%heroGoodsSlides.length;const slide=heroGoodsSlides[heroGoodsIndex];heroGoodsImage.src=slide.image;heroGoodsArea.style.setProperty("--hero-slide-bg",slide.bg);heroGoodsArea.style.setProperty("--hero-slide-orbit",slide.orbit);heroGoodsArea.style.setProperty("--hero-slide-card",slide.card);heroGoodsImage.classList.remove("is-changing")},450)},3500)}
-    renderListings();renderServices();renderEvents();renderCommunity();renderInbox();renderAccountMenu();
+    renderListings();renderServices();renderCommunity();renderInbox();renderAccountMenu();
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-config.js"></script>
