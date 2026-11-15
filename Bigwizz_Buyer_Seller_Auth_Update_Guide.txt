@@ -1,0 +1,280 @@
+BIGWIZZ — BUYER & SELLER SIGN-IN UPDATE
+========================================
+
+IMPORTANT
+---------
+These are PATCHES for your existing files, not complete replacement files.
+Do NOT upload these patch files over index.html or supabase-app.js.
+Open the existing files on GitHub and make the exact edits below.
+
+Files to edit:
+1. index.html
+2. assets/supabase-app.js
+
+The current database/schema.sql already has a signup trigger that creates a buyer role
+and adds the seller role when signup metadata says account_type = "seller".
+Do not replace the database schema for this update.
+
+PART A — index.html
+===================
+
+A1. Add a visible Sign in button
+--------------------------------
+Find this line inside the top bar:
+
+    <div class="account-switch-wrap">
+
+Immediately BEFORE that line, insert:
+
+    <button class="icon-button" type="button" data-auth-open>Sign in</button>
+
+A2. Add name and account type fields to the auth form
+-----------------------------------------------------
+Find:
+
+    <form id="auth-form">
+
+Immediately AFTER it, insert:
+
+        <div class="field" id="auth-name-field" hidden>
+          <label for="auth-name">Your name</label>
+          <input id="auth-name" name="displayName" type="text" autocomplete="name" maxlength="80">
+        </div>
+        <div class="field" id="auth-role-field" hidden>
+          <label for="auth-role">Account type</label>
+          <select id="auth-role" name="accountType">
+            <option value="buyer">Buyer — shop and purchase</option>
+            <option value="seller">Seller — create a shop or offer services</option>
+          </select>
+        </div>
+
+A3. Keep the existing email, password, feedback, submit button and auth-links
+    that already follow these new fields. Do not duplicate the form.
+
+PART B — assets/supabase-app.js
+===============================
+
+B1. Replace the existing showAuth() function
+---------------------------------------------
+Find the existing function:
+
+  function showAuth() {
+    notify("Sign-in isn't available yet. You can continue browsing Bigwizz.");
+  }
+
+Replace that whole function with:
+
+  let authMode = "signin";
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    const nameField = document.getElementById("auth-name-field");
+    const roleField = document.getElementById("auth-role-field");
+    const passwordField = document.getElementById("auth-password-field");
+    const password = document.getElementById("auth-password");
+    const name = document.getElementById("auth-name");
+    const title = document.getElementById("auth-title");
+    const summary = document.getElementById("auth-summary");
+    const submit = document.getElementById("auth-submit");
+    const feedback = document.getElementById("auth-feedback");
+    const signupLink = document.querySelector('[data-auth-mode="signup"]');
+    const resetLink = document.querySelector('[data-auth-mode="reset"]');
+    const backLink = document.querySelector('[data-auth-mode="signin"]');
+
+    feedback.hidden = true;
+    feedback.textContent = "";
+    nameField.hidden = mode !== "signup";
+    roleField.hidden = mode !== "signup";
+    name.required = mode === "signup";
+    passwordField.hidden = mode === "reset";
+    password.required = mode !== "reset";
+    password.autocomplete = mode === "signup" ? "new-password" : "current-password";
+    signupLink.hidden = mode !== "signin";
+    resetLink.hidden = mode !== "signin";
+    backLink.hidden = mode === "signin";
+
+    if (mode === "signup") {
+      title.textContent = "Create your Bigwizz account";
+      summary.textContent = "Choose whether you want to shop as a buyer or sell on Bigwizz.";
+      submit.textContent = "Create account";
+    } else if (mode === "reset") {
+      title.textContent = "Reset your password";
+      summary.textContent = "We will email you a password reset link.";
+      submit.textContent = "Send reset link";
+    } else {
+      title.textContent = "Sign in to Bigwizz";
+      summary.textContent = "Sign in to continue to your Bigwizz account.";
+      submit.textContent = "Sign in";
+    }
+  }
+
+  function showAuth(mode = "signin") {
+    const dialog = document.getElementById("auth-dialog");
+    if (!dialog) {
+      notify("The sign-in window could not be opened.");
+      return;
+    }
+    setAuthMode(mode);
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function showAuthFeedback(message, isError = false) {
+    const feedback = document.getElementById("auth-feedback");
+    feedback.textContent = message;
+    feedback.hidden = false;
+    feedback.style.background = isError ? "#fff0ef" : "#edf4e9";
+    feedback.style.color = isError ? "#8b3028" : "#245c45";
+  }
+
+B2. Add an auth form submit handler
+-----------------------------------
+Find the existing document submit listener:
+
+  document.addEventListener("submit", event => {
+
+At the VERY FIRST line inside its callback, before the seller-setup-form check,
+insert this block:
+
+    if (event.target.id === "auth-form") {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      const form = event.target;
+      const submit = document.getElementById("auth-submit");
+      const email = document.getElementById("auth-email").value.trim();
+      const password = document.getElementById("auth-password").value;
+      const displayName = document.getElementById("auth-name").value.trim();
+      const accountType = document.getElementById("auth-role").value;
+
+      submit.disabled = true;
+      submit.textContent = "Please wait…";
+
+      try {
+        let result;
+
+        if (authMode === "signup") {
+          result = await client.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                display_name: displayName,
+                account_type: accountType
+              },
+              emailRedirectTo: window.location.origin + window.location.pathname
+            }
+          });
+
+          if (result.error) throw result.error;
+
+          if (result.data.session) {
+            document.getElementById("auth-dialog").close();
+            notify("Your Bigwizz account has been created.");
+          } else {
+            showAuthFeedback("Account created. Check your email for a confirmation link, then return here to sign in.");
+          }
+        } else if (authMode === "reset") {
+          result = await client.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + window.location.pathname
+          });
+          if (result.error) throw result.error;
+          showAuthFeedback("If an account exists for that email, a password reset link has been sent.");
+        } else {
+          result = await client.auth.signInWithPassword({ email, password });
+          if (result.error) throw result.error;
+          document.getElementById("auth-dialog").close();
+          notify("You are signed in to Bigwizz.");
+        }
+      } catch (error) {
+        showAuthFeedback(error.message || "Authentication failed. Please try again.", true);
+      } finally {
+        submit.disabled = false;
+        submit.textContent = authMode === "signup" ? "Create account" :
+          authMode === "reset" ? "Send reset link" : "Sign in";
+      }
+      return;
+    }
+
+IMPORTANT: Because this block uses `await`, the existing submit listener callback must be async.
+Change its opening line from:
+
+  document.addEventListener("submit", event => {
+
+to:
+
+  document.addEventListener("submit", async event => {
+
+B3. Add sign-in, close and mode-switch click handlers
+-----------------------------------------------------
+Find the existing document click listener:
+
+  document.addEventListener("click", event => {
+
+At the VERY FIRST line inside its callback, before the seller-listing-cancel check,
+insert:
+
+    const authOpen = event.target.closest("[data-auth-open]");
+    if (authOpen) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showAuth("signin");
+      return;
+    }
+
+    const authClose = event.target.closest("[data-auth-close]");
+    if (authClose) {
+      document.getElementById("auth-dialog").close();
+      return;
+    }
+
+    const authModeButton = event.target.closest("[data-auth-mode]");
+    if (authModeButton) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      showAuth(authModeButton.dataset.authMode);
+      return;
+    }
+
+B4. Hide the Sign in button after login
+---------------------------------------
+In setProfileDisplay(name), find:
+
+    const signOut = document.querySelector("[data-supabase-signout]");
+
+Immediately BEFORE that line, insert:
+
+    const authOpen = document.querySelector("[data-auth-open]");
+    if (authOpen) authOpen.hidden = Boolean(user);
+
+B5. Allow a newly registered seller to open Seller Studio setup
+---------------------------------------------------------------
+In the existing click listener, find this line:
+
+    if (accountChoice.dataset.accountOption === "seller" && !sellerProfileReady) return;
+
+Delete ONLY that line. The existing seller setup screen will then be available to signed-in sellers who have not yet created their shop profile.
+
+PART C — Supabase settings to check
+===================================
+
+In your Supabase project:
+1. Open Authentication → URL Configuration.
+2. Add your live Bigwizz website URL to the Site URL / Redirect URLs as appropriate.
+3. In Authentication → Providers → Email, decide whether email confirmation is enabled.
+   If enabled, new users must click the confirmation link before signing in.
+
+WHAT THIS UPDATE DOES
+=====================
+- Adds a Sign in button.
+- Lets a person create a Buyer or Seller account.
+- Lets existing users sign in with email and password.
+- Adds a password reset email flow.
+- Uses the existing database trigger to create the user's buyer/seller role.
+- Lets a seller finish creating their shop profile after signing up.
+
+SECURITY NOTES
+==============
+- Never put your Supabase service_role key in index.html or browser JavaScript.
+- The browser app should use only the Supabase publishable/anon key.
+- Do not disable Row Level Security to make sign-in work.
+- Test with a new email address before relying on the flow for real customers.
