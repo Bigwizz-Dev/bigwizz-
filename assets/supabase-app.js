@@ -892,7 +892,10 @@
         sellerAuthVerified = false;
         sessionStorage.setItem("bigwizz-active-account", "seller");
         updateAccountState();
+        // Switching into Seller must open the Seller sign-in first.
+        // After successful Seller authentication, handleSession opens Seller Studio.
         activatePage("seller-studio");
+        showAuth("signin", "seller");
         return;
       }
       if (!user) return;
