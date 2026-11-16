@@ -126,6 +126,7 @@
   function setAuthMode(mode) {
     authMode = mode;
     const nameField = document.getElementById("auth-name-field");
+    const locationFields = document.getElementById("auth-location-fields");
     const roleField = document.getElementById("auth-role-field");
     const passwordField = document.getElementById("auth-password-field");
     const password = document.getElementById("auth-password");
@@ -140,6 +141,7 @@
     feedback.hidden = true;
     feedback.textContent = "";
     nameField.hidden = mode !== "signup";
+    if (locationFields) locationFields.hidden = mode !== "signup";
     roleField.hidden = mode !== "signup";
     name.required = mode === "signup";
     passwordField.hidden = mode === "reset";
@@ -212,7 +214,7 @@
   async function loadCatalog() {
     const { data: rows, error } = await client
       .from("listings")
-      .select("id,seller_id,kind,category,title,description,seller_name,price,image_url,rating,rating_count,seller_profiles(service_area)")
+      .select("id,seller_id,kind,category,title,description,seller_name,price,image_url,rating,rating_count,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (error) {
@@ -271,7 +273,7 @@
       rating: row.rating === null ? "New listing" : Number(row.rating).toFixed(1),
       ratingCount: Number(row.rating_count || 0),
       provider: row.seller_name,
-      location: row.seller_profiles && row.seller_profiles.service_area || "Location not provided by this service provider"
+      location: row.seller_profiles && [row.seller_profiles.area,row.seller_profiles.city,row.seller_profiles.state].filter(Boolean).join(", ") || (row.seller_profiles && row.seller_profiles.service_area) || "Location not provided by this service provider", providerCountry:row.seller_profiles?.country||"", providerState:row.seller_profiles?.state||"", providerCity:row.seller_profiles?.city||"", providerArea:row.seller_profiles?.area||"", providerLatitude:row.seller_profiles?.latitude??null, providerLongitude:row.seller_profiles?.longitude??null
     }));
 
     const [eventsResult, postsResult] = await Promise.all([
@@ -302,13 +304,21 @@
   async function loadAccount() {
     if (!user) return;
     const [profileResult, rolesResult] = await Promise.all([
-      client.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
+      client.from("profiles").select("display_name,country,state,city,area").eq("id", user.id).maybeSingle(),
       client.from("user_roles").select("role").eq("user_id", user.id)
     ]);
     if (profileResult.error) throw profileResult.error;
     if (rolesResult.error) throw rolesResult.error;
 
     profile = profileResult.data || { display_name: user.email || "Member" };
+    const metadata = user.user_metadata || {};
+    if (!profileResult.data || (!profile.city && metadata.city)) {
+      const saved = { id:user.id, display_name:profile.display_name || metadata.display_name || user.email || "Member", country:metadata.country || "Nigeria", state:metadata.state || null, city:metadata.city || null, area:metadata.area || null };
+      const savedResult = await client.from("profiles").upsert(saved,{onConflict:"id"}).select("display_name,country,state,city,area").single();
+      if (!savedResult.error) profile = savedResult.data;
+    }
+    window.BIGWIZZ_LOCATION_CONTEXT = { source:"saved", country:profile.country||"", state:profile.state||"", city:profile.city||"", area:profile.area||"", latitude:null, longitude:null };
+    if (typeof window.BIGWIZZ_REFRESH_SERVICE_LOCATION === "function") window.BIGWIZZ_REFRESH_SERVICE_LOCATION();
     accountRoles = rolesResult.data.map(item => item.role);
     if (!accountRoles.includes("buyer")) accountRoles.unshift("buyer");
     activeAccount = "buyer";
@@ -601,7 +611,7 @@
     if(!city||!area||!details){notify("Please add your city, neighbourhood and a short description.");return;}
     submit.disabled=true;submit.textContent="Sending request…";
     try{
-      const {error}=await client.from("service_requests").insert({buyer_id:user.id,listing_id:listing.id,provider_id:listing.providerId,service_title:serviceTitle,request_type:String(values.get("requestType")),preferred_date:String(values.get("preferredDate")||"")||null,city,area,details,status:"new"});
+      const {error}=await client.from("service_requests").insert({buyer_id:user.id,listing_id:listing.id,provider_id:listing.providerId,service_title:serviceTitle,request_type:String(values.get("requestType")),preferred_date:String(values.get("preferredDate")||"")||null,city,area,latitude:((window.BIGWIZZ_LOCATION_CONTEXT||{}).latitude??null),longitude:((window.BIGWIZZ_LOCATION_CONTEXT||{}).longitude??null),details,status:"new"});
       if(error)throw error;
       form.reset();document.getElementById("service-dialog").close();await loadBuyerServiceRequests();
       notify("Your request was sent to the service provider. Track the response under Orders.");
@@ -725,6 +735,7 @@
       const email = document.getElementById("auth-email").value.trim();
       const password = document.getElementById("auth-password").value;
       const displayName = document.getElementById("auth-name").value.trim();
+      const registrationLocation = { country: document.getElementById("auth-country")?.value.trim() || "Nigeria", state: document.getElementById("auth-state")?.value.trim() || "", city: document.getElementById("auth-city")?.value.trim() || "", area: document.getElementById("auth-area")?.value.trim() || "" };
       const accountType = document.getElementById("auth-role").value;
       submit.disabled = true;
       submit.textContent = "Please wait…";
@@ -735,12 +746,13 @@
             email,
             password,
             options: {
-              data: { display_name: displayName, account_type: accountType },
+              data: { display_name: displayName, account_type: accountType, country: registrationLocation.country, state: registrationLocation.state, city: registrationLocation.city, area: registrationLocation.area },
               emailRedirectTo: window.location.origin + window.location.pathname
             }
           });
           if (result.error) throw result.error;
           if (result.data.session) {
+            await client.from("profiles").upsert({ id: result.data.user.id, display_name: displayName, ...registrationLocation }, { onConflict: "id" });
             document.getElementById("auth-dialog").close();
             notify("Your Buyer account has been created.");
           } else {
