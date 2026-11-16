@@ -334,7 +334,7 @@
     container.innerHTML = data.map(item => `<article class="seller-listing-item">
       <img src="${escapeHtml(item.image_url)}" alt="">
       <div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong>
-        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
+        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.kind === "service" && (item.pricing_mode === "quote" || item.price === null) ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
       </div>
       <div class="seller-listing-actions">
         <button type="button" data-seller-listing-action="edit" data-listing-id="${item.id}">Edit</button>
@@ -630,7 +630,7 @@
       document.getElementById("seller-listing-type").value = item.kind;
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change", { bubbles: true }));
       document.getElementById("seller-listing-category").value = item.category;
-      document.getElementById("seller-service-pricing-mode").value = item.pricing_mode || "fixed";
+      document.getElementById("seller-service-pricing-mode").value = item.price === null ? "quote" : item.pricing_mode || "fixed";
       document.getElementById("seller-service-availability").value = sellerAvailabilityStatus;
       document.getElementById("seller-listing-price").value = item.price === null ? "" : String(item.price);
       document.getElementById("seller-listing-price").disabled = item.kind === "service" && item.pricing_mode === "quote";
