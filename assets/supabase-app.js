@@ -630,7 +630,9 @@
     if(!listing||!listing.id||!listing.providerId){notify("This service is not connected to a provider account yet. Please choose a published service.");return;}
     if(!city||!area||!details){notify("Please add your city, neighbourhood and a short description.");return;}
     if(bookingTiming==="later"&&(!preferredDate||!preferredTime)){notify("Choose the date and time you want the service.");return;}
-    const scheduledAt=bookingTiming==="later"?new Date(preferredDate+"T"+preferredTime).toISOString():null;
+    const scheduledDate=bookingTiming==="later"?new Date(preferredDate+"T"+preferredTime):null;
+    if(scheduledDate&&(!Number.isFinite(scheduledDate.getTime())||scheduledDate.getTime()<=Date.now())){notify("Choose a future date and time for this service.");return;}
+    const scheduledAt=scheduledDate?scheduledDate.toISOString():null;
     submit.disabled=true;submit.textContent="Sending request…";
     try{
       const {error}=await client.from("service_requests").insert({buyer_id:user.id,listing_id:listing.id,provider_id:listing.providerId,service_title:serviceTitle,request_type:"Request a time",booking_timing:bookingTiming,preferred_date:bookingTiming==="later"?preferredDate:null,preferred_time:bookingTiming==="later"?preferredTime:null,scheduled_at:scheduledAt,city,area,latitude:((window.BIGWIZZ_LOCATION_CONTEXT||{}).latitude??null),longitude:((window.BIGWIZZ_LOCATION_CONTEXT||{}).longitude??null),details,status:"new"});
@@ -664,6 +666,13 @@
   }
 
   function serviceStatusLabel(status){return ({new:"New request",responded:"Quote / response sent",accepted:"Accepted",declined:"Declined",cancelled:"Cancelled"})[status]||status;}
+  function serviceTimingLabel(item){
+    if(item.booking_timing==="later"&&item.preferred_date){
+      const time=item.preferred_time?String(item.preferred_time).slice(0,5):"";
+      return "Scheduled for "+item.preferred_date+(time?" at "+time:"");
+    }
+    return "Requested as soon as possible";
+  }
   async function loadSellerServiceRequests(){
     const target=document.getElementById("seller-service-request-list");if(!target)return;
     if(!user){target.innerHTML='<p class="notice">Sign in with your seller account to view customer requests.</p>';return;}
@@ -673,7 +682,7 @@
     if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Seller service requests could not be loaded.");return;}
     target.innerHTML=data.length?data.map(item=>`<article class="service-request-card" data-service-request-card="${escapeHtml(item.id)}"><div>
       <h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4><span class="service-request-status status-${escapeHtml(item.status)}">${escapeHtml(serviceStatusLabel(item.status))}</span>
-      <p>${escapeHtml(item.details)}</p><small>Customer location: ${escapeHtml(item.city||"")} ${item.city&&item.area?" · ":""}${escapeHtml(item.area)}${item.preferred_date?` · Preferred date: ${escapeHtml(item.preferred_date)}`:""} · Received ${new Date(item.created_at).toLocaleString()}</small>
+      <p>${escapeHtml(item.details)}</p><small>Customer location: ${escapeHtml(item.city||"")} ${item.city&&item.area?" · ":""}${escapeHtml(item.area)}${serviceTimingLabel(item)} ·  · Received ${new Date(item.created_at).toLocaleString()}</small>
       ${item.quoted_amount!==null?`<div class="service-request-response"><b>Quotation sent</b>${escapeHtml(item.quote_currency)} ${Number(item.quoted_amount).toFixed(2)}</div>`:""}
       ${item.provider_response?`<div class="service-request-response"><b>Your response</b>${escapeHtml(item.provider_response)}</div>`:""}
       ${["new","responded"].includes(item.status)?`<form class="seller-request-actions" data-service-response-form><input type="hidden" name="requestId" value="${escapeHtml(item.id)}"><div class="field"><label>Quotation amount (optional)</label><input name="quotedAmount" type="number" min="0" step="0.01" placeholder="Enter your price"></div><div class="field"><label>Your response to the customer</label><textarea name="providerResponse" maxlength="2000" placeholder="Explain your availability, price or next steps…" required></textarea></div><button class="primary" type="submit">Send response / quotation</button><div class="seller-request-action-row"><button class="outline-button" type="button" data-service-request-action="accepted" data-request-id="${escapeHtml(item.id)}">Accept request</button><button class="outline-button" type="button" data-service-request-action="declined" data-request-id="${escapeHtml(item.id)}">Decline</button></div></form>`:""}
