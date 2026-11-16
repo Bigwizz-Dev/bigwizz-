@@ -1108,7 +1108,7 @@
       const available=new Set(listedSizes.map(value=>String(value).trim().toLowerCase()));
       return `<details class="product-size-chart"><summary>${guide.title}</summary><table class="size-chart-table"><thead><tr>${guide.headers.map(value=>`<th scope="col">${value}</th>`).join("")}<th scope="col">Listing</th></tr></thead><tbody>${guide.rows.map(row=>`<tr>${row.map(value=>`<td>${value}</td>`).join("")}<td>${available.has(row[0].toLowerCase())?"Available":"Not listed"}</td></tr>`).join("")}</tbody></table><p class="notice">Measure your body, foot, or head and compare it with the available sizes shown. Fit can vary by brand; ask the seller if you are between sizes.</p></details>`;
     }
-    function renderProductDetails(listingId){
+    function renderProductDetails(listingId,skipRemoteLoad=false){
       const item=getGoodsListing(listingId);
       if(!item){setPage("discover");showToast("This item is no longer available.");return}
       if(selectedRatingProductId!==String(item.id)){selectedRatingProductId=String(item.id);selectedReviewRating=0}
@@ -1153,6 +1153,17 @@
       if(typeof updateSavedButtons==="function")updateSavedButtons();
       currentProductId=item.id;
       setPage("product-details");
+      window.BIGWIZZ_PRODUCT_REVIEWS_UPDATED=rows=>{
+        reviewsByListing[item.id]=[...(sampleReviewsByListing[item.id]||[]),...rows];
+        renderListings(document.getElementById("search-input").value);
+        if(currentProductId===item.id)renderProductDetails(item.id,true);
+      };
+      if(!skipRemoteLoad&&window.BIGWIZZ_BACKEND){
+        window.BIGWIZZ_BACKEND.loadListingReviews(item.id).then(rows=>{
+          reviewsByListing[item.id]=[...(sampleReviewsByListing[item.id]||[]),...rows];
+          if(currentProductId===item.id)renderProductDetails(item.id,true);
+        }).catch(error=>console.error("Could not load shared product reviews.",error));
+      }
     }
     function renderListings(query=""){
       const container=document.getElementById("listing-grid"),normalized=query.trim().toLowerCase();
@@ -1291,7 +1302,7 @@
       const openProduct=event.target.closest("[data-open-product]");if(openProduct){renderProductDetails(openProduct.dataset.openProduct);return}
       const productCard=event.target.closest("[data-product-card]");if(productCard&&!event.target.closest("[data-save]")){renderProductDetails(productCard.dataset.productCard);return}
       const serviceReviewRating=event.target.closest("[data-service-review-rating]");if(serviceReviewRating){selectedServiceReviewRating=Number(serviceReviewRating.dataset.serviceReviewRating);const form=document.getElementById("service-review-form");if(form)form.dataset.selectedRating=String(selectedServiceReviewRating);document.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=selectedServiceReviewRating)));return}
-      const reviewRating=event.target.closest("[data-review-rating]");if(reviewRating){selectedReviewRating=Number(reviewRating.dataset.reviewRating);document.querySelectorAll("#product-review-rating [data-review-rating]").forEach(button=>{const selected=Number(button.dataset.reviewRating)<=selectedReviewRating;button.setAttribute("aria-pressed",String(selected));button.classList.remove("rating-pop");if(selected){button.style.setProperty("--star-delay",`${(Number(button.dataset.reviewRating)-1)*55}ms`);void button.offsetWidth;button.classList.add("rating-pop")}});return}
+      const reviewRating=event.target.closest("[data-review-rating]");if(reviewRating){selectedReviewRating=Number(reviewRating.dataset.reviewRating);window.BIGWIZZ_PRODUCT_SELECTED_RATING=selectedReviewRating;document.querySelectorAll("#product-review-rating [data-review-rating]").forEach(button=>{const selected=Number(button.dataset.reviewRating)<=selectedReviewRating;button.setAttribute("aria-pressed",String(selected));button.classList.remove("rating-pop");if(selected){button.style.setProperty("--star-delay",`${(Number(button.dataset.reviewRating)-1)*55}ms`);void button.offsetWidth;button.classList.add("rating-pop")}});return}
       const writeReview=event.target.closest("[data-write-review]");if(writeReview){document.getElementById("item-review-form").reset();document.getElementById("review-listing-id").value=writeReview.dataset.writeReview;document.getElementById("review-dialog-title").textContent=`Review ${writeReview.dataset.reviewTitle}`;document.getElementById("review-dialog-summary").textContent="How was this item?";document.getElementById("review-dialog").showModal();return}
       const salesRange=event.target.closest("[data-sales-range]");if(salesRange){salesRangeDays=Number(salesRange.dataset.salesRange);document.querySelectorAll("[data-sales-range]").forEach(button=>button.classList.toggle("active",button===salesRange));renderSellerSales();return}
       const listingAction=event.target.closest("[data-seller-listing-action]");if(listingAction){
