@@ -137,6 +137,7 @@
     .product-detail-price{margin:12px 0;color:var(--deep);font-size:22px;font-weight:850}
     .product-detail-description{color:var(--muted);font-size:13px;line-height:1.6}
     .product-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .product-options-panel{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}.product-options-panel h4{margin:0 0 5px;font-size:15px}.product-options-panel>p{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.5}.product-options-panel .product-option-grid{margin-top:8px}.product-review-actions{display:flex;justify-content:flex-end;margin-top:16px}.product-review-actions .outline-button{width:auto}
     .product-detail-actions{display:flex;gap:9px;margin-top:18px}
     .product-detail-actions button{flex:1}
     .product-reviews,.related-products{margin-top:26px}
@@ -1058,9 +1059,10 @@
           </div>
         </article>
         <section class="product-reviews">
-          <div class="section-head"><div><h3>Rating</h3>${renderProductRatingStars()}</div><button type="button" class="outline-button" style="width:auto" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
-          <div class="product-option-grid">${variantFields}</div>
+          <div class="section-head"><div><h3>Rating</h3>${renderProductRatingStars()}</div></div>
+          ${variantFields?`<div class="product-options-panel"><h4>Choose your options</h4><p>Select the colour and size you want before adding this item to your cart.</p><div class="product-option-grid">${variantFields}</div></div>`:""}
           ${renderSizeChart(item.sizeType||"other",sizes)}
+          <div class="product-review-actions"><button type="button" class="outline-button" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
           <div class="product-review-list">${reviewRows||'<p class="notice">No written reviews yet. Be the first to share your experience.</p>'}</div>
           <p class="notice">Sample reviews are demo content. New reviews are saved only in this browser.</p>
         </section>
