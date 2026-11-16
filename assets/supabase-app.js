@@ -252,7 +252,11 @@
         `${sellerType} · Manage listings, customer orders, and earnings.`;
     }
     if (!accountRoles.includes("seller") && sellerProfileReady) accountRoles.push("seller");
-    if (!accountRoles.includes(activeAccount)) activeAccount = "buyer";
+    // Keep an explicitly authenticated Seller journey selected while its
+    // seller profile/role is being created or loaded.
+    if (!accountRoles.includes(activeAccount) && !(activeAccount === "seller" && sellerAuthVerified)) {
+      activeAccount = "buyer";
+    }
     updateAccountState();
     await loadSavedListings();
   }
@@ -728,6 +732,9 @@
               sellerAuthVerified = true;
               activeAccount = "seller";
               await handleSession(result.data.user);
+              activeAccount = "seller";
+              updateAccountState();
+              activatePage("seller-studio");
               const setupForm = document.getElementById("seller-setup-form");
               if (setupForm) setupForm.requestSubmit();
               notify("Seller account created. Finishing your studio setup…");
@@ -751,6 +758,9 @@
             sellerAuthVerified = true;
             activeAccount = "seller";
             await handleSession(result.data.user);
+            activeAccount = "seller";
+            updateAccountState();
+            activatePage("seller-studio");
             const setupForm = document.getElementById("seller-setup-form");
             if (setupForm) setupForm.requestSubmit();
             notify("Seller sign-in successful. Finishing your studio setup…");
@@ -797,7 +807,7 @@
     const authModeButton = event.target.closest("[data-auth-mode]");
     if (authModeButton) {
       stop(event);
-      showAuth(authModeButton.dataset.authMode);
+      showAuth(authModeButton.dataset.authMode, authAudience);
       return;
     }
     if (event.target.closest("#seller-listing-cancel")) {
@@ -822,14 +832,16 @@
       if (accountChoice.dataset.accountOption === "seller") {
         stop(event);
         activeAccount = "seller";
+        sellerAuthVerified = false;
         updateAccountState();
         activatePage("seller-studio");
-        if (!sellerProfileReady) showAuth("signin", "seller");
+        showAuth("signin", "seller");
         return;
       }
       if (!user) return;
       stop(event);
-      activeAccount = accountChoice.dataset.accountOption;
+      sellerAuthVerified = false;
+      activeAccount = "buyer";
       updateAccountState();
       activatePage(activeAccount === "seller" ? "seller-studio" : "discover");
       return;
