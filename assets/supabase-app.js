@@ -53,6 +53,8 @@
   }
 
   let authMode = "signin";
+  let authAudience = "buyer";
+  let sellerAuthVerified = false;
 
   function setAuthMode(mode) {
     authMode = mode;
@@ -80,27 +82,29 @@
     resetLink.hidden = mode !== "signin";
     backLink.hidden = mode === "signin";
     if (mode === "signup") {
-      title.textContent = "Create your Bigwizz account";
-      summary.textContent = "Choose whether you want to shop as a buyer or sell on Bigwizz.";
+      title.textContent = authAudience === "seller" ? "Create your Seller account" : "Create your Buyer account";
+      summary.textContent = authAudience === "seller" ? "Create your seller sign-in to continue to Seller Studio." : "Create your buyer sign-in to shop on Bigwizz.";
       submit.textContent = "Create account";
     } else if (mode === "reset") {
-      title.textContent = "Reset your password";
+      title.textContent = authAudience === "seller" ? "Reset Seller password" : "Reset Buyer password";
       summary.textContent = "We will email you a password reset link.";
       submit.textContent = "Send reset link";
     } else {
-      title.textContent = "Sign in to Bigwizz";
-      summary.textContent = "Sign in to continue to your Bigwizz account.";
+      title.textContent = authAudience === "seller" ? "Sign in to Seller Studio" : "Sign in to your Buyer account";
+      summary.textContent = authAudience === "seller" ? "Use your email and password to open your separate Seller sign-in journey. You can use the same email as your Buyer account." : "Sign in to continue to your Buyer account.";
       submit.textContent = "Sign in";
     }
   }
 
-  function showAuth(mode = "signin") {
+  function showAuth(mode = "signin", audience = "buyer") {
+    authAudience = audience;
     const dialog = document.getElementById("auth-dialog");
     if (!dialog) {
       notify("The sign-in window could not be opened.");
       return;
     }
     setAuthMode(mode);
+    if (authAudience === "seller" && mode === "signup") document.getElementById("auth-role").value = "seller";
     if (!dialog.open) dialog.showModal();
   }
 
@@ -431,11 +435,11 @@
 
     const form = event.currentTarget;
     const submit = form.querySelector('button[type="submit"]');
-    if (!user) {
-      showAuth();
+    if (submit && submit.disabled) return;
+    if (!user || !sellerAuthVerified) {
+      showAuth("signin", "seller");
       return;
     }
-    if (submit && submit.disabled) return;
 
     const values = new FormData(form);
     const shopName = String(values.get("shopName") || "").trim();
@@ -734,7 +738,16 @@
           result = await client.auth.signInWithPassword({ email, password });
           if (result.error) throw result.error;
           document.getElementById("auth-dialog").close();
-          notify("You are signed in to Bigwizz.");
+          if (authAudience === "seller") {
+            sellerAuthVerified = true;
+            activeAccount = "seller";
+            await handleSession(result.data.user);
+            const setupForm = document.getElementById("seller-setup-form");
+            if (setupForm) setupForm.requestSubmit();
+            notify("Seller sign-in successful. Finishing your studio setup…");
+          } else {
+            notify("You are signed in to your Buyer account.");
+          }
         }
       } catch (error) {
         showAuthFeedback(error.message || "Authentication failed. Please try again.", true);
@@ -764,7 +777,7 @@
     const authOpen = event.target.closest("[data-auth-open]");
     if (authOpen) {
       stop(event);
-      showAuth("signin");
+      showAuth("signin", "buyer");
       return;
     }
     const authClose = event.target.closest("[data-auth-close]");
@@ -785,6 +798,7 @@
     const signOut = event.target.closest("[data-supabase-signout]");
     if (signOut) {
       stop(event);
+      sellerAuthVerified = false;
       client.auth.signOut().then(({ error }) => {
         if (error) report(error, "Could not sign out.");
         else {
@@ -796,17 +810,15 @@
     }
     const accountChoice = event.target.closest("[data-account-option]");
     if (accountChoice) {
-      if (!user) {
-        if (accountChoice.dataset.accountOption === "seller") {
-          stop(event);
-          activeAccount = "seller";
-          updateAccountState();
-          activatePage("seller-studio");
-          notify("Seller setup is available to preview. Sign-in is required to save it.");
-          return;
-        }
+      if (accountChoice.dataset.accountOption === "seller") {
+        stop(event);
+        activeAccount = "seller";
+        updateAccountState();
+        activatePage("seller-studio");
+        if (!sellerProfileReady) showAuth("signin", "seller");
         return;
       }
+      if (!user) return;
       stop(event);
       activeAccount = accountChoice.dataset.accountOption;
       updateAccountState();
