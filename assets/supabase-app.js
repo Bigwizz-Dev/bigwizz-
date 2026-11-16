@@ -747,9 +747,9 @@
               activeAccount = "seller";
               updateAccountState();
               activatePage("seller-studio");
-              const setupForm = document.getElementById("seller-setup-form");
-              if (setupForm) setupForm.requestSubmit();
-              notify("Seller account created. Finishing your studio setup…");
+              notify(sellerProfileReady
+                ? "Seller account created. Opening Seller Studio."
+                : "Seller account created. Complete your shop profile in Seller Studio.");
             } else {
               notify("Your Buyer account has been created.");
             }
@@ -773,9 +773,9 @@
             activeAccount = "seller";
             updateAccountState();
             activatePage("seller-studio");
-            const setupForm = document.getElementById("seller-setup-form");
-            if (setupForm) setupForm.requestSubmit();
-            notify("Seller sign-in successful. Finishing your studio setup…");
+            notify(sellerProfileReady
+              ? "Seller sign-in successful. Opening Seller Studio."
+              : "Seller sign-in successful. Complete your shop profile in Seller Studio.");
           } else {
             notify("You are signed in to your Buyer account.");
           }
