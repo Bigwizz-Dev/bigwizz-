@@ -27,7 +27,14 @@
     .service-review-dialog .dialog-head h2{margin:0 0 5px;font-size:20px}
     .service-review-dialog .dialog-head p{margin:0;color:var(--muted);font-size:12px}
     .service-review-dialog .dialog-close{width:36px;height:36px;border:0;border-radius:50%;background:var(--canvas);color:var(--ink);font-size:23px}
-    .service-review-dialog .service-write-review form{display:grid;gap:9px}
+    .service-review-dialog #service-review-form{display:grid;gap:9px}
+    .service-review-dialog #service-review-form label,.service-review-dialog .service-review-form-label{color:var(--ink);font-size:12px;font-weight:800}
+    .service-review-dialog #service-review-form input,.service-review-dialog #service-review-form textarea{width:100%;min-height:45px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px}
+    .service-review-dialog #service-review-form textarea{min-height:110px;resize:vertical;line-height:1.5}
+    .service-review-dialog .service-review-rating-picker{display:flex;gap:7px;margin:0 0 6px}
+    .service-review-dialog .service-review-rating-picker button{width:39px;height:39px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:#c9c2cc;font-size:25px;line-height:1}
+    .service-review-dialog .service-review-rating-picker button[aria-pressed="true"]{color:#e4a72d;border-color:#e4a72d;background:#fff9e9}
+
     .service-review-dialog .service-review-submit{width:100%}
     @media(max-width:480px){.service-write-review-prompt{align-items:flex-start;flex-direction:column}.service-review-open{width:100%}}
     .service-write-review h3{margin:0 0 6px;font-size:18px}
