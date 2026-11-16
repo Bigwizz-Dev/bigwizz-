@@ -40,14 +40,13 @@
     document.getElementById("profile-avatar").textContent = initials(name);
     document.getElementById("account-switch-trigger").setAttribute(
       "aria-label",
-      user ? `Switch account. Current account: ${activeAccount === "seller" ? "Seller" : "Buyer"}` : "Switch account"
+      user ? "Switch account. Current account: Buyer" : "Switch account"
     );
     const authOpen = document.querySelector("[data-auth-open]");
     if (authOpen) {
-      // Keep the Buyer sign-in entry visible while the Seller workspace is active.
-      authOpen.hidden = Boolean(user) && activeAccount !== "seller";
-      authOpen.setAttribute("aria-label", activeAccount === "seller" ? "Seller sign in" : "Buyer sign in");
-      authOpen.title = activeAccount === "seller" ? "Seller sign in" : "Buyer sign in";
+      authOpen.hidden = false;
+      authOpen.setAttribute("aria-label", "Buyer sign in");
+      authOpen.title = "Buyer sign in";
     }
     const signOut = document.querySelector("[data-supabase-signout]");
     if (signOut) signOut.hidden = !user;
@@ -108,7 +107,6 @@
       return;
     }
     setAuthMode(mode);
-    if (authAudience === "seller" && mode === "signup") document.getElementById("auth-role").value = "seller";
     if (!dialog.open) dialog.showModal();
   }
 
@@ -133,7 +131,6 @@
       button.classList.toggle("active", button.dataset.page === page);
     });
     if (page === "cart") loadCart();
-    if (page === "messages") loadInbox();
     if (page === "notifications") loadNotifications();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -666,16 +663,10 @@
     if (!user) {
       profile = null;
       accountRoles = ["buyer"];
-      const hasPendingSellerStudio = Boolean(sessionStorage.getItem("bigwizz-pending-seller-studio"));
-      activeAccount = hasPendingSellerStudio ? "seller" : "buyer";
-      sellerProfileReady = false;
-      sellerAuthVerified = false;
-      authAudience = hasPendingSellerStudio ? "seller" : "buyer";
-      if (sellerWorkspace) sellerWorkspace.hidden = true;
-      const buyerShell = document.querySelector("#marketplace-app > .shell");
-      const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
-      if (buyerShell) buyerShell.hidden = false;
-      if (buyerNav) buyerNav.hidden = false;
+      activeAccount = "buyer";
+      authAudience = "buyer";
+      sessionStorage.removeItem("bigwizz-active-account");
+      sessionStorage.removeItem("bigwizz-pending-seller-studio");
       setProfileDisplay("Guest");
       updateMobileNavigation();
       return;
@@ -684,14 +675,8 @@
       await loadAccount();
       showApp();
       await loadCatalog();
-      if (activeAccount === "seller" && sessionStorage.getItem("bigwizz-pending-seller-studio")) {
-        sellerAuthVerified = true;
-        await finalizePendingSellerStudio();
-      } else if (activeAccount === "seller" && sellerAuthVerified) {
-        activatePage("seller-studio");
-      } else if (!document.querySelector(".page.active")) {
-        activatePage("discover");
-      }
+      activeAccount = "buyer";
+      if (!document.querySelector(".page.active")) activatePage("discover");
       notify("Signed in. Your account data is shared across devices.");
     } catch (error) {
       report(error, "Account details could not be loaded.");
@@ -727,19 +712,7 @@
           if (result.error) throw result.error;
           if (result.data.session) {
             document.getElementById("auth-dialog").close();
-            if (authAudience === "seller") {
-              sellerAuthVerified = true;
-              activeAccount = "seller";
-              await handleSession(result.data.user);
-              activeAccount = "seller";
-              updateAccountState();
-              activatePage("seller-studio");
-              notify(sellerProfileReady
-                ? "Seller account created. Opening Seller Studio."
-                : "Seller account created. Complete your shop profile in Seller Studio.");
-            } else {
-              notify("Your Buyer account has been created.");
-            }
+            notify("Your Buyer account has been created.");
           } else {
             showAuthFeedback("Account created. Check your email for a confirmation link, then return here to sign in.");
           }
@@ -894,29 +867,14 @@
       return;
     }
     const pageButton = event.target.closest("[data-page]");
-    if (pageButton && ["seller-studio", "seller-listings", "seller-progress", "cart", "messages", "notifications"].includes(pageButton.dataset.page)) {
-      if (!user && pageButton.dataset.page !== "seller-studio") {
+    if (pageButton && ["cart", "notifications"].includes(pageButton.dataset.page)) {
+      if (!user) {
         stop(event);
         showAuth();
         return;
       }
-      if (pageButton.dataset.page === "seller-studio" || pageButton.dataset.page === "seller-listings" || pageButton.dataset.page === "seller-progress" || pageButton.dataset.page === "messages") {
-        stop(event);
-        if (!sellerAuthVerified) {
-          activeAccount = "seller";
-          updateAccountState();
-          activatePage("seller-studio");
-          showAuth("signin", "seller");
-          return;
-        }
-        activeAccount = "seller";
-        updateAccountState();
-        activatePage(pageButton.dataset.page);
-        return;
-      }
       window.setTimeout(() => {
         if (pageButton.dataset.page === "cart") loadCart();
-        if (pageButton.dataset.page === "messages") loadInbox();
         if (pageButton.dataset.page === "notifications") loadNotifications();
       }, 0);
     }
