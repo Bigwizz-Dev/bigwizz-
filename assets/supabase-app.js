@@ -4,14 +4,6 @@
   if (!config || !config.url || !config.publishableKey || !supabaseApi) return;
 
   const client = supabaseApi.createClient(config.url, config.publishableKey);
-  // The Seller workspace owns its pages and navigation, outside the Buyer shell.
-  const sellerWorkspace = document.getElementById("seller-workspace");
-  const sellerWorkspaceMain = document.getElementById("seller-workspace-main");
-  ["seller-studio", "seller-listings", "seller-progress", "messages"].forEach(id => {
-    const page = document.getElementById(id);
-    if (page && sellerWorkspaceMain) sellerWorkspaceMain.appendChild(page);
-  });
-
   const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
   let user = null;
   let profile = null;
@@ -67,7 +59,6 @@
 
   let authMode = "signin";
   let authAudience = "buyer";
-  let sellerAuthVerified = false;
 
   function setAuthMode(mode) {
     authMode = mode;
@@ -109,8 +100,8 @@
     }
   }
 
-  function showAuth(mode = "signin", audience = "buyer") {
-    authAudience = audience;
+  function showAuth(mode = "signin") {
+    authAudience = "buyer";
     const dialog = document.getElementById("auth-dialog");
     if (!dialog) {
       notify("The sign-in window could not be opened.");
@@ -134,36 +125,13 @@
   }
 
   function activatePage(page) {
-    const sellerPages = ["seller-studio", "seller-listings", "seller-progress", "messages"];
-    const isSellerPage = sellerPages.includes(page);
-    if (isSellerPage && page !== "seller-studio" && (!user || activeAccount !== "seller" || !sellerAuthVerified)) {
-      notify("Sign in to your Seller account to open the Seller Dashboard.");
-      return;
-    }
-    if (page === "seller-listings" && !sellerProfileReady) {
-      page = "seller-studio";
-      notify("Complete your shop profile before managing listings.");
-    }
-    if (sellerWorkspace) {
-      sellerWorkspace.hidden = !isSellerPage;
-      const buyerShell = document.querySelector("#marketplace-app > .shell");
-      if (buyerShell) buyerShell.hidden = isSellerPage;
-      const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
-      if (buyerNav) buyerNav.hidden = isSellerPage;
-    }
+    if (["seller-studio", "seller-listings", "seller-progress", "messages"].includes(page)) page = "discover";
     document.querySelectorAll(".page").forEach(section => {
       section.classList.toggle("active", section.id === page);
     });
     document.querySelectorAll("[data-page]").forEach(button => {
       button.classList.toggle("active", button.dataset.page === page);
     });
-    if (page === "seller-studio") {
-      const sellerCanOpenDashboard = sellerProfileReady && Boolean(user) &&
-        activeAccount === "seller" && sellerAuthVerified;
-      document.getElementById("seller-onboarding").hidden = sellerCanOpenDashboard;
-      document.getElementById("seller-dashboard").hidden = !sellerCanOpenDashboard;
-    }
-    if (page === "seller-listings") loadMyListings();
     if (page === "cart") loadCart();
     if (page === "messages") loadInbox();
     if (page === "notifications") loadNotifications();
@@ -255,37 +223,17 @@
 
   async function loadAccount() {
     if (!user) return;
-    const [profileResult, rolesResult, sellerResult] = await Promise.all([
+    const [profileResult, rolesResult] = await Promise.all([
       client.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
-      client.from("user_roles").select("role").eq("user_id", user.id),
-      client.from("seller_profiles").select("shop_name,seller_type").eq("user_id", user.id).maybeSingle()
+      client.from("user_roles").select("role").eq("user_id", user.id)
     ]);
     if (profileResult.error) throw profileResult.error;
     if (rolesResult.error) throw rolesResult.error;
-    if (sellerResult.error) throw sellerResult.error;
 
     profile = profileResult.data || { display_name: user.email || "Member" };
     accountRoles = rolesResult.data.map(item => item.role);
     if (!accountRoles.includes("buyer")) accountRoles.unshift("buyer");
-    sellerProfileReady = Boolean(sellerResult.data);
-    if (sellerResult.data) {
-      sellerShopName = sellerResult.data.shop_name;
-      sellerType = sellerResult.data.seller_type;
-      document.getElementById("seller-shop-title").textContent = sellerShopName;
-      document.getElementById("seller-type-label").textContent =
-        `${sellerType} · Manage listings, customer orders, and earnings.`;
-    }
-    if (!accountRoles.includes("seller") && sellerProfileReady) accountRoles.push("seller");
-    // A restored session must recognize an existing seller account without
-    // forcing the seller to sign in again after refreshing the page.
-    if (accountRoles.includes("seller") || sellerProfileReady) sellerAuthVerified = true;
-    // Keep the Seller journey selected while sign-in callbacks race or the
-    // seller profile is being created for an account that already signed in.
-    const sellerJourneyRequested = activeAccount === "seller" &&
-      (sellerAuthVerified || authAudience === "seller");
-    if (!accountRoles.includes(activeAccount) && !sellerJourneyRequested) {
-      activeAccount = "buyer";
-    }
+    activeAccount = "buyer";
     updateAccountState();
     await loadSavedListings();
   }
@@ -805,19 +753,7 @@
           result = await client.auth.signInWithPassword({ email, password });
           if (result.error) throw result.error;
           document.getElementById("auth-dialog").close();
-          if (authAudience === "seller") {
-            sellerAuthVerified = true;
-            activeAccount = "seller";
-            await handleSession(result.data.user);
-            activeAccount = "seller";
-            updateAccountState();
-            activatePage("seller-studio");
-            notify(sellerProfileReady
-              ? "Seller sign-in successful. Opening Seller Studio."
-              : "Seller sign-in successful. Complete your shop profile in Seller Studio.");
-          } else {
-            notify("You are signed in to your Buyer account.");
-          }
+          notify("You are signed in to your Buyer account.");
         }
       } catch (error) {
         showAuthFeedback(error.message || "Authentication failed. Please try again.", true);
@@ -828,8 +764,6 @@
       }
       return;
     }
-    if (event.target.id === "seller-setup-form") return saveSellerProfile(event);
-    if (event.target.id === "seller-listing-form") return saveSellerListing(event);
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
     if (event.target.id === "issue-form") return submitOrderReport(event);
     if (event.target.id === "search-form") {
@@ -847,12 +781,9 @@
     const authOpen = event.target.closest("[data-auth-open]");
     if (authOpen) {
       stop(event);
-      const sellerPageOpen = Boolean(document.getElementById("seller-studio")?.classList.contains("active"));
-      const audience = activeAccount === "seller" || sellerPageOpen ? "seller" : "buyer";
-      activeAccount = audience;
-      sellerAuthVerified = false;
+      activeAccount = "buyer";
       updateAccountState();
-      showAuth("signin", audience);
+      showAuth("signin");
       return;
     }
     const authClose = event.target.closest("[data-auth-close]");
@@ -873,7 +804,6 @@
     const signOut = event.target.closest("[data-supabase-signout]");
     if (signOut) {
       stop(event);
-      sellerAuthVerified = false;
       sessionStorage.removeItem("bigwizz-active-account");
       client.auth.signOut().then(({ error }) => {
         if (error) report(error, "Could not sign out.");
@@ -886,25 +816,12 @@
     }
     const accountChoice = event.target.closest("[data-account-option]");
     if (accountChoice) {
-      if (accountChoice.dataset.accountOption === "seller") {
-        stop(event);
-        activeAccount = "seller";
-        sellerAuthVerified = false;
-        sessionStorage.setItem("bigwizz-active-account", "seller");
-        updateAccountState();
-        // Switching into Seller must open the Seller sign-in first.
-        // After successful Seller authentication, handleSession opens Seller Studio.
-        activatePage("seller-studio");
-        showAuth("signin", "seller");
-        return;
-      }
       if (!user) return;
       stop(event);
-      sellerAuthVerified = false;
       activeAccount = "buyer";
       sessionStorage.setItem("bigwizz-active-account", "buyer");
       updateAccountState();
-      activatePage(activeAccount === "seller" ? "seller-studio" : "discover");
+      activatePage("discover");
       return;
     }
     const category = event.target.closest("[data-category]");
