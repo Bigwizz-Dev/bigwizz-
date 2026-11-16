@@ -330,7 +330,7 @@
     container.innerHTML = data.map(item => `<article class="seller-listing-item">
       <img src="${escapeHtml(item.image_url)}" alt="">
       <div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong>
-        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
+        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
       </div>
       <div class="seller-listing-actions">
         <button type="button" data-seller-listing-action="edit" data-listing-id="${item.id}">Edit</button>
@@ -657,6 +657,10 @@
     const serviceTitle = String(values.get("service") || "");
     const listing = services.find(item => item.title === serviceTitle);
     const matchingMode = String(values.get("matchingMode") || "direct");
+    if (matchingMode === "direct" && !listing?.providerId) {
+      notify("Choose the nearby-provider option for this service so Bigwizz can find an available professional.");
+      return;
+    }
     const scheduledAt = String(values.get("scheduledAt") || "");
     const latitude = values.get("latitude") ? Number(values.get("latitude")) : null;
     const longitude = values.get("longitude") ? Number(values.get("longitude")) : null;
@@ -741,12 +745,13 @@
     if(!user){showAuth();return;}
     if(activeAccount!=="seller")return;
     const {data,error}=await client.from("service_request_matches")
-      .select("id,status,quoted_amount,currency,response_note,sent_at,service_requests(service_title,request_type,area,details,scheduled_at,service_address,representative_name)")
+      .select("id,status,quoted_amount,currency,response_note,sent_at,service_requests(service_title,request_type,area,details,scheduled_at,service_address,representative_name),service_request_selections(match_id)")
       .eq("provider_id",user.id).order("sent_at",{ascending:false});
     if(error){report(error,"Nearby service requests could not be loaded.");return;}
     const requests=data.length?`<div class="service-request-list">${data.map(match=>{
       const item=match.service_requests||{},schedule=item.scheduled_at?new Date(item.scheduled_at).toLocaleString():"As soon as possible";
-      return `<article class="service-request-card"><div><h4>${escapeHtml(item.service_title||"Service request")} · ${escapeHtml(match.status)}</h4><p>${escapeHtml(item.details||"")}</p><small>${escapeHtml(item.area||"")} · ${escapeHtml(schedule)} · ${escapeHtml(item.service_address||"")}${item.representative_name?" · Contact on arrival: "+escapeHtml(item.representative_name):""}</small>
+      const selected=(match.service_request_selections||[]).some(row=>row.match_id===match.id);
+      return `<article class="service-request-card"><div><h4>${escapeHtml(item.service_title||"Service request")} · ${escapeHtml(selected?"Buyer selected you":match.status)}</h4><p>${escapeHtml(item.details||"")}</p><small>${escapeHtml(item.area||"")} · ${escapeHtml(schedule)} · ${escapeHtml(item.service_address||"")}${item.representative_name?" · Contact on arrival: "+escapeHtml(item.representative_name):""}</small>
       ${match.status==="sent"||match.status==="viewed"?`<form class="service-match-response" data-service-match-response="${match.id}"><input name="quotedAmount" type="number" min="0.01" step="0.01" placeholder="Your quotation" required><input name="currency" value="USD" maxlength="3" aria-label="Currency" required><textarea name="responseNote" placeholder="Explain what is included, availability and any conditions" maxlength="2000"></textarea><button class="primary" type="submit">Send private quotation</button></form>`:match.quoted_amount?`<div class="service-quote-card">Your quotation: <strong>${escapeHtml(match.currency)} ${Number(match.quoted_amount).toLocaleString()}</strong><p>${escapeHtml(match.response_note||"")}</p></div>`:""}</div></article>`;
     }).join("")}</div>`:'<p class="notice">No nearby service requests yet. New requests from buyers in your service area will appear here.</p>';
     document.getElementById("inbox").innerHTML=`<section class="service-request-section"><h3>Nearby service requests</h3>${requests}</section><p class="notice">Send quotations privately. Buyers compare provider profiles and offers; Bigwizz does not run a public bidding contest.</p>`;
