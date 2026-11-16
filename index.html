@@ -624,8 +624,15 @@
           <input id="request-date" type="date" name="preferredDate">
         </div>
         <div class="service-request-field">
-          <label for="request-area">Where do you need the service?</label>
-          <input id="request-area" name="area" placeholder="Enter your neighbourhood or city" autocomplete="address-level2" required>
+          <label for="request-city">City</label>
+          <input id="request-city" name="city" list="bigwizz-city-options" placeholder="Search or enter your city" autocomplete="address-level2" required>
+          <datalist id="bigwizz-city-options">
+            <option value="Lagos"><option value="Abuja"><option value="Port Harcourt"><option value="Ibadan"><option value="Benin City"><option value="Warri"><option value="Sapele"><option value="Asaba"><option value="Uyo"><option value="Calabar"><option value="Enugu"><option value="Onitsha"><option value="Aba"><option value="Owerri"><option value="Awka"><option value="Jos"><option value="Kaduna"><option value="Kano"><option value="Maiduguri"><option value="Ilorin"><option value="Abeokuta"><option value="Akure"><option value="Lokoja"><option value="Makurdi"><option value="Yenagoa"><option value="Sokoto"><option value="Minna"><option value="Gombe"><option value="Bauchi"><option value="Damaturu"><option value="Jalingo"><option value="Birnin Kebbi"><option value="Dutse"><option value="Katsina"><option value="Lafia"><option value="Abakaliki"><option value="Ogbomoso"><option value="Ife"><option value="Umuahia"><option value="Ekpoma">
+          </datalist>
+        </div>
+        <div class="service-request-field">
+          <label for="request-area">Neighbourhood / area</label>
+          <input id="request-area" name="area" placeholder="Enter your neighbourhood or area" autocomplete="address-line2" required>
         </div>
         <div class="service-request-field">
           <label for="request-details">Tell the provider a little more</label>
@@ -1409,7 +1416,7 @@
         if(!requests.length)return '<section class="service-request-section"><h3>Service requests</h3><p class="notice">No service requests yet. New requests from this browser will appear here.</p></section>';
         return `<section class="service-request-section"><h3>Service requests</h3><div class="service-request-list">${requests.slice().reverse().map(item=>{
           const created=Date.parse(item.createdAt),received=Number.isFinite(created)?new Date(created).toLocaleString():"Date unavailable";
-          return `<article class="service-request-card"><div><h4>${escapeHtml(item.service)} Â· ${escapeHtml(item.requestType)}</h4><p>${escapeHtml(item.details)}</p><small>${escapeHtml(item.area)}${item.preferredDate?` Â· Preferred date: ${escapeHtml(item.preferredDate)}`:""} Â· ${escapeHtml(received)}</small></div><button class="outline-button" type="button" data-reply-to="${escapeHtml(item.service)}">Respond</button></article>`;
+          return `<article class="service-request-card"><div><h4>${escapeHtml(item.service)} Â· ${escapeHtml(item.requestType)}</h4><p>${escapeHtml(item.details)}</p><small>${escapeHtml(item.city||"")} ${item.city&&item.area?" · ":""}${escapeHtml(item.area)}${item.preferredDate?` Â· Preferred date: ${escapeHtml(item.preferredDate)}`:""} Â· ${escapeHtml(received)}</small></div><button class="outline-button" type="button" data-reply-to="${escapeHtml(item.service)}">Respond</button></article>`;
         }).join("")}</div></section>`;
       })():"";
       const messageSection=`<section class="seller-message-section"><h3>${sellerInbox?"Buyer messages":"Recent messages"}</h3>${threads.map((item,index)=>`<div class="message-row" style="padding:12px 4px;border-bottom:1px solid var(--line)"><span class="avatar" style="background:${item.color}">${item.initials}</span><div><span class="pill" style="${index===2?"background:#c9d3ca;color:#45574a":""}">${item.priority}</span><b>${item.name}</b><small>${item.context}</small><small>${item.preview}</small></div><button class="outline-button" style="width:auto" data-reply-to="${item.name}">Reply</button></div>`).join("")}</section>`;
