@@ -550,7 +550,7 @@
     const commissionRate=0.02;
     const currencyFormatter=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
     let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7,selectedReviewRating=0,selectedRatingProductId=null,currentProductId=null;
-    let accountRoles=["buyer"],activeAccount="buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
+    let accountRoles=["buyer"],activeAccount=sessionStorage.getItem("bigwizz-active-account")==="seller"?"seller":"buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
     let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true,reviewsByListing={},reviewStorageAvailable=true,productBaseImage="",productColorImages={};
     function showToast(message){const toast=document.getElementById("toast");toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2800)}
     const starIcon=filled=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"${filled?' fill="currentColor"':''}/></svg>`;
@@ -854,6 +854,7 @@
       closeAccountMenu();
       if(account==="buyer"){
         activeAccount="buyer";
+        sessionStorage.setItem("bigwizz-active-account","buyer");
         updateMobileNavigation();
         renderAccountMenu();
         setPage("discover");
@@ -862,6 +863,7 @@
       }
       if(account==="seller"){
         activeAccount="seller";
+        sessionStorage.setItem("bigwizz-active-account","seller");
         updateMobileNavigation();
         renderAccountMenu();
         setPage("seller-studio");
