@@ -361,6 +361,23 @@
     .notification-card h3{margin:1px 0 5px;font-size:13px}
     .notification-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
     .notification-card small{display:block;margin-top:7px;color:var(--muted);font-size:10px}
+    .buyer-service-tracking{margin:0 0 22px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--paper)}
+    .service-request-status{display:inline-flex;align-items:center;padding:4px 9px;border-radius:99px;background:var(--canvas);color:var(--deep);font-size:10px;font-weight:850;text-transform:capitalize}
+    .service-request-status.status-accepted{background:#e8f3e8;color:#28603b}
+    .service-request-status.status-declined{background:#fbeaea;color:#9a3434}
+    .service-request-status.status-responded{background:#fff3d8;color:#815a13}
+    .service-request-response{margin-top:10px;padding:11px 12px;border-radius:11px;background:var(--canvas);font-size:12px;line-height:1.55}
+    .service-request-response b{display:block;margin-bottom:4px}
+    .seller-request-actions{display:grid;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+    .seller-request-actions .field{margin:0}
+    .seller-request-actions textarea{width:100%;min-height:76px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:12px}
+    .seller-request-actions input{width:100%;min-height:42px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:12px}
+    .seller-request-action-row{display:flex;gap:8px;flex-wrap:wrap}
+    .seller-request-action-row button{flex:1;min-width:110px}
+    .service-request-card{align-items:flex-start}
+    .service-request-card>div{min-width:0;flex:1}
+    .service-request-card .service-request-status{margin-top:6px}
+    @media(max-width:520px){.seller-request-action-row{flex-direction:column}.seller-request-action-row button{width:100%}}
     .service-request-section,.seller-message-section{margin-bottom:20px}
     .service-request-section>h3,.seller-message-section>h3{margin:0 0 11px;font-size:15px}
     .service-request-list{display:grid;gap:10px}
@@ -526,11 +543,10 @@
         </div>
         <section id="service-provider-placeholder" class="service-provider-placeholder" hidden>
           <div class="service-provider-panel">
-            <span class="service-provider-kicker">BIGWIZZ SERVICES</span>
-            <h3>Offer your services on Bigwizz</h3>
-            <p>The service provider interface will connect here to the central Seller Area when we build it. Your provider profile, service listings and customer requests will be managed from that shared area.</p>
-            <div class="service-provider-next"><span>Provider profile</span><span>Publish services</span><span>Manage requests</span></div>
-            <p class="notice">Provider setup is not open yet. Buyers can continue browsing and requesting services.</p>
+            <span class="service-provider-kicker">BIGWIZZ SELLER STUDIO</span>
+            <h3>Your service requests</h3>
+            <p>Review customer requests, send a quotation or response, and update the customer when you can take the job.</p>
+            <div id="seller-service-request-list" class="service-request-list"><p class="notice">Loading your requests…</p></div>
             <button type="button" class="outline-button" data-service-role="buyer">Back to finding services</button>
           </div>
         </section>
@@ -556,8 +572,9 @@
       <section id="notifications" class="page"><div class="section-head"><div><h2>App notifications</h2><p>Updates about orders, messages, and the community.</p></div></div><div class="notification-list" id="notification-list"></div></section>
       <section id="cart" class="page"><div class="section-head"><div><h2>Your cart</h2><p>Review your goods and the Bigwizz fee before checkout.</p></div></div><div class="cart-layout"><div class="cart-items" id="cart-items"></div><aside class="cart-summary" id="cart-summary"></aside></div></section>
       </section>
-      <section id="orders" class="page"><div class="section-head"><div><h2>Order support</h2><p>What arrived should match what you agreed to buy. Start a report if it doesn't.</p></div></div>
-        <div class="issue-wrap"><h3>Report an order that doesn't match</h3><p>Share the order reference and what went wrong. Keep the packaging and any photos while the seller or support team reviews it. Reports are saved to your Bigwizz account; support is not contacted.</p>
+      <section id="orders" class="page"><div class="section-head"><div><h2>Orders & service requests</h2><p>Track customer service requests and get help with an order.</p></div></div>
+        <section class="service-request-section buyer-service-tracking"><h3>My service requests</h3><div id="buyer-service-request-list" class="service-request-list"><p class="notice">Sign in to see your service requests.</p></div></section>
+        <div class="issue-wrap"><h3>Report an order that doesn't match</h3><p>Share the order reference and what went wrong. Keep the packaging and any photos while the seller or support team reviews it. Reports are saved to your Bigwizz account; support is not contacted.</p><h3>Report an order that doesn't match</h3><p>Share the order reference and what went wrong. Keep the packaging and any photos while the seller or support team reviews it. Reports are saved to your Bigwizz account; support is not contacted.</p>
           <form id="issue-form"><div class="field"><label for="order-ref">Order reference</label><input id="order-ref" name="order" placeholder="e.g. BW-10482" required></div><div class="field"><label for="issue-type">What was different?</label><select id="issue-type" name="issue" required><option value="">Choose an issue</option><option>Item is damaged</option><option>Item is materially different from the listing</option><option>Something is missing</option><option>Service was not completed as agreed</option><option>Other order concern</option></select></div><div class="field"><label for="issue-notes">A few details</label><input id="issue-notes" name="notes" placeholder="Describe what you expected and what arrived" required></div><button class="primary" type="submit">Save report</button></form>
           <div class="notice">This prototype does not process payments, contact a seller, or open a real support case.</div></div>
       </section>
@@ -1031,6 +1048,7 @@
       });
       if(page==="notifications")renderNotifications();
       if(page==="cart")renderCart();
+      if(page==="orders")window.BIGWIZZ_BACKEND?.loadBuyerServiceRequests?.();
       if(focusTarget){document.getElementById(focusTarget).scrollIntoView({behavior:"smooth",block:"start"})}
       else window.scrollTo({top:0,behavior:"smooth"});
     }
@@ -1399,7 +1417,7 @@
       const openCommunityPost=event.target.closest("[data-open-community-post]");if(openCommunityPost){openCommunityThread(openCommunityPost.dataset.openCommunityPost);return}
       if(!event.target.closest(".account-switch-wrap"))closeAccountMenu();
       const accountMenuToggle=event.target.closest("[data-account-menu-toggle]");if(accountMenuToggle){const menu=document.getElementById("account-switch-menu");const wrap=document.querySelector(".account-switch-wrap");const isOpen=!menu.hidden;menu.hidden=isOpen;accountMenuToggle.setAttribute("aria-expanded",String(!isOpen));if(wrap){wrap.classList.toggle("is-open",!isOpen)};return}
-      const serviceRole=event.target.closest("[data-service-role]");if(serviceRole){const role=serviceRole.dataset.serviceRole;document.getElementById("service-buyer-interface").hidden=role!=="buyer";document.getElementById("service-provider-placeholder").hidden=role!=="seller";document.querySelectorAll(".service-role-button").forEach(button=>{const selected=button.dataset.serviceRole===role;button.classList.toggle("active",selected);button.setAttribute("aria-pressed",String(selected))});return}
+      const serviceRole=event.target.closest("[data-service-role]");if(serviceRole){const role=serviceRole.dataset.serviceRole;document.getElementById("service-buyer-interface").hidden=role!=="buyer";document.getElementById("service-provider-placeholder").hidden=role!=="seller";document.querySelectorAll(".service-role-button").forEach(button=>{const selected=button.dataset.serviceRole===role;button.classList.toggle("active",selected);button.setAttribute("aria-pressed",String(selected))});if(role==="seller")window.BIGWIZZ_BACKEND?.loadSellerServiceRequests?.();return}
       const accountOption=event.target.closest("[data-account-option]");if(accountOption){switchAccount(accountOption.dataset.accountOption);return}
       const openProduct=event.target.closest("[data-open-product]");if(openProduct){renderProductDetails(openProduct.dataset.openProduct);return}
       const productCard=event.target.closest("[data-product-card]");if(productCard&&!event.target.closest("[data-save]")){renderProductDetails(productCard.dataset.productCard);return}
