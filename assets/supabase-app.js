@@ -38,7 +38,9 @@
       if (error.code === "23505") throw new Error("You have already reviewed this listing.");
       throw error;
     }
-    return loadListingReviews(listingId);
+    const rows = await loadListingReviews(listingId);
+    await loadCatalog();
+    return rows;
   }
 
   window.BIGWIZZ_BACKEND = Object.freeze({
@@ -191,6 +193,31 @@
     if (error) {
       report(error, "Marketplace listings could not be loaded from the database.");
       return;
+    }
+    if (rows.length) {
+      const reviewResult = await client.from("listing_reviews")
+        .select("listing_id,rating").in("listing_id", rows.map(row => row.id));
+      if (reviewResult.error) report(reviewResult.error, "Shared listing ratings could not be loaded.");
+      else {
+        const grouped = new Map();
+        (reviewResult.data || []).forEach(review => {
+          const current = grouped.get(review.listing_id) || { count: 0, total: 0 };
+          current.count += 1;
+          current.total += Number(review.rating);
+          grouped.set(review.listing_id, current);
+        });
+        rows.forEach(row => {
+          const added = grouped.get(row.id);
+          if (!added || !added.count) return;
+          const oldCount = Number(row.rating_count || 0);
+          const oldRating = Number(row.rating);
+          const totalCount = oldCount + added.count;
+          row.rating = (oldCount && Number.isFinite(oldRating)
+            ? (oldRating * oldCount + added.total) / totalCount
+            : added.total / added.count);
+          row.rating_count = totalCount;
+        });
+      }
     }
 
     listings = rows.filter(row => row.kind === "goods").map(row => ({
