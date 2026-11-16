@@ -109,6 +109,10 @@
     html[data-theme="dark"] .service-filter.active{background:#624478;color:white}
     html[data-theme="dark"] .top-actions .icon-button{border-color:var(--line)}
     html[data-theme="dark"] .service-foot b{color:var(--lime)}
+    .auth-g-button{width:41px;min-width:41px;padding:0;border-radius:13px;font-size:25px;font-weight:900;line-height:1;color:var(--deep);letter-spacing:-2px}
+    .auth-g-button span{display:block;transform:translateY(-1px)}
+    .account-switch-icon{width:41px;min-width:41px;padding:0;display:grid;place-items:center}
+    .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
     .account-switch-wrap{position:relative}
     .account-switch-trigger{border:0;background:transparent;color:var(--ink);font:inherit}
     .switch-caret{color:var(--muted);font-size:12px;transition:transform .18s ease}
@@ -301,11 +305,13 @@
     <header class="topbar">
       <a class="brand" href="#" aria-label="Bigwizz home" data-page="discover"><span class="brand-mark">b</span> bigwizz</a>
       <div class="top-actions"><button class="icon-button theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" title="Switch between light and dark mode"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.5 8.5 0 1 0 20.5 15.2Z"/></svg></button>
-        <button class="icon-button" type="button" data-auth-open>Sign in</button>
+        <button class="icon-button auth-g-button" type="button" data-auth-open aria-label="Sign in" title="Sign in"><span aria-hidden="true">G</span></button>
         <div class="account-switch-wrap">
-          <button class="profile account-switch-trigger" id="account-switch-trigger" type="button" aria-label="Switch account" aria-expanded="false" aria-controls="account-switch-menu" data-account-menu-toggle><span class="avatar" id="profile-avatar">JD</span><span id="profile-name">Jamie</span><span class="switch-caret" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></button>
+          <button class="icon-button account-switch-trigger account-switch-icon" id="account-switch-trigger" type="button" aria-label="Switch account" title="Switch account" aria-expanded="false" aria-controls="account-switch-menu" data-account-menu-toggle>
+            <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9A7 7 0 0 1 18 6l2 1M4 17l2 1a7 7 0 0 0 12.4-3"/></svg>
+            <span class="sr-only" id="profile-name">Jamie</span><span class="sr-only" id="profile-avatar">JD</span>
+          </button>
           <div class="account-menu" id="account-switch-menu" hidden>
-            <div class="account-menu-title">Switch account</div>
             <button type="button" data-account-option="buyer" aria-pressed="true"><span class="account-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10 12 3l9 7v10H3zM9 20v-6h6v6"/></svg></span><span><b>Buyer account</b><small>Discover goods and manage purchases</small></span><span class="account-check" id="buyer-account-check"></span></button>
             <button type="button" data-account-option="seller" aria-pressed="false"><span class="account-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10h18l-2-6H5zM5 10v10h14V10M9 20v-6h6v6"/></svg></span><span><b>Seller account</b><small id="seller-account-description">Set up your shop or services</small></span><span class="account-check" id="seller-account-check"></span></button>
             <p>One sign-in can include both buyer and seller accounts.</p>
