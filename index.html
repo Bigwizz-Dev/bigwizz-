@@ -163,6 +163,19 @@
     #service-dialog .service-request-close{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid #e1d5e7;border-radius:50%;background:#fff;color:#4a3455}
     #service-dialog .service-request-close svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
     #service-dialog .service-request-form{display:grid;gap:17px;padding:23px 26px 25px}
+    #service-dialog .service-request-timing{min-width:0;margin:0;padding:0;border:0}
+    #service-dialog .service-request-timing legend{margin-bottom:10px;color:var(--ink);font-size:12px;font-weight:800}
+    #service-dialog .service-timing-options{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    #service-dialog .service-timing-option{position:relative;display:flex;align-items:center;gap:10px;min-height:82px;padding:13px;border:1px solid var(--line);border-radius:14px;background:var(--paper);cursor:pointer;transition:border-color .18s,background .18s,box-shadow .18s}
+    #service-dialog .service-timing-option:has(input:checked){border-color:#9475a2;background:#f4edf7;box-shadow:0 0 0 2px #9475a21c}
+    #service-dialog .service-timing-option input{position:absolute;top:10px;right:10px;width:16px;height:16px;accent-color:#765684}
+    #service-dialog .service-timing-icon{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:11px;background:#eee5f2;color:#765684;font-size:17px;font-weight:800}
+    #service-dialog .service-timing-copy{display:grid;gap:4px;padding-right:13px}
+    #service-dialog .service-timing-copy strong{color:var(--ink);font-size:11px;line-height:1.3}
+    #service-dialog .service-timing-copy small{color:var(--muted);font-size:10px;line-height:1.35}
+    #service-dialog .service-schedule-inputs{display:grid;grid-template-columns:1.2fr 1fr;gap:9px}
+    html[data-theme="dark"] #service-dialog .service-timing-option:has(input:checked){background:#3b3043;border-color:#c29bd6}
+    html[data-theme="dark"] #service-dialog .service-timing-icon{background:#4a3b51;color:#e4c9f0}
     #service-dialog .service-request-field{display:grid;gap:8px;min-width:0}
     #service-dialog .service-request-field label{color:var(--ink);font-size:12px;font-weight:800}
     #service-dialog .service-request-field label span{margin-left:5px;color:var(--muted);font-size:10px;font-weight:500}
@@ -626,13 +639,27 @@
       </div>
       <form id="service-request-form" class="service-request-form">
         <input type="hidden" name="service" id="service-request-name">
-        <div class="service-request-field">
-          <label for="request-type">How can the provider help?</label>
-          <select id="request-type" name="requestType" required><option value="Request a quote">Request a quote</option><option value="Ask a question">Ask a question</option><option value="Request a time">Request a time</option></select>
-        </div>
-        <div class="service-request-field">
-          <label for="request-date">Preferred date <span>Optional</span></label>
-          <input id="request-date" type="date" name="preferredDate">
+        <fieldset class="service-request-timing">
+          <legend>When do you need this service?</legend>
+          <div class="service-timing-options">
+            <label class="service-timing-option">
+              <input type="radio" name="bookingTiming" value="now" checked>
+              <span class="service-timing-icon" aria-hidden="true">⚡</span>
+              <span class="service-timing-copy"><strong>As soon as possible</strong><small>I need this service now</small></span>
+            </label>
+            <label class="service-timing-option">
+              <input type="radio" name="bookingTiming" value="later">
+              <span class="service-timing-icon" aria-hidden="true">▣</span>
+              <span class="service-timing-copy"><strong>Schedule for later</strong><small>Choose a date and time</small></span>
+            </label>
+          </div>
+        </fieldset>
+        <div class="service-request-field service-schedule-fields" id="service-schedule-fields" hidden>
+          <label for="request-date">Preferred date and time</label>
+          <div class="service-schedule-inputs">
+            <input id="request-date" type="date" name="preferredDate" aria-label="Preferred date">
+            <input id="request-time" type="time" name="preferredTime" aria-label="Preferred time">
+          </div>
         </div>
         <div class="service-request-field">
           <label for="request-city">City</label>
