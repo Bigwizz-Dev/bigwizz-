@@ -216,6 +216,7 @@
       sellerPrice: row.price,
       price: row.price === null ? "Request an estimate" : `From ${currency.format(row.price)} / service`,
       rating: row.rating === null ? "New listing" : Number(row.rating).toFixed(1),
+      ratingCount: Number(row.rating_count || 0),
       provider: row.seller_name,
       location: row.seller_profiles && row.seller_profiles.service_area || "Location not provided by this service provider"
     }));
