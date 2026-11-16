@@ -90,6 +90,10 @@
     .service-detail-provider span{color:var(--muted);font-size:12px}
     .service-detail-aside h3{margin:0 0 8px;font-size:17px}
     .service-detail-price{display:block;margin:12px 0 18px;color:var(--deep);font-size:21px;font-weight:900}
+    .service-request-inline{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 0 18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--canvas)}
+    .service-request-inline .service-detail-price{margin:0;font-size:clamp(18px,4vw,23px);font-weight:900}
+    .service-request-inline .service-detail-request{flex:0 0 auto;min-width:150px}
+    @media(max-width:420px){.service-request-inline{gap:10px;padding:12px}.service-request-inline .service-detail-request{min-width:0;padding-inline:12px}}
     .service-request-compact{display:flex;flex-direction:column;gap:16px}
     .service-request-compact .service-detail-price{margin:0}
     .service-detail-request{width:100%;min-height:49px;border:0;border-radius:12px;background:var(--deep);color:white;font-size:14px;font-weight:850}
@@ -1252,6 +1256,10 @@
           <img class="service-detail-image" src="${escapeHtml(service.image||"")}" alt="${escapeHtml(service.title)}">
           <div class="service-detail-meta"><span>${escapeHtml(service.category||"Service")}</span><span>★ ${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New listing"}</span></div>
           <h3>${escapeHtml(service.title)}</h3>
+          <div class="service-request-compact service-request-inline">
+            <span class="service-detail-price">${escapeHtml(service.price||"Request an estimate")}</span>
+            <button type="button" class="service-detail-request" data-service-detail-request>Request this service</button>
+          </div>
           <p class="service-detail-description">${escapeHtml(service.description||"Contact the provider to discuss the service and your requirements.")}</p>
           <div class="service-detail-provider"><strong>${escapeHtml(service.provider||"Independent provider")}</strong><span class="service-provider-location">⌖ ${escapeHtml(service.location||"Location not provided by this service provider")}</span></div>
           <div class="service-provider-rating" aria-label="Service rating">
@@ -1297,10 +1305,7 @@
           </section>
 
         </article>
-        <aside class="service-detail-aside service-request-compact">
-          <span class="service-detail-price">${escapeHtml(service.price||"Request an estimate")}</span>
-          <button type="button" class="service-detail-request" data-service-detail-request>Request this service</button>
-        </aside>
+
       </div>`;
       setPage("service-details");
       window.BIGWIZZ_RENDER_SERVICE_REVIEWS=rows=>{
