@@ -11,6 +11,19 @@
   let savedListingIds = new Set();
   let remoteEditingId = null;
 
+  async function loadProductReviews(productKey) {
+    if (!productKey) return [];
+    const { data, error } = await client.from("product_reviews").select("id,rating,body,reviewer_name,created_at").eq("product_key", String(productKey)).order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data || []).map(row => ({ id: row.id, rating: row.rating, text: row.body, reviewer: row.reviewer_name || "Customer", createdAt: row.created_at, demo: false }));
+  }
+
+  async function submitProductReview({ productKey, rating, text, reviewer }) {
+    if (!user) { showAuth(); throw new Error("Please sign in to submit a review."); }
+    const { error } = await client.from("product_reviews").insert({ product_key: String(productKey), user_id: user.id, rating, body: text, reviewer_name: reviewer || (profile && profile.display_name) || "Customer" });
+    if (error) { if (error.code === "23505") throw new Error("You have already reviewed this product."); throw error; }
+    return await loadProductReviews(productKey);
+  }
   async function loadListingReviews(listingId) {
     if (!listingId) return [];
     const { data, error } = await client.from("listing_reviews")
@@ -73,7 +86,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -822,7 +835,7 @@
       const submit = form.querySelector('[type="submit"]');
       submit.disabled = true;
       try {
-        const rows = await submitListingReview({ listingId, rating, text: body, reviewer });
+        const rows = await submitProductReview({ productKey: listingId, rating, text: body, reviewer });
         document.getElementById("review-dialog").close();
         form.reset();
         if (typeof window.BIGWIZZ_PRODUCT_REVIEWS_UPDATED === "function") window.BIGWIZZ_PRODUCT_REVIEWS_UPDATED(rows);
