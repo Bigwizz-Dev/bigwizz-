@@ -4,6 +4,14 @@
   if (!config || !config.url || !config.publishableKey || !supabaseApi) return;
 
   const client = supabaseApi.createClient(config.url, config.publishableKey);
+  // The Seller workspace owns its pages and navigation, outside the Buyer shell.
+  const sellerWorkspace = document.getElementById("seller-workspace");
+  const sellerWorkspaceMain = document.getElementById("seller-workspace-main");
+  ["seller-studio", "seller-listings", "seller-progress", "messages"].forEach(id => {
+    const page = document.getElementById(id);
+    if (page && sellerWorkspaceMain) sellerWorkspaceMain.appendChild(page);
+  });
+
   const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
   let user = null;
   let profile = null;
@@ -126,13 +134,22 @@
   }
 
   function activatePage(page) {
-    if (page === "seller-listings" && (!user || !sellerProfileReady || activeAccount !== "seller")) {
-      notify("Set up and switch to your Seller account to manage listings.");
+    const sellerPages = ["seller-studio", "seller-listings", "seller-progress", "messages"];
+    const isSellerPage = sellerPages.includes(page);
+    if (isSellerPage && page !== "seller-studio" && (!user || activeAccount !== "seller" || !sellerAuthVerified)) {
+      notify("Sign in to your Seller account to open the Seller Dashboard.");
       return;
     }
-    if (page === "seller-progress" && (!user || activeAccount !== "seller")) {
-      notify("Sign in and switch to your Seller account to continue.");
-      return;
+    if (page === "seller-listings" && !sellerProfileReady) {
+      page = "seller-studio";
+      notify("Complete your shop profile before managing listings.");
+    }
+    if (sellerWorkspace) {
+      sellerWorkspace.hidden = !isSellerPage;
+      const buyerShell = document.querySelector("#marketplace-app > .shell");
+      if (buyerShell) buyerShell.hidden = isSellerPage;
+      const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
+      if (buyerNav) buyerNav.hidden = isSellerPage;
     }
     document.querySelectorAll(".page").forEach(section => {
       section.classList.toggle("active", section.id === page);
@@ -141,8 +158,10 @@
       button.classList.toggle("active", button.dataset.page === page);
     });
     if (page === "seller-studio") {
-      document.getElementById("seller-onboarding").hidden = sellerProfileReady;
-      document.getElementById("seller-dashboard").hidden = !sellerProfileReady;
+      const sellerCanOpenDashboard = sellerProfileReady && Boolean(user) &&
+        activeAccount === "seller" && sellerAuthVerified;
+      document.getElementById("seller-onboarding").hidden = sellerCanOpenDashboard;
+      document.getElementById("seller-dashboard").hidden = !sellerCanOpenDashboard;
     }
     if (page === "seller-listings") loadMyListings();
     if (page === "cart") loadCart();
@@ -443,6 +462,38 @@
     updateSavedButtons();
   }
 
+  async function finalizePendingSellerStudio() {
+    if (!user || !sellerAuthVerified || activeAccount !== "seller") return false;
+    let pending;
+    try {
+      pending = JSON.parse(sessionStorage.getItem("bigwizz-pending-seller-studio") || "null");
+    } catch {
+      sessionStorage.removeItem("bigwizz-pending-seller-studio");
+      throw new Error("Your saved studio details could not be read. Please enter them again.");
+    }
+    if (!pending || !pending.shopName || !pending.sellerType) return false;
+
+    const { error } = await client.from("seller_profiles").upsert({
+      user_id: user.id,
+      shop_name: pending.shopName,
+      seller_type: pending.sellerType
+    }, { onConflict: "user_id" });
+    if (error) throw error;
+
+    sessionStorage.removeItem("bigwizz-pending-seller-studio");
+    await loadAccount();
+    if (!sellerProfileReady) {
+      throw new Error("Your Seller Studio details were submitted but could not be loaded. Please try again.");
+    }
+    activeAccount = "seller";
+    sellerAuthVerified = true;
+    sessionStorage.setItem("bigwizz-active-account", "seller");
+    updateAccountState();
+    activatePage("seller-studio");
+    notify("Seller Studio created successfully. Welcome to your Seller Dashboard.");
+    return true;
+  }
+
   async function saveSellerProfile(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -450,10 +501,6 @@
     const form = event.currentTarget;
     const submit = form.querySelector('button[type="submit"]');
     if (submit && submit.disabled) return;
-    if (!user || !sellerAuthVerified) {
-      showAuth("signin", "seller");
-      return;
-    }
 
     const values = new FormData(form);
     const shopName = String(values.get("shopName") || "").trim();
@@ -463,36 +510,16 @@
       return;
     }
 
-    if (submit) {
-      submit.disabled = true;
-      submit.textContent = "Creating your studio…";
-    }
-    try {
-      const { error } = await client.from("seller_profiles").upsert({
-        user_id: user.id,
-        shop_name: shopName,
-        seller_type: sellerTypeValue
-      }, { onConflict: "user_id" });
-      if (error) throw error;
-
-      await loadAccount();
-      if (!sellerProfileReady) {
-        throw new Error("Your seller profile was saved, but it could not be loaded. Please try again.");
-      }
-
-      activeAccount = "seller";
-      updateAccountState();
-      activatePage("seller-studio");
-      form.reset();
-      notify("Seller Studio created successfully.");
-    } catch (error) {
-      report(error, error instanceof Error ? error.message : "Seller Studio could not be created.");
-    } finally {
-      if (submit) {
-        submit.disabled = false;
-        submit.textContent = "Create seller studio";
-      }
-    }
+    sessionStorage.setItem("bigwizz-pending-seller-studio", JSON.stringify({
+      shopName,
+      sellerType: sellerTypeValue
+    }));
+    activeAccount = "seller";
+    sellerAuthVerified = false;
+    sessionStorage.setItem("bigwizz-active-account", "seller");
+    updateAccountState();
+    showAuth("signin", "seller");
+    notify("Studio details saved. Sign in and confirm your account to finish creating your Seller Studio.");
   }
 
   async function uploadListingImage(file) {
@@ -691,10 +718,16 @@
     if (!user) {
       profile = null;
       accountRoles = ["buyer"];
-      activeAccount = "buyer";
+      const hasPendingSellerStudio = Boolean(sessionStorage.getItem("bigwizz-pending-seller-studio"));
+      activeAccount = hasPendingSellerStudio ? "seller" : "buyer";
       sellerProfileReady = false;
       sellerAuthVerified = false;
-      authAudience = "buyer";
+      authAudience = hasPendingSellerStudio ? "seller" : "buyer";
+      if (sellerWorkspace) sellerWorkspace.hidden = true;
+      const buyerShell = document.querySelector("#marketplace-app > .shell");
+      const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
+      if (buyerShell) buyerShell.hidden = false;
+      if (buyerNav) buyerNav.hidden = false;
       setProfileDisplay("Guest");
       updateMobileNavigation();
       return;
@@ -702,9 +735,15 @@
     try {
       await loadAccount();
       showApp();
-      if (!document.querySelector(".page.active")) setPage("discover");
       await loadCatalog();
-      if (activeAccount === "seller" && sellerProfileReady) loadMyListings();
+      if (activeAccount === "seller" && sessionStorage.getItem("bigwizz-pending-seller-studio")) {
+        sellerAuthVerified = true;
+        await finalizePendingSellerStudio();
+      } else if (activeAccount === "seller" && sellerAuthVerified) {
+        activatePage("seller-studio");
+      } else if (!document.querySelector(".page.active")) {
+        activatePage("discover");
+      }
       notify("Signed in. Your account data is shared across devices.");
     } catch (error) {
       report(error, "Account details could not be loaded.");
@@ -833,6 +872,7 @@
     if (signOut) {
       stop(event);
       sellerAuthVerified = false;
+      sessionStorage.removeItem("bigwizz-active-account");
       client.auth.signOut().then(({ error }) => {
         if (error) report(error, "Could not sign out.");
         else {
@@ -848,15 +888,16 @@
         stop(event);
         activeAccount = "seller";
         sellerAuthVerified = false;
+        sessionStorage.setItem("bigwizz-active-account", "seller");
         updateAccountState();
         activatePage("seller-studio");
-        showAuth("signin", "seller");
         return;
       }
       if (!user) return;
       stop(event);
       sellerAuthVerified = false;
       activeAccount = "buyer";
+      sessionStorage.setItem("bigwizz-active-account", "buyer");
       updateAccountState();
       activatePage(activeAccount === "seller" ? "seller-studio" : "discover");
       return;
@@ -937,7 +978,7 @@
         showAuth();
         return;
       }
-      if (pageButton.dataset.page === "seller-studio" || pageButton.dataset.page === "seller-listings" || pageButton.dataset.page === "seller-progress") {
+      if (pageButton.dataset.page === "seller-studio" || pageButton.dataset.page === "seller-listings" || pageButton.dataset.page === "seller-progress" || pageButton.dataset.page === "messages") {
         stop(event);
         if (!sellerAuthVerified) {
           activeAccount = "seller";
