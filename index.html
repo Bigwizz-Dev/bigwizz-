@@ -1381,11 +1381,6 @@
           </div>
           <p class="service-detail-description">${escapeHtml(service.description||"Contact the provider to discuss the service and your requirements.")}</p>
           <div class="service-detail-provider"><strong>${escapeHtml(service.provider||"Independent provider")}</strong><span class="service-provider-location">⌖ ${escapeHtml(service.location||"Location not provided by this service provider")}</span></div>
-          <div class="service-provider-rating" aria-label="Service rating">
-            <span class="service-provider-rating-stars" aria-label="${stars} out of 5 stars">${"★".repeat(stars)}<span>${"★".repeat(5-stars)}</span></span>
-            <strong>${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New"}</strong>
-            <small>${totalRatingCount} ${totalRatingCount===1?"rating":"ratings"}</small>
-          </div>
           <div class="service-quick-rating">
             <span>Rate this service</span>
             <div class="service-quick-rating-stars" role="group" aria-label="Choose your rating">
