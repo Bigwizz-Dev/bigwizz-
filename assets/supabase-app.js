@@ -140,10 +140,10 @@
     const backLink = document.querySelector('[data-auth-mode="signin"]');
     feedback.hidden = true;
     feedback.textContent = "";
-    nameField.hidden = mode !== "signup";
+    if (nameField) nameField.hidden = mode !== "signup";
     if (locationFields) { locationFields.hidden = mode !== "signup"; locationFields.querySelectorAll("input").forEach(input => { input.required = mode === "signup"; }); }
     roleField.hidden = mode !== "signup";
-    name.required = mode === "signup";
+    if (name) name.required = mode === "signup";
     passwordField.hidden = mode === "reset";
     password.required = mode !== "reset";
     password.autocomplete = mode === "signup" ? "new-password" : "current-password";
