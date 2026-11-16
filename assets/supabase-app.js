@@ -43,7 +43,12 @@
       user ? `Switch account. Current account: ${activeAccount === "seller" ? "Seller" : "Buyer"}` : "Switch account"
     );
     const authOpen = document.querySelector("[data-auth-open]");
-    if (authOpen) authOpen.hidden = Boolean(user);
+    if (authOpen) {
+      // Keep the Buyer sign-in entry visible while the Seller workspace is active.
+      authOpen.hidden = Boolean(user) && activeAccount !== "seller";
+      authOpen.setAttribute("aria-label", activeAccount === "seller" ? "Buyer sign in" : "Sign in");
+      authOpen.title = activeAccount === "seller" ? "Buyer sign in" : "Sign in";
+    }
     const signOut = document.querySelector("[data-supabase-signout]");
     if (signOut) signOut.hidden = !user;
     if (!user) {
@@ -803,6 +808,9 @@
     const authOpen = event.target.closest("[data-auth-open]");
     if (authOpen) {
       stop(event);
+      activeAccount = "buyer";
+      sellerAuthVerified = false;
+      updateAccountState();
       showAuth("signin", "buyer");
       return;
     }
