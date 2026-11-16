@@ -44,32 +44,32 @@
   }
 
   async function loadCommunityPosts(){
-    const query=client.from("community_posts").select("id,title,category,body,image_url,status,created_at,author:profiles!community_posts_author_id_fkey(display_name)").order("created_at",{ascending:false});
+    const query=client.from("community_posts").select("id,title,category,body,image_url,status,created_at,author_name").order("created_at",{ascending:false});
     const {data,error}=user?await query.or(`status.eq.published,author_id.eq.${user.id}`):await query.eq("status","published");
     if(error)throw error;
     const rows=data||[],ids=rows.map(row=>row.id);let counts=new Map();
     if(ids.length){const result=await client.from("community_comments").select("post_id").in("post_id",ids).eq("status","published");if(result.error)throw result.error;for(const row of result.data||[])counts.set(row.post_id,(counts.get(row.post_id)||0)+1);}
-    conversations=rows.map(row=>({id:row.id,title:row.title,meta:row.category||"Community",copy:row.body,author:row.author&&row.author.display_name||"Community member",status:row.status,commentCount:counts.get(row.id)||0,image:row.image_url||"assets/home-repairs.jpg"}));
+    conversations=rows.map(row=>({id:row.id,title:row.title,meta:row.category||"Community",copy:row.body,author:row.author_name||"Community member",status:row.status,commentCount:counts.get(row.id)||0,image:row.image_url||"assets/home-repairs.jpg"}));
     return conversations;
   }
   async function loadCommunityComments(postId){
     if(!postId)return [];
-    const query=client.from("community_comments").select("id,post_id,body,status,created_at,author:profiles!community_comments_author_id_fkey(display_name)").eq("post_id",postId).order("created_at",{ascending:true});
+    const query=client.from("community_comments").select("id,post_id,body,status,created_at,author_name").eq("post_id",postId).order("created_at",{ascending:true});
     const {data,error}=user?await query.or(`status.eq.published,author_id.eq.${user.id}`):await query.eq("status","published");
     if(error)throw error;
-    return (data||[]).map(row=>({id:row.id,body:row.body,status:row.status,author:row.author&&row.author.display_name||"Community member",createdAt:row.created_at}));
+    return (data||[]).map(row=>({id:row.id,body:row.body,status:row.status,author:row.author_name||"Community member",createdAt:row.created_at}));
   }
   async function submitCommunityPost({title,category,body}){
     if(!user){showAuth();throw new Error("Please sign in to start a conversation.");}
     const cleanTitle=String(title||"").trim(),cleanBody=String(body||"").trim();
     if(!cleanTitle||cleanTitle.length>160||!cleanBody||cleanBody.length>5000)throw new Error("Add a title and a message before submitting.");
-    const {error}=await client.from("community_posts").insert({author_id:user.id,title:cleanTitle,category:String(category||"General").slice(0,60),body:cleanBody,status:"pending"});
+    const {error}=await client.from("community_posts").insert({author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",title:cleanTitle,category:String(category||"General").slice(0,60),body:cleanBody,status:"pending"});
     if(error)throw error;await loadCommunityPosts();renderCommunity();
   }
   async function submitCommunityComment({postId,body}){
     if(!user){showAuth();throw new Error("Please sign in to comment.");}
     const cleanBody=String(body||"").trim();if(!postId||!cleanBody||cleanBody.length>5000)throw new Error("Write a comment before submitting.");
-    const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,body:cleanBody,status:"pending"});
+    const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
   window.BIGWIZZ_BACKEND=Object.freeze({loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
