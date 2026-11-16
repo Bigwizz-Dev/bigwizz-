@@ -54,8 +54,8 @@
     if (authOpen) {
       // Keep the Buyer sign-in entry visible while the Seller workspace is active.
       authOpen.hidden = Boolean(user) && activeAccount !== "seller";
-      authOpen.setAttribute("aria-label", activeAccount === "seller" ? "Buyer sign in" : "Sign in");
-      authOpen.title = activeAccount === "seller" ? "Buyer sign in" : "Sign in";
+      authOpen.setAttribute("aria-label", activeAccount === "seller" ? "Seller sign in" : "Buyer sign in");
+      authOpen.title = activeAccount === "seller" ? "Seller sign in" : "Buyer sign in";
     }
     const signOut = document.querySelector("[data-supabase-signout]");
     if (signOut) signOut.hidden = !user;
@@ -847,10 +847,12 @@
     const authOpen = event.target.closest("[data-auth-open]");
     if (authOpen) {
       stop(event);
-      activeAccount = "buyer";
+      const sellerPageOpen = Boolean(document.getElementById("seller-studio")?.classList.contains("active"));
+      const audience = activeAccount === "seller" || sellerPageOpen ? "seller" : "buyer";
+      activeAccount = audience;
       sellerAuthVerified = false;
       updateAccountState();
-      showAuth("signin", "buyer");
+      showAuth("signin", audience);
       return;
     }
     const authClose = event.target.closest("[data-auth-close]");
