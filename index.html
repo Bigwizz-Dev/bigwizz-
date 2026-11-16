@@ -301,6 +301,7 @@
     <header class="topbar">
       <a class="brand" href="#" aria-label="Bigwizz home" data-page="discover"><span class="brand-mark">b</span> bigwizz</a>
       <div class="top-actions"><button class="icon-button theme-toggle" type="button" aria-label="Dark mode" aria-pressed="false" title="Switch between light and dark mode"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.5 8.5 0 1 0 20.5 15.2Z"/></svg></button>
+        <button class="icon-button" type="button" data-auth-open>Sign in</button>
         <div class="account-switch-wrap">
           <button class="profile account-switch-trigger" id="account-switch-trigger" type="button" aria-label="Switch account" aria-expanded="false" aria-controls="account-switch-menu" data-account-menu-toggle><span class="avatar" id="profile-avatar">JD</span><span id="profile-name">Jamie</span><span class="switch-caret" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span></button>
           <div class="account-menu" id="account-switch-menu" hidden>
@@ -438,6 +439,8 @@
     <div class="dialog-content">
       <div class="dialog-head"><div><h2 id="auth-title">Sign in to Bigwizz</h2><p id="auth-summary">Use your Bigwizz account to continue to Seller Studio.</p></div><button class="dialog-close" type="button" data-auth-close aria-label="Close sign-in">×</button></div>
       <form id="auth-form">
+        <div class="field" id="auth-name-field" hidden><label for="auth-name">Your name</label><input id="auth-name" name="displayName" type="text" autocomplete="name" maxlength="80"></div>
+        <div class="field" id="auth-role-field" hidden><label for="auth-role">Account type</label><select id="auth-role" name="accountType"><option value="buyer">Buyer — shop and purchase</option><option value="seller">Seller — create a shop or offer services</option></select></div>
         <div class="field" id="auth-email-field"><label for="auth-email">Email address</label><input id="auth-email" name="email" type="email" autocomplete="email" required></div>
         <div class="field" id="auth-password-field"><label id="auth-password-label" for="auth-password">Password</label><input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="8" required></div>
         <p class="notice auth-feedback" id="auth-feedback" role="status" aria-live="polite" hidden></p>
