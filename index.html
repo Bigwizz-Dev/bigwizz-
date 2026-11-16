@@ -410,7 +410,7 @@
   </nav>
   <dialog id="auth-dialog" aria-labelledby="auth-title">
     <div class="dialog-content">
-      <div class="dialog-head"><div><h2 id="auth-title">Sign in to Bigwizz</h2><p id="auth-summary">Use your Bigwizz account to continue to Seller Studio.</p></div><button class="dialog-close" type="button" data-auth-close aria-label="Close sign-in">×</button></div>
+      <div class="dialog-head"><div><h2 id="auth-title">Sign in to Bigwizz</h2><p id="auth-summary">Sign in to continue to your Buyer account.</p></div><button class="dialog-close" type="button" data-auth-close aria-label="Close sign-in">×</button></div>
       <form id="auth-form">
         <div class="field" id="auth-name-field" hidden><label for="auth-name">Your name</label><input id="auth-name" name="displayName" type="text" autocomplete="name" maxlength="80"></div>
         <div class="field" id="auth-role-field" hidden><label for="auth-role">Account type</label><select id="auth-role" name="accountType"><option value="buyer">Buyer — shop and purchase</option></select></div>
@@ -516,7 +516,7 @@
     const commissionRate=0.02;
     const currencyFormatter=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
     let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7,selectedReviewRating=0,selectedRatingProductId=null,currentProductId=null;
-    let accountRoles=["buyer"],activeAccount=sessionStorage.getItem("bigwizz-active-account")==="seller"?"seller":"buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
+    let accountRoles=["buyer"],activeAccount="buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
     let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true,reviewsByListing={},reviewStorageAvailable=true,productBaseImage="",productColorImages={};
     function showToast(message){const toast=document.getElementById("toast");toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2800)}
     const starIcon=filled=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"${filled?' fill="currentColor"':''}/></svg>`;
@@ -806,35 +806,22 @@
       if(wrap)wrap.classList.remove("is-open");
     }
     function renderAccountMenu(){
-      const currentName=activeAccount==="seller"?"Seller account":"Buyer account";
-      document.getElementById("account-switch-trigger").setAttribute("aria-label",`Switch account. Current account: ${currentName}`);
-      document.getElementById("buyer-account-check").innerHTML=activeAccount==="buyer"?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 13H4zM9 8V6a3 3 0 0 1 6 0v2"/></svg>`:"";
-      document.getElementById("seller-account-check").innerHTML=activeAccount==="seller"?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v10H3zM2 10l2-6h16l2 6M8 20v-6h8v6"/></svg>`:"";
-      document.querySelectorAll("#account-switch-menu [data-account-option]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.accountOption===activeAccount)));
-      document.getElementById("seller-account-description").textContent=sellerProfileReady?`${sellerShopName} Â· Sales and requests`:accountRoles.includes("seller")?"Finish seller setup":"Create seller profile";
+      document.getElementById("account-switch-trigger").setAttribute("aria-label","Switch account. Current account: Buyer");
+      const buyerCheck=document.getElementById("buyer-account-check");
+      if(buyerCheck)buyerCheck.innerHTML='<span aria-hidden="true">✓</span>';
+      document.querySelectorAll("#account-switch-menu [data-account-option]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.accountOption==="buyer")));
     }
     function updateMobileNavigation(){
-      document.querySelectorAll(".mobile-nav [data-audience]").forEach(button=>{button.hidden=button.dataset.audience!==activeAccount});
+      document.querySelectorAll(".mobile-nav [data-audience]").forEach(button=>{button.hidden=button.dataset.audience!=="buyer"});
     }
     function switchAccount(account){
       closeAccountMenu();
-      if(account==="buyer"){
-        activeAccount="buyer";
-        sessionStorage.setItem("bigwizz-active-account","buyer");
-        updateMobileNavigation();
-        renderAccountMenu();
-        setPage("discover");
-        showToast("Switched to your Buyer account.");
-        return;
-      }
-      if(account==="seller"){
-        activeAccount="seller";
-        sessionStorage.setItem("bigwizz-active-account","seller");
-        updateMobileNavigation();
-        renderAccountMenu();
-        setPage("seller-studio");
-        showToast(sellerProfileReady?"Switched to your Seller account.":"Seller demo mode enabled. Complete the profile to publish listings.");
-      }
+      activeAccount="buyer";
+      sessionStorage.setItem("bigwizz-active-account","buyer");
+      updateMobileNavigation();
+      renderAccountMenu();
+      setPage("discover");
+      showToast("Buyer account selected.");
     }
     function setPage(page,focusTarget=null,mobileNavButton=null){
       if(!document.getElementById(page))return;
@@ -844,15 +831,8 @@
         const isMobileButton=Boolean(button.closest(".mobile-nav"));
         button.classList.toggle("active",isMobileButton&&mobileNavButton?button===mobileNavButton:button.dataset.page===page);
       });
-      if(page==="seller-studio"){
-        document.getElementById("seller-onboarding").hidden=sellerProfileReady;
-        document.getElementById("seller-dashboard").hidden=!sellerProfileReady;
-      }
-      if(page==="seller-listings")renderSellerListings();
-      if(page==="seller-progress")renderSellerSales();
       if(page==="notifications")renderNotifications();
       if(page==="cart")renderCart();
-      if(page==="messages")renderInbox();
       if(focusTarget){document.getElementById(focusTarget).scrollIntoView({behavior:"smooth",block:"start"})}
       else window.scrollTo({top:0,behavior:"smooth"});
     }
@@ -935,8 +915,7 @@
       document.getElementById("seller-sales-rows").innerHTML=rows.length?rows.join(""):'<tr><td colspan="6">No sales in this period.</td></tr>';
     }
     function getGoodsListings(){
-      const sellerGoods=customListings.filter(item=>item.type==="goods"&&item.status==="published").map(item=>({...item,kind:"Goods",detail:item.description,sellerDescription:sellerOfferingDescription,verified:false,basePrice:item.price}));
-      return [...listings.map((item,index)=>({...item,id:item.id||`seed-${index}`})),...sellerGoods].filter(item=>item.kind==="Goods");
+        return listings.map((item,index)=>({...item,id:item.id||`seed-${index}`})).filter(item=>item.kind==="Goods");
     }
     function getGoodsListing(listingId){
       return getGoodsListings().find(item=>String(item.id)===String(listingId));
@@ -1173,79 +1152,9 @@
       if(currentProductId)renderProductDetails(currentProductId);
       showToast("Review saved in this browser.");
     });
-    document.getElementById("seller-listing-type").addEventListener("change",event=>updateSellerListingOptions(event.currentTarget.value));
-    document.getElementById("seller-listing-size-type").addEventListener("change",event=>updateSellerListingOptions("goods",document.getElementById("seller-listing-category").value,event.currentTarget.value,true));
-    document.getElementById("seller-listing-sizes").addEventListener("input",()=>updateSellerListingOptions("goods",document.getElementById("seller-listing-category").value,document.getElementById("seller-listing-size-type").value));
-    document.getElementById("seller-listing-colors").addEventListener("change",event=>renderSellerColorPhotoFields(parseVariantOptions(event.currentTarget.value),customListings.find(item=>item.id===editingListingId)?.colorImages||{}));
-    document.getElementById("seller-listing-price").addEventListener("input",updateSellerListingPricePreview);
-    document.getElementById("seller-listing-cancel").addEventListener("click",resetSellerListingForm);
-    document.getElementById("seller-listing-form").addEventListener("submit",async event=>{
-      event.preventDefault();
-      const form=event.currentTarget,submitButton=document.getElementById("seller-listing-submit");
-      submitButton.disabled=true;
-      try{
-        const values=new FormData(form),existing=customListings.find(item=>item.id===editingListingId);
-        const title=String(values.get("title")||"").trim(),description=String(values.get("description")||"").trim();
-        const price=Number(values.get("price")),type=String(values.get("type")),category=String(values.get("category")),sizeType=type==="goods"?String(values.get("sizeType")||"other"):"other";
-        if(!title||!description||!Number.isFinite(price)||price<=0){showToast("Enter a title, description, and a valid price.");return}
-        const sizes=type==="goods"&&sizeType!=="other"?parseVariantOptions(values.get("sizes")):[],colors=type==="goods"?parseVariantOptions(values.get("colors")):[];
-        if(sizeType!=="other"&&!sizes.length)throw new Error("Add the sizes buyers can choose for this clothing, shoe, or cap listing.");
-        const selectedFile=document.getElementById("seller-listing-image").files[0];
-        const image=selectedFile?await prepareListingImage(selectedFile):existing&&existing.image;
-        if(!image){showToast("Upload a product photo before publishing.");return}
-        const colorImages={...(existing&&existing.colorImages||{})};
-        Object.keys(colorImages).forEach(color=>{if(!colors.includes(color))delete colorImages[color]});
-        for(const input of document.querySelectorAll("[data-color-image]")){
-          const file=input.files&&input.files[0];if(file)colorImages[input.dataset.colorImage]=await prepareListingImage(file);
-        }
-        const missingColorPhoto=colors.find(color=>!colorImages[color]);
-        if(missingColorPhoto)throw new Error(`Upload a product photo for the ${missingColorPhoto} color.`);
-        const item={
-          id:existing?existing.id:`listing-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,
-          title,description,type,category,price:Math.round((price+Number.EPSILON)*100)/100,image,
-          sizeType,sizes,colors,colorImages,
-          seller:existing?existing.seller:sellerShopName||document.getElementById("profile-name").textContent,
-          status:existing?existing.status:"published"
-        };
-        if(!isCustomListing(item)){showToast("Check the listing details and try again.");return}
-        const nextListings=existing?customListings.map(listing=>listing.id===existing.id?item:listing):[...customListings,item];
-        if(saveCustomListings(nextListings)){
-          resetSellerListingForm();
-          renderSellerListings();
-          renderListings(document.getElementById("search-input").value);
-          renderServices(document.getElementById("service-search-input").value);
-          showToast(existing?"Listing updated.":"Listing published. The 2% fee is added to the buyer price.");
-        }
-      }catch(error){
-        console.error("Could not prepare the seller listing.",error);
-        showToast(error instanceof Error?error.message:"Listing could not be prepared. Try another image.");
-      }finally{
-        submitButton.disabled=false;
-      }
-    });
     document.querySelector(".dialog-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
     document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");requests.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();document.getElementById("service-dialog").close();showToast("Request saved in this browser. The provider was not contacted.")});
     document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
-    document.getElementById("seller-setup-form").addEventListener("submit",event=>{
-      event.preventDefault();
-      const profile=Object.fromEntries(new FormData(event.currentTarget).entries());
-      const savedProfile={shopName:String(profile.shopName).trim(),sellerType:String(profile.sellerType)||"Goods and services",offeringDescription:String(profile.offeringDescription).trim()};
-      if(!saveSellerProfile(savedProfile))return;
-      sellerShopName=savedProfile.shopName;
-      sellerType=savedProfile.sellerType;
-      sellerOfferingDescription=savedProfile.offeringDescription;
-      sellerProfileReady=true;
-      if(!accountRoles.includes("seller"))accountRoles.push("seller");
-      activeAccount="seller";
-      updateMobileNavigation();
-      document.getElementById("seller-shop-title").textContent=sellerShopName;
-      document.getElementById("seller-type-label").textContent=`${sellerType} Â· Manage listings, customer orders, and earnings.`;
-      document.getElementById("seller-offering-label").textContent=sellerOfferingDescription;
-      event.currentTarget.reset();
-      renderAccountMenu();
-      setPage("seller-studio");
-      showToast("Seller account set up. You can switch accounts from your profile menu.");
-    });
     document.getElementById("new-post").addEventListener("click",()=>showToast("Community posting is a demo. Sign-in and moderation are needed before launch."));
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});
     setTimeout(()=>{
@@ -1257,9 +1166,6 @@
     },matchMedia("(prefers-reduced-motion: reduce)").matches?250:1250);
     document.getElementById("clear-filter").addEventListener("click",()=>{activeCategory="All";document.getElementById("search-input").value="";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderListings()});
     document.getElementById("issue-form").addEventListener("submit",event=>{event.preventDefault();const reports=JSON.parse(localStorage.getItem("bigwizz-order-reports")||"[]");reports.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-order-reports",JSON.stringify(reports));event.currentTarget.reset();showToast("Report saved in this browser. No real support case was created.")});
-    updateSellerListingOptions("goods");
-    loadCustomListings();
-    loadSellerProfile();
     loadCart();
     loadReviews();
     seedSampleReviews();
