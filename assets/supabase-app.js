@@ -15,6 +15,7 @@
   const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
   let user = null;
   let profile = null;
+  let sellerAvailabilityStatus = "available";
   let savedListingIds = new Set();
   let remoteEditingId = null;
 
@@ -259,7 +260,7 @@
     const [profileResult, rolesResult, sellerResult] = await Promise.all([
       client.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
       client.from("user_roles").select("role").eq("user_id", user.id),
-      client.from("seller_profiles").select("shop_name,seller_type").eq("user_id", user.id).maybeSingle()
+      client.from("seller_profiles").select("shop_name,seller_type,availability_status").eq("user_id", user.id).maybeSingle()
     ]);
     if (profileResult.error) throw profileResult.error;
     if (rolesResult.error) throw rolesResult.error;
@@ -272,6 +273,9 @@
     if (sellerResult.data) {
       sellerShopName = sellerResult.data.shop_name;
       sellerType = sellerResult.data.seller_type;
+      sellerAvailabilityStatus = sellerResult.data.availability_status || "available";
+      const availabilitySelect = document.getElementById("seller-service-availability");
+      if (availabilitySelect) availabilitySelect.value = sellerAvailabilityStatus;
       document.getElementById("seller-shop-title").textContent = sellerShopName;
       document.getElementById("seller-type-label").textContent =
         `${sellerType} · Manage listings, customer orders, and earnings.`;
@@ -479,7 +483,7 @@
       city: pending.city || null, area: pending.area || null, service_area: pending.serviceArea || "",
       latitude: pending.latitude === null || pending.latitude === "" ? null : Number(pending.latitude),
       longitude: pending.longitude === null || pending.longitude === "" ? null : Number(pending.longitude),
-      availability_status: "available"
+      availability_status: pending.availabilityStatus || "available"
     }, { onConflict: "user_id" });
     if (error) throw error;
 
@@ -519,7 +523,8 @@
       area: String(values.get("area") || "").trim(),
       serviceArea: String(values.get("serviceArea") || "").trim(),
       latitude: String(values.get("latitude") || ""),
-      longitude: String(values.get("longitude") || "")
+      longitude: String(values.get("longitude") || ""),
+      availabilityStatus: String(values.get("availabilityStatus") || "available")
     }));
     activeAccount = "seller";
     sellerAuthVerified = false;
@@ -592,8 +597,9 @@
       if (kind === "service") {
         const { error: profileError } = await client.from("seller_profiles").update({
           is_public: true,
-          availability_status: String(values.get("serviceAvailability") || "available")
+          availability_status: String(values.get("serviceAvailability") || sellerAvailabilityStatus || "available")
         }).eq("user_id", user.id);
+        sellerAvailabilityStatus = String(values.get("serviceAvailability") || sellerAvailabilityStatus || "available");
         if (profileError) throw profileError;
       }
       remoteEditingId = null;
@@ -624,7 +630,7 @@
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change", { bubbles: true }));
       document.getElementById("seller-listing-category").value = item.category;
       document.getElementById("seller-service-pricing-mode").value = item.pricing_mode || "fixed";
-      document.getElementById("seller-service-availability").value = "available";
+      document.getElementById("seller-service-availability").value = sellerAvailabilityStatus;
       document.getElementById("seller-listing-price").value = item.price === null ? "" : String(item.price);
       document.getElementById("seller-listing-price").disabled = item.kind === "service" && item.pricing_mode === "quote";
       document.getElementById("seller-listing-description").value = item.description;
