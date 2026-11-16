@@ -42,6 +42,8 @@
       "aria-label",
       user ? `Switch account. Current account: ${activeAccount === "seller" ? "Seller" : "Buyer"}` : "Switch account"
     );
+    const authOpen = document.querySelector("[data-auth-open]");
+    if (authOpen) authOpen.hidden = Boolean(user);
     const signOut = document.querySelector("[data-supabase-signout]");
     if (signOut) signOut.hidden = !user;
     if (!user) {
@@ -50,8 +52,64 @@
     }
   }
 
-  function showAuth() {
-    notify("Sign-in isn't available yet. You can continue browsing Bigwizz.");
+  let authMode = "signin";
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    const nameField = document.getElementById("auth-name-field");
+    const roleField = document.getElementById("auth-role-field");
+    const passwordField = document.getElementById("auth-password-field");
+    const password = document.getElementById("auth-password");
+    const name = document.getElementById("auth-name");
+    const title = document.getElementById("auth-title");
+    const summary = document.getElementById("auth-summary");
+    const submit = document.getElementById("auth-submit");
+    const feedback = document.getElementById("auth-feedback");
+    const signupLink = document.querySelector('[data-auth-mode="signup"]');
+    const resetLink = document.querySelector('[data-auth-mode="reset"]');
+    const backLink = document.querySelector('[data-auth-mode="signin"]');
+    feedback.hidden = true;
+    feedback.textContent = "";
+    nameField.hidden = mode !== "signup";
+    roleField.hidden = mode !== "signup";
+    name.required = mode === "signup";
+    passwordField.hidden = mode === "reset";
+    password.required = mode !== "reset";
+    password.autocomplete = mode === "signup" ? "new-password" : "current-password";
+    signupLink.hidden = mode !== "signin";
+    resetLink.hidden = mode !== "signin";
+    backLink.hidden = mode === "signin";
+    if (mode === "signup") {
+      title.textContent = "Create your Bigwizz account";
+      summary.textContent = "Choose whether you want to shop as a buyer or sell on Bigwizz.";
+      submit.textContent = "Create account";
+    } else if (mode === "reset") {
+      title.textContent = "Reset your password";
+      summary.textContent = "We will email you a password reset link.";
+      submit.textContent = "Send reset link";
+    } else {
+      title.textContent = "Sign in to Bigwizz";
+      summary.textContent = "Sign in to continue to your Bigwizz account.";
+      submit.textContent = "Sign in";
+    }
+  }
+
+  function showAuth(mode = "signin") {
+    const dialog = document.getElementById("auth-dialog");
+    if (!dialog) {
+      notify("The sign-in window could not be opened.");
+      return;
+    }
+    setAuthMode(mode);
+    if (!dialog.open) dialog.showModal();
+  }
+
+  function showAuthFeedback(message, isError = false) {
+    const feedback = document.getElementById("auth-feedback");
+    feedback.textContent = message;
+    feedback.hidden = false;
+    feedback.style.background = isError ? "#fff0ef" : "#edf4e9";
+    feedback.style.color = isError ? "#8b3028" : "#245c45";
   }
 
   function showApp() {
@@ -613,7 +671,55 @@
     event.stopImmediatePropagation();
   }
 
-  document.addEventListener("submit", event => {
+  document.addEventListener("submit", async event => {
+    if (event.target.id === "auth-form") {
+      stop(event);
+      const submit = document.getElementById("auth-submit");
+      const email = document.getElementById("auth-email").value.trim();
+      const password = document.getElementById("auth-password").value;
+      const displayName = document.getElementById("auth-name").value.trim();
+      const accountType = document.getElementById("auth-role").value;
+      submit.disabled = true;
+      submit.textContent = "Please wait…";
+      try {
+        let result;
+        if (authMode === "signup") {
+          result = await client.auth.signUp({
+            email,
+            password,
+            options: {
+              data: { display_name: displayName, account_type: accountType },
+              emailRedirectTo: window.location.origin + window.location.pathname
+            }
+          });
+          if (result.error) throw result.error;
+          if (result.data.session) {
+            document.getElementById("auth-dialog").close();
+            notify("Your Bigwizz account has been created.");
+          } else {
+            showAuthFeedback("Account created. Check your email for a confirmation link, then return here to sign in.");
+          }
+        } else if (authMode === "reset") {
+          result = await client.auth.resetPasswordForEmail(email, {
+            redirectTo: window.location.origin + window.location.pathname
+          });
+          if (result.error) throw result.error;
+          showAuthFeedback("If an account exists for that email, a password reset link has been sent.");
+        } else {
+          result = await client.auth.signInWithPassword({ email, password });
+          if (result.error) throw result.error;
+          document.getElementById("auth-dialog").close();
+          notify("You are signed in to Bigwizz.");
+        }
+      } catch (error) {
+        showAuthFeedback(error.message || "Authentication failed. Please try again.", true);
+      } finally {
+        submit.disabled = false;
+        submit.textContent = authMode === "signup" ? "Create account" :
+          authMode === "reset" ? "Send reset link" : "Sign in";
+      }
+      return;
+    }
     if (event.target.id === "seller-setup-form") return saveSellerProfile(event);
     if (event.target.id === "seller-listing-form") return saveSellerListing(event);
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
@@ -630,6 +736,23 @@
   }, true);
 
   document.addEventListener("click", event => {
+    const authOpen = event.target.closest("[data-auth-open]");
+    if (authOpen) {
+      stop(event);
+      showAuth("signin");
+      return;
+    }
+    const authClose = event.target.closest("[data-auth-close]");
+    if (authClose) {
+      document.getElementById("auth-dialog").close();
+      return;
+    }
+    const authModeButton = event.target.closest("[data-auth-mode]");
+    if (authModeButton) {
+      stop(event);
+      showAuth(authModeButton.dataset.authMode);
+      return;
+    }
     if (event.target.closest("#seller-listing-cancel")) {
       remoteEditingId = null;
       return;
@@ -659,7 +782,6 @@
         }
         return;
       }
-      if (accountChoice.dataset.accountOption === "seller" && !sellerProfileReady) return;
       stop(event);
       activeAccount = accountChoice.dataset.accountOption;
       updateAccountState();
