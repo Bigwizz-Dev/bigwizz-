@@ -1031,7 +1031,7 @@
       const item=getGoodsListing(listingId);
       if(!item){setPage("discover");showToast("This item is no longer available.");return}
       if(selectedRatingProductId!==String(item.id)){selectedRatingProductId=String(item.id);selectedReviewRating=0}
-      const sizes=Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
+      const sizeEnabled=["clothing","shoes","caps"].includes(item.sizeType),sizes=sizeEnabled&&Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
       productBaseImage=item.image;productColorImages=item.colorImages&&typeof item.colorImages==="object"?item.colorImages:{};
       const reviews=reviewsByListing[item.id]||[];
       const allRelated=getGoodsListings().filter(other=>other.id!==item.id);
