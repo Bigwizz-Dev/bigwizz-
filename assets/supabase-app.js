@@ -686,9 +686,11 @@
     };
     const {data:request,error}=await client.from("service_requests").insert(requestRow).select("id").single();
     if(error){report(error,"Service request could not be saved.");return;}
+    let directMatchCreated=false;
     if(matchingMode==="direct"&&listing?.providerId){
       const {error:matchError}=await client.from("service_request_matches").insert({request_id:request.id,buyer_id:user.id,provider_id:listing.providerId});
       if(matchError)report(matchError,"Request saved, but the selected provider could not be notified.");
+      else directMatchCreated=true;
     }
     if(matchingMode==="nearby"){
       const {data:providers,error:providerError}=await client.from("seller_profiles")
@@ -720,7 +722,7 @@
           }else notify("Your request was saved. No available nearby provider matched this area yet.");
         }
       }
-    }else notify("Your request was sent to the selected provider.");
+    }else if(directMatchCreated) notify("Your request was sent to the selected provider.");
     form.reset();
     document.getElementById("service-dialog").close();
     await loadBuyerServiceRequests();
