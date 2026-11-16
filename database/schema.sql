@@ -34,7 +34,7 @@ create table if not exists public.listings (
   description text not null,
   seller_name text not null,
   price numeric(12, 2) check (price is null or price > 0),
-  currency text not null default 'USD' check (currency ~ '^[A-Z]{3}$'),
+  currency text not null default 'NGN' check (currency ~ '^[A-Z]{3}$'),
   image_url text not null,
   status text not null default 'published' check (status in ('draft', 'published', 'paused', 'archived')),
   rating numeric(2, 1) check (rating >= 0 and rating <= 5),
@@ -145,7 +145,7 @@ create table if not exists public.orders (
   buyer_id uuid not null references public.profiles (id) on delete restrict,
   seller_id uuid references public.seller_profiles (user_id) on delete set null,
   status text not null default 'pending' check (status in ('pending', 'paid', 'processing', 'completed', 'cancelled', 'refunded')),
-  currency text not null default 'USD' check (currency ~ '^[A-Z]{3}$'),
+  currency text not null default 'NGN' check (currency ~ '^[A-Z]{3}$'),
   seller_subtotal numeric(12, 2) not null check (seller_subtotal >= 0),
   platform_fee numeric(12, 2) not null check (platform_fee >= 0),
   total numeric(12, 2) not null check (total = seller_subtotal + platform_fee),
@@ -172,7 +172,7 @@ create table if not exists public.payment_records (
   provider_reference text,
   status text not null default 'pending' check (status in ('pending', 'authorized', 'paid', 'failed', 'refunded')),
   amount numeric(12, 2) not null check (amount >= 0),
-  currency text not null default 'USD' check (currency ~ '^[A-Z]{3}$'),
+  currency text not null default 'NGN' check (currency ~ '^[A-Z]{3}$'),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -562,7 +562,7 @@ on conflict (seed_key) do update set
   status = excluded.status;
 
 insert into public.platform_settings (key, value)
-values ('buyer_fee_rate', '{"rate": 0.02, "currency": "USD"}'::jsonb)
+values ('buyer_fee_rate', '{"rate": 0.02, "currency": "NGN"}'::jsonb)
 on conflict (key) do update set value = excluded.value;
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)

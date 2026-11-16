@@ -346,6 +346,7 @@
     .seller-listing-form textarea{width:100%;min-height:84px;resize:vertical;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
     .seller-listing-form-actions{display:flex;gap:9px;align-items:center;margin-top:16px}
     .seller-listing-form-actions .primary{background:var(--deep);color:white}
+    #seller-service-pricing-field[hidden],#seller-service-availability-field[hidden]{display:none}
     .seller-listings{display:grid;gap:10px;margin-top:17px}
     .seller-listing-item{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:13px}
     .seller-listing-item>img{width:58px;height:58px;flex:0 0 58px;border-radius:10px;object-fit:cover;background:var(--canvas)}
@@ -390,6 +391,12 @@
     .service-request-card p{margin:6px 0;color:var(--ink);font-size:11px;line-height:1.5}
     .service-request-card small{color:var(--muted);font-size:10px}
     .service-request-card .outline-button{width:auto;flex:0 0 auto}
+    .service-match-response{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+    .service-match-response input,.service-match-response textarea{width:100%;padding:9px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink)}
+    .service-match-response textarea{grid-column:1/-1;min-height:65px}
+    .service-quote-card{padding:12px;border:1px solid var(--line);border-radius:12px;margin-top:9px;background:var(--paper)}
+    .service-quote-card .primary{margin-top:8px;background:var(--deep);color:white}
+    @media(max-width:700px){.service-match-response{grid-template-columns:1fr}}
     .cart-layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:18px;align-items:start}
     .cart-items{display:grid;gap:11px}
     .cart-item{display:flex;gap:13px;align-items:center;padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--paper)}
@@ -745,7 +752,7 @@
       {icon:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3"/></svg>',title:"Live event coming up",copy:"Join the small-space styling Q&A and ask a maker your questions.",time:"Yesterday Â· 9:05 AM"}
     ];
     const commissionRate=0.02;
-    const currencyFormatter=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
+    const currencyFormatter=new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:2});
     let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7,selectedReviewRating=0,selectedRatingProductId=null,currentProductId=null;
     let accountRoles=["buyer"],activeAccount="buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
     let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true,reviewsByListing={},reviewStorageAvailable=true,productBaseImage="",productColorImages={};
@@ -764,6 +771,8 @@
         (item.colors===undefined||Array.isArray(item.colors)&&item.colors.every(value=>typeof value==="string"))&&
         (item.sizeType===undefined||["other","clothing","shoes","caps"].includes(item.sizeType))&&
         (item.colorImages===undefined||item.colorImages&&typeof item.colorImages==="object"&&!Array.isArray(item.colorImages)&&Object.values(item.colorImages).every(value=>typeof value==="string"&&/^data:image\/(?:webp|png|jpeg);base64,/.test(value)))&&
+        (item.pricingMode===undefined||["fixed","starting","quote"].includes(item.pricingMode))&&
+        (item.price===null&&item.type==="service"&&item.pricingMode==="quote"||Number.isFinite(item.price)&&item.price>0)&&
         typeof item.seller==="string"&&(item.status==="published"||item.status==="paused");
     }
     function loadCustomListings(){
@@ -872,6 +881,12 @@
       if(categoryValue&&listingCategories[type].some(item=>item.value===categoryValue))document.getElementById("seller-listing-category").value=categoryValue;
       document.getElementById("seller-variant-fields").hidden=type!=="goods";
       document.getElementById("seller-product-sizing-field").hidden=type!=="goods";
+      document.getElementById("seller-service-pricing-field").hidden=type!=="service";
+      document.getElementById("seller-service-availability-field").hidden=type!=="service";
+      document.getElementById("seller-listing-price-label").textContent=type==="service"?"Service price (₦)":"Your price (₦)";
+      const pricingMode=document.getElementById("seller-service-pricing-mode").value;
+      document.getElementById("seller-listing-price").required=type!=="service"||pricingMode!=="quote";
+      document.getElementById("seller-listing-price").disabled=type==="service"&&pricingMode==="quote";
       const sizeType=document.getElementById("seller-listing-size-type");if(sizeTypeValue)sizeType.value=sizeTypeValue;
       const input=document.getElementById("seller-listing-sizes"),activeType=sizeType.value;
       input.disabled=type!=="goods"||activeType==="other";
@@ -1071,7 +1086,7 @@
     function renderSellerListings(){
       const container=document.getElementById("seller-listing-items");
       if(!customListings.length){container.innerHTML='<div class="empty">You havenâ€™t created any listings yet.</div>';return}
-      container.innerHTML=customListings.map(item=>`<article class="seller-listing-item"><img src="${item.image}" alt=""><div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong><small>${item.type==="goods"?"Goods":"Service"} Â· ${escapeHtml(item.category)} Â· ${currencyFormatter.format(item.price)} Â· ${item.status==="published"?"Published":"Paused"}</small></div><div class="seller-listing-actions"><button type="button" data-seller-listing-action="edit" data-listing-id="${escapeHtml(item.id)}">Edit</button><button type="button" data-seller-listing-action="toggle" data-listing-id="${escapeHtml(item.id)}">${item.status==="published"?"Pause":"Publish"}</button><button type="button" data-seller-listing-action="delete" data-listing-id="${escapeHtml(item.id)}">Delete</button></div></article>`).join("");
+      container.innerHTML=customListings.map(item=>`<article class="seller-listing-item"><img src="${item.image}" alt=""><div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong><small>${item.type==="goods"?"Goods":"Service"} Â· ${escapeHtml(item.category)} Â· ${item.type==="service"&&item.pricingMode==="quote"?"Request a quote":item.type==="service"&&item.pricingMode==="starting"?"From "+currencyFormatter.format(item.price):currencyFormatter.format(item.price)} Â· ${item.status==="published"?"Published":"Paused"}</small></div><div class="seller-listing-actions"><button type="button" data-seller-listing-action="edit" data-listing-id="${escapeHtml(item.id)}">Edit</button><button type="button" data-seller-listing-action="toggle" data-listing-id="${escapeHtml(item.id)}">${item.status==="published"?"Pause":"Publish"}</button><button type="button" data-seller-listing-action="delete" data-listing-id="${escapeHtml(item.id)}">Delete</button></div></article>`).join("");
     }
     function resetSellerListingForm(){
       const form=document.getElementById("seller-listing-form");
@@ -1088,7 +1103,10 @@
       document.getElementById("seller-listing-title").value=item.title;
       document.getElementById("seller-listing-type").value=item.type;
       updateSellerListingOptions(item.type,item.category,item.sizeType||"other");
-      document.getElementById("seller-listing-price").value=String(item.price);
+      document.getElementById("seller-service-pricing-mode").value=item.pricingMode||"starting";
+      document.getElementById("seller-service-availability").value=item.serviceAvailability||"available";
+      document.getElementById("seller-listing-price").value=item.price===null?"":String(item.price);
+      updateSellerListingOptions(item.type,item.category,item.sizeType||"other");
       document.getElementById("seller-listing-description").value=item.description;
       document.getElementById("seller-listing-sizes").value=(item.sizes||[]).join(", ");
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
@@ -1102,9 +1120,15 @@
     function updateSellerListingPricePreview(){
       const price=Number(document.getElementById("seller-listing-price").value);
       const preview=document.getElementById("seller-listing-price-preview");
-      preview.textContent=Number.isFinite(price)&&price>0
-        ?`Buyer-facing price: ${currencyFormatter.format(buyerPrice(price))} (includes ${currencyFormatter.format(platformFee(price))} Bigwizz fee).`
-        :"Enter your price to preview the buyer-facing total with the 2% Bigwizz fee.";
+      const type=document.getElementById("seller-listing-type").value;
+      const mode=document.getElementById("seller-service-pricing-mode").value;
+      if(type==="service"&&mode==="quote"){preview.textContent="Buyers will see “Request a quote”. They must approve the final price before payment.";return}
+      if(Number.isFinite(price)&&price>0){
+        if(type==="service"){
+          const buyerFee=Math.round(price*0.03*100)/100,providerCommission=Math.round(price*0.05*100)/100;
+          preview.textContent=`${mode==="starting"?"Starting price":"Fixed service price"}: ${currencyFormatter.format(price)}. Buyer fee (3%): ${currencyFormatter.format(buyerFee)}. Provider commission (5%): ${currencyFormatter.format(providerCommission)}. Provider net: ${currencyFormatter.format(price-providerCommission)}.`;
+        }else preview.textContent=`Buyer-facing price: ${currencyFormatter.format(buyerPrice(price))} (includes ${currencyFormatter.format(platformFee(price))} Bigwizz fee).`;
+      }else preview.textContent=type==="service"?"Enter the starting or fixed service price, or select quotation required.":"Enter your price to preview the buyer-facing total with the 2% Bigwizz fee.";
     }
     function renderSellerSales(){
       const periodSales=sellerSales.filter(sale=>sale.daysAgo<salesRangeDays);
@@ -1295,8 +1319,8 @@
     document.getElementById("service-use-gps")?.addEventListener("click",requestCurrentLocation);document.getElementById("request-use-gps")?.addEventListener("click",requestCurrentLocation);
     function renderServices(query=""){
       const normalized=query.trim().toLowerCase();
-      const sellerServices=customListings.filter(item=>item.type==="service"&&item.status==="published").map(item=>({...item,provider:item.seller,sellerPrice:item.price,price:`From ${currencyFormatter.format(buyerPrice(item.price))} / service`,rating:"New listing",requestId:`custom-${item.id}`}));
-      const results=[...services.map((item,index)=>({...item,sellerPrice:item.sellerPrice===undefined?sellerPriceFrom(item.price):item.sellerPrice,price:priceWithBuyerFee(item.price),requestId:item.requestId||item.id||String(index)})),...sellerServices].filter(item=>(activeServiceCategory==="All"||item.category===activeServiceCategory)&&(!normalized||[item.title,item.description,item.provider,item.category].join(" ").toLowerCase().includes(normalized)));
+      const sellerServices=customListings.filter(item=>item.type==="service"&&item.status==="published").map(item=>({...item,provider:item.seller,sellerPrice:item.price,pricingMode:item.pricingMode||"starting",price:item.pricingMode==="quote"?"Request a quote":item.pricingMode==="starting"?`From ${currencyFormatter.format(item.price)} / service`:currencyFormatter.format(item.price),rating:"New listing",requestId:`custom-${item.id}`}));
+      const results=[...services.map((item,index)=>{const mode=item.pricingMode||(String(item.price).startsWith("Request")?"quote":String(item.price).startsWith("From")?"starting":"fixed"),base=item.sellerPrice===undefined?sellerPriceFrom(item.price):item.sellerPrice;return {...item,sellerPrice:base,pricingMode:mode,price:mode==="quote"?"Request a quote":mode==="starting"?(base?`From ${currencyFormatter.format(base)} / service`:item.price):base?currencyFormatter.format(base):item.price,requestId:item.requestId||item.id||String(index)}}),...sellerServices].filter(item=>(activeServiceCategory==="All"||item.category===activeServiceCategory)&&(!normalized||[item.title,item.description,item.provider,item.category].join(" ").toLowerCase().includes(normalized)));
       const ctx=window.BIGWIZZ_LOCATION_CONTEXT||{};results.forEach(item=>{const rank=serviceLocationScore(item,ctx);item._locationScore=rank.score;item._distanceKm=rank.distance;});results.sort((a,b)=>b._locationScore-a._locationScore);
       const container=document.getElementById("service-grid");
       if(!results.length){container.innerHTML='<div class="empty">No services match yet. Try another search or category.</div>';return}
@@ -1484,7 +1508,7 @@
         const requestId=requestButton.dataset.serviceRequest;
         const custom=requestId.startsWith("custom-")?customListings.find(item=>item.id===requestId.slice(7)):null;
         const original=custom?null:services.find(item=>item.id===requestId)||services[Number(requestId)];
-        const service=custom?{title:custom.title,provider:custom.seller,price:`From ${currencyFormatter.format(buyerPrice(custom.price))} / service`,rating:"New listing",sellerPrice:custom.price}:original?{...original,price:priceWithBuyerFee(original.price),sellerPrice:original.sellerPrice===undefined?sellerPriceFrom(original.price):original.sellerPrice}:null;
+        const service=custom?{title:custom.title,provider:custom.seller,price:custom.pricingMode==="quote"?"Request a quote":custom.pricingMode==="starting"?`From ${currencyFormatter.format(custom.price)} / service`:currencyFormatter.format(custom.price),rating:"New listing",sellerPrice:custom.price,pricingMode:custom.pricingMode||"starting"}:original?{...original,price:original.price,sellerPrice:original.sellerPrice===undefined?sellerPriceFrom(original.price):original.sellerPrice}:null;
         if(!service)return;
         renderServiceDetails({...service,category:custom?custom.category:original.category,image:custom?custom.image:original.image,description:custom?custom.description:original.description});return
       }
@@ -1514,7 +1538,7 @@
       showToast("Review saved in this browser.");
     });
     document.querySelector(".service-request-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
-    document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");requests.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();document.getElementById("service-dialog").close();showToast("Request saved in this browser. The provider was not contacted.")});
+    document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");requests.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();document.getElementById("service-dialog").close();showToast("Demo request saved locally. Sign in to send a real request through Bigwizz.")});
     document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
     document.getElementById("new-post").addEventListener("click",()=>showToast("Community posting is a demo. Sign-in and moderation are needed before launch."));
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});

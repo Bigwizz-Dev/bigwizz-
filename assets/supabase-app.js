@@ -4,9 +4,10 @@
   if (!config || !config.url || !config.publishableKey || !supabaseApi) return;
 
   const client = supabaseApi.createClient(config.url, config.publishableKey);
-  const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+  const currency = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 2 });
   let user = null;
   let profile = null;
+  let sellerAvailabilityStatus = "available";
   let savedListingIds = new Set();
   let remoteEditingId = null;
 
@@ -269,7 +270,8 @@
       description: row.description,
       providerId: row.seller_id,
       sellerPrice: row.price,
-      price: row.price === null ? "Request an estimate" : `From ${currency.format(row.price)} / service`,
+      pricingMode: row.pricing_mode || "fixed",
+      price: row.pricing_mode === "quote" || row.price === null ? "Request a quote" : row.pricing_mode === "starting" ? `From ${currency.format(row.price)} / service` : currency.format(row.price),
       rating: row.rating === null ? "New listing" : Number(row.rating).toFixed(1),
       ratingCount: Number(row.rating_count || 0),
       provider: row.seller_name,
@@ -350,7 +352,7 @@
   async function loadMyListings() {
     if (!user || !sellerProfileReady) return;
     const { data, error } = await client.from("listings")
-      .select("id,kind,category,title,description,price,image_url,status,seller_name")
+      .select("id,kind,category,title,description,price,pricing_mode,image_url,status,seller_name")
       .eq("seller_id", user.id)
       .order("created_at", { ascending: false });
     if (error) {
@@ -365,7 +367,7 @@
     container.innerHTML = data.map(item => `<article class="seller-listing-item">
       <img src="${escapeHtml(item.image_url)}" alt="">
       <div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong>
-        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
+        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.kind === "service" && (item.pricing_mode === "quote" || item.price === null) ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
       </div>
       <div class="seller-listing-actions">
         <button type="button" data-seller-listing-action="edit" data-listing-id="${item.id}">Edit</button>
@@ -528,9 +530,11 @@
       const description = String(values.get("description") || "").trim();
       const kind = String(values.get("type") || "");
       const category = String(values.get("category") || "");
-      const price = Number(values.get("price"));
-      if (!title || !description || !Number.isFinite(price) || price <= 0) {
-        throw new Error("Enter a title, description, and valid price.");
+      const pricingMode = kind === "service" ? String(values.get("pricingMode") || "fixed") : "fixed";
+      const rawPrice = String(values.get("price") || "").trim();
+      const price = kind === "service" && pricingMode === "quote" ? null : Number(rawPrice);
+      if (!title || !description || (price !== null && (!Number.isFinite(price) || price <= 0)) || (price === null && !(kind === "service" && pricingMode === "quote"))) {
+        throw new Error("Enter a valid price or select quotation required.");
       }
       const { data: existing, error: existingError } = remoteEditingId
         ? await client.from("listings").select("id,status,image_url")
@@ -547,7 +551,8 @@
         title,
         description,
         seller_name: sellerShopName,
-        price: Math.round((price + Number.EPSILON) * 100) / 100,
+        price: price === null ? null : Math.round((price + Number.EPSILON) * 100) / 100,
+        pricing_mode: pricingMode,
         image_url: imageUrl,
         status: existing ? existing.status : "published"
       };
@@ -555,8 +560,17 @@
         ? await client.from("listings").update(row).eq("id", remoteEditingId).eq("seller_id", user.id)
         : await client.from("listings").insert(row);
       if (result.error) throw result.error;
+      if (kind === "service") {
+        const { error: profileError } = await client.from("seller_profiles").update({
+          is_public: true,
+          availability_status: String(values.get("serviceAvailability") || sellerAvailabilityStatus || "available")
+        }).eq("user_id", user.id);
+        sellerAvailabilityStatus = String(values.get("serviceAvailability") || sellerAvailabilityStatus || "available");
+        if (profileError) throw profileError;
+      }
       remoteEditingId = null;
       resetSellerListingForm();
+      document.getElementById("seller-service-availability").value = sellerAvailabilityStatus;
       await Promise.all([loadMyListings(), loadCatalog()]);
       notify("Listing saved to the shared marketplace.");
     } catch (error) {
@@ -572,7 +586,7 @@
       return;
     }
     const row = await client.from("listings")
-      .select("id,title,kind,category,description,price,image_url,status")
+      .select("id,title,kind,category,description,price,pricing_mode,image_url,status")
       .eq("id", listingId).eq("seller_id", user.id).single();
     if (row.error) throw row.error;
     if (action === "edit") {
@@ -582,7 +596,10 @@
       document.getElementById("seller-listing-type").value = item.kind;
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change", { bubbles: true }));
       document.getElementById("seller-listing-category").value = item.category;
-      document.getElementById("seller-listing-price").value = String(item.price);
+      document.getElementById("seller-service-pricing-mode").value = item.price === null ? "quote" : item.pricing_mode || "fixed";
+      document.getElementById("seller-service-availability").value = sellerAvailabilityStatus;
+      document.getElementById("seller-listing-price").value = item.price === null ? "" : String(item.price);
+      document.getElementById("seller-listing-price").disabled = item.kind === "service" && item.pricing_mode === "quote";
       document.getElementById("seller-listing-description").value = item.description;
       document.getElementById("seller-listing-submit").textContent = "Save changes";
       document.getElementById("seller-listing-cancel").hidden = false;
@@ -970,6 +987,17 @@
     }
   }, true);
 
+  document.addEventListener("click",async event=>{
+    const choose=event.target.closest("[data-select-service-match]");
+    if(!choose||!user)return;
+    const {error}=await client.from("service_request_selections").insert({
+      request_id:choose.dataset.requestId,match_id:choose.dataset.selectServiceMatch,
+      buyer_id:user.id,provider_id:choose.dataset.providerId
+    });
+    if(error){report(error,"Provider selection could not be saved.");return;}
+    notify("Provider selected. No payment has been taken; secure checkout is not connected yet.");
+    await loadBuyerServiceRequests();
+  });
   const accountMenu = document.getElementById("account-switch-menu");
   accountMenu.insertAdjacentHTML("beforeend",
     '<button type="button" data-supabase-signout><span class="account-option-icon">↪</span><span><b>Sign out</b><small>End this session</small></span></button>');
@@ -989,4 +1017,7 @@
     if (error) report(error, "Could not check the current sign-in session.");
     else handleSession(data.session && data.session.user);
   });
+  document.querySelectorAll('[data-page="services"]').forEach(button => button.addEventListener("click", () => {
+    window.setTimeout(loadBuyerServiceRequests, 100);
+  }));
 })();
