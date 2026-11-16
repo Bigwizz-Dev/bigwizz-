@@ -43,11 +43,36 @@
     return rows;
   }
 
-  window.BIGWIZZ_BACKEND = Object.freeze({
-    loadListingReviews,
-    submitListingReview,
-    getCurrentUser: () => user
-  });
+  async function loadCommunityPosts(){
+    const query=client.from("community_posts").select("id,title,category,body,image_url,status,created_at,author:profiles!community_posts_author_id_fkey(display_name)").order("created_at",{ascending:false});
+    const {data,error}=user?await query.or(`status.eq.published,author_id.eq.${user.id}`):await query.eq("status","published");
+    if(error)throw error;
+    const rows=data||[],ids=rows.map(row=>row.id);let counts=new Map();
+    if(ids.length){const result=await client.from("community_comments").select("post_id").in("post_id",ids).eq("status","published");if(result.error)throw result.error;for(const row of result.data||[])counts.set(row.post_id,(counts.get(row.post_id)||0)+1);}
+    conversations=rows.map(row=>({id:row.id,title:row.title,meta:row.category||"Community",copy:row.body,author:row.author&&row.author.display_name||"Community member",status:row.status,commentCount:counts.get(row.id)||0,image:row.image_url||"assets/home-repairs.jpg"}));
+    return conversations;
+  }
+  async function loadCommunityComments(postId){
+    if(!postId)return [];
+    const query=client.from("community_comments").select("id,post_id,body,status,created_at,author:profiles!community_comments_author_id_fkey(display_name)").eq("post_id",postId).order("created_at",{ascending:true});
+    const {data,error}=user?await query.or(`status.eq.published,author_id.eq.${user.id}`):await query.eq("status","published");
+    if(error)throw error;
+    return (data||[]).map(row=>({id:row.id,body:row.body,status:row.status,author:row.author&&row.author.display_name||"Community member",createdAt:row.created_at}));
+  }
+  async function submitCommunityPost({title,category,body}){
+    if(!user){showAuth();throw new Error("Please sign in to start a conversation.");}
+    const cleanTitle=String(title||"").trim(),cleanBody=String(body||"").trim();
+    if(!cleanTitle||cleanTitle.length>160||!cleanBody||cleanBody.length>5000)throw new Error("Add a title and a message before submitting.");
+    const {error}=await client.from("community_posts").insert({author_id:user.id,title:cleanTitle,category:String(category||"General").slice(0,60),body:cleanBody,status:"pending"});
+    if(error)throw error;await loadCommunityPosts();renderCommunity();
+  }
+  async function submitCommunityComment({postId,body}){
+    if(!user){showAuth();throw new Error("Please sign in to comment.");}
+    const cleanBody=String(body||"").trim();if(!postId||!cleanBody||cleanBody.length>5000)throw new Error("Write a comment before submitting.");
+    const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,body:cleanBody,status:"pending"});
+    if(error)throw error;return loadCommunityComments(postId);
+  }
+  window.BIGWIZZ_BACKEND=Object.freeze({loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -251,8 +276,7 @@
 
     const [eventsResult, postsResult] = await Promise.all([
       client.from("events").select("id,title,host,starts_at").order("starts_at"),
-      client.from("community_posts").select("id,title,category,body,image_url,created_at")
-        .eq("status", "published").order("created_at", { ascending: false })
+      loadCommunityPosts().then(data=>({data,error:null})).catch(error=>({data:null,error}))
     ]);
     if (eventsResult.error) report(eventsResult.error, "Events could not be loaded from the database.");
     else {
@@ -268,17 +292,7 @@
         };
       });
     }
-    if (postsResult.error) report(postsResult.error, "Community posts could not be loaded from the database.");
-    else {
-      conversations = postsResult.data.map(item => ({
-        id: item.id,
-        title: item.title,
-        meta: item.category || "Community",
-        copy: item.body,
-        replies: "View discussion",
-        image: item.image_url || "assets/home-repairs.jpg"
-      }));
-    }
+    if(postsResult.error)report(postsResult.error,"Community posts could not be loaded from the database.");
     renderListings(document.getElementById("search-input").value);
     renderServices(document.getElementById("service-search-input").value);
     renderEvents();
@@ -790,6 +804,8 @@
       return;
     }
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
+    if(event.target.id==="community-post-form"){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]');submit.disabled=true;try{await submitCommunityPost({title:values.get("title"),category:values.get("category"),body:values.get("body")});form.reset();document.getElementById("community-compose-dialog").close();notify("Your post was submitted and is awaiting review.");}catch(error){report(error,error.message||"Your post could not be submitted.");}finally{submit.disabled=false;}return;}
+    if(event.target.id==="community-comment-form"){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]'),postId=String(values.get("postId")||"");submit.disabled=true;try{const comments=await submitCommunityComment({postId,body:values.get("body")});form.reset();document.getElementById("community-comment-post-id").value=postId;renderCommunityComments(comments);notify("Your comment was submitted and is awaiting review.");}catch(error){report(error,error.message||"Your comment could not be submitted.");}finally{submit.disabled=false;}return;}
     if (event.target.id === "issue-form") return submitOrderReport(event);
     if (event.target.id === "search-form") {
       stop(event);
@@ -941,6 +957,10 @@
   client.auth.onAuthStateChange((_event, session) => {
     window.setTimeout(() => handleSession(session && session.user), 0);
   });
+  client.channel("bigwizz-community-live")
+    .on("postgres_changes",{event:"*",schema:"public",table:"community_posts"},async()=>{try{await loadCommunityPosts();renderCommunity();}catch(error){console.error("Community live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"community_comments"},async()=>{try{await loadCommunityPosts();renderCommunity();const postId=document.getElementById("community-comment-post-id")?.value;if(postId&&document.getElementById("community-thread-dialog")?.open)renderCommunityComments(await loadCommunityComments(postId));}catch(error){console.error("Community comment live refresh failed.",error);}})
+    .subscribe();
   client.auth.getSession().then(({ data, error }) => {
     if (error) report(error, "Could not check the current sign-in session.");
     else handleSession(data.session && data.session.user);
