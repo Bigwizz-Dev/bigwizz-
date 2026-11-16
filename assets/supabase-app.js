@@ -428,28 +428,53 @@
   async function saveSellerProfile(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
+
+    const form = event.currentTarget;
+    const submit = form.querySelector('button[type="submit"]');
     if (!user) {
       showAuth();
       return;
     }
-    const values = new FormData(event.currentTarget);
+    if (submit && submit.disabled) return;
+
+    const values = new FormData(form);
     const shopName = String(values.get("shopName") || "").trim();
-    const sellerTypeValue = String(values.get("sellerType") || "");
-    const { error } = await client.from("seller_profiles").upsert({
-      user_id: user.id,
-      shop_name: shopName,
-      seller_type: sellerTypeValue
-    }, { onConflict: "user_id" });
-    if (error) {
-      report(error, "Seller profile could not be saved.");
+    const sellerTypeValue = String(values.get("sellerType") || "").trim();
+    if (!shopName || !sellerTypeValue) {
+      notify("Enter your shop name and choose a seller type.");
       return;
     }
-    await loadAccount();
-    event.currentTarget.reset();
-    activeAccount = "seller";
-    updateAccountState();
-    activatePage("seller-studio");
-    notify("Seller profile saved.");
+
+    if (submit) {
+      submit.disabled = true;
+      submit.textContent = "Creating your studio…";
+    }
+    try {
+      const { error } = await client.from("seller_profiles").upsert({
+        user_id: user.id,
+        shop_name: shopName,
+        seller_type: sellerTypeValue
+      }, { onConflict: "user_id" });
+      if (error) throw error;
+
+      await loadAccount();
+      if (!sellerProfileReady) {
+        throw new Error("Your seller profile was saved, but it could not be loaded. Please try again.");
+      }
+
+      activeAccount = "seller";
+      updateAccountState();
+      activatePage("seller-studio");
+      form.reset();
+      notify("Seller Studio created successfully.");
+    } catch (error) {
+      report(error, error instanceof Error ? error.message : "Seller Studio could not be created.");
+    } finally {
+      if (submit) {
+        submit.disabled = false;
+        submit.textContent = "Create seller studio";
+      }
+    }
   }
 
   async function uploadListingImage(file) {
