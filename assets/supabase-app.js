@@ -718,10 +718,11 @@
     if (!user) {
       profile = null;
       accountRoles = ["buyer"];
-      activeAccount = "buyer";
+      const hasPendingSellerStudio = Boolean(sessionStorage.getItem("bigwizz-pending-seller-studio"));
+      activeAccount = hasPendingSellerStudio ? "seller" : "buyer";
       sellerProfileReady = false;
       sellerAuthVerified = false;
-      authAudience = "buyer";
+      authAudience = hasPendingSellerStudio ? "seller" : "buyer";
       if (sellerWorkspace) sellerWorkspace.hidden = true;
       const buyerShell = document.querySelector("#marketplace-app > .shell");
       const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
