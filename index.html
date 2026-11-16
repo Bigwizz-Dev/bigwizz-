@@ -283,7 +283,7 @@
     .product-detail-price{margin:12px 0;color:var(--deep);font-size:22px;font-weight:850}
     .product-detail-description{color:var(--muted);font-size:13px;line-height:1.6}
     .product-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .product-options-panel{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}.product-options-panel h4{margin:0 0 5px;font-size:15px}.product-options-panel>p{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.5}.product-options-panel .product-option-grid{margin-top:8px}.product-review-actions{display:flex;justify-content:flex-end;margin-top:16px}.product-review-actions .outline-button{width:auto}
+    .product-options-panel{margin-top:20px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--canvas)}.product-options-panel h4{margin:0 0 6px;font-size:16px;font-weight:850;letter-spacing:-.2px}.product-options-panel>p{margin:0 0 14px;color:var(--muted);font-size:12px;line-height:1.55}.product-options-panel .product-option-grid{margin-top:8px;gap:14px}.product-options-panel .field label{display:block;margin-bottom:7px;font-size:12px;font-weight:800;color:var(--ink)}.product-options-panel select{min-height:44px;border-radius:10px;background:var(--paper)}
     .product-detail-actions{display:flex;gap:9px;margin-top:18px}
     .product-detail-actions button{flex:1}
     .product-reviews{margin-top:28px;padding:24px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
@@ -1270,7 +1270,6 @@
       if(selectedRatingProductId!==String(item.id)){selectedRatingProductId=String(item.id);selectedReviewRating=0}
       const sizeEnabled=["clothing","shoes","caps"].includes(item.sizeType),sizes=sizeEnabled&&Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
       productBaseImage=item.image;productColorImages=item.colorImages&&typeof item.colorImages==="object"?item.colorImages:{};
-      const reviews=reviewsByListing[item.id]||[];
       const allRelated=getGoodsListings().filter(other=>other.id!==item.id);
       const sellerPrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
       const displayedPrice=sellerPrice?currencyFormatter.format(buyerPrice(sellerPrice)):item.price;
@@ -1278,31 +1277,23 @@
         sizeEnabled?(sizes.length?`<div class="field"><label for="product-size">Size</label><select id="product-size" required><option value="">Choose a size</option>${sizes.map(size=>`<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`).join("")}</select></div>`:`<p class="notice">The seller has not added size choices for this item yet.</p>`):"",
         colors.length?`<div class="field"><label for="product-color">Colour</label><select id="product-color" required><option value="">Choose a colour</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select><small id="product-color-preview-label" class="notice">Choose a colour to view its product photo.</small></div>`:`<p class="notice">No colour options have been provided by the seller for this item.</p>`
       ].filter(Boolean).join("");
-      const reviewRows=reviews.slice().reverse().map(review=>{
-        const date=Date.parse(review.createdAt),dateLabel=Number.isFinite(date)?new Date(date).toLocaleDateString():"Date unavailable";
-        const reviewer=review.reviewer||"Buyer";
-        const initials=reviewer.trim().split(/\s+/).map(part=>part[0]).slice(0,2).join("").toUpperCase()||"B";
-        return `<article class="product-review"><div class="product-review-head"><span class="review-author"><span class="review-avatar" aria-hidden="true">${escapeHtml(initials)}</span><strong>${escapeHtml(reviewer)}</strong></span><time datetime="${escapeHtml(review.createdAt)}">${escapeHtml(dateLabel)}</time></div><div class="product-review-comment"><div class="product-review-stars" role="img" aria-label="${review.rating} out of 5 stars">${starIcon(true).repeat(review.rating)}</div><p>${escapeHtml(review.text)}</p></div></article>`;
-      }).join("");
       document.getElementById("product-detail-content").innerHTML=`
         <article class="product-detail">
           <div class="product-image-frame"><img class="product-detail-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}"></div>
           <div class="product-detail-info">
-            <div class="seller-line"><span>${escapeHtml(item.seller)}</span><span class="rating">${listingRating(item)}</span></div>
+            <div class="seller-line"><span>${escapeHtml(item.seller)}</span></div>
             <h2>${escapeHtml(item.title)}</h2>
             <div class="product-detail-price">${escapeHtml(displayedPrice)}</div>
             <p class="product-detail-description">${escapeHtml(item.detail||"")}</p>
+            <section class="product-options-panel" aria-labelledby="product-options-title">
+              <h4 id="product-options-title">Choose your options</h4>
+              <p>Select the available options before adding this item to your cart.</p>
+              <div class="product-option-grid">${variantFields}</div>
+            </section>
+            ${sizeEnabled?renderSizeChart(item.sizeType,sizes):""}
             <div class="product-detail-actions"><button class="primary" type="button" data-add-to-cart="${escapeHtml(item.id)}">Add to cart</button></div>
           </div>
         </article>
-        <section class="product-reviews">
-          <div class="section-head"><div><h3>Customer reviews</h3><p class="review-intro">Thoughtful feedback from people who have purchased this item.</p><span class="rating-control-label">Your rating</span>${renderProductRatingStars()}</div></div>
-          <div class="product-options-panel"><h4>Choose your options</h4><p>Select from the options provided by the seller before adding this item to your cart.</p><div class="product-option-grid">${variantFields}</div></div>
-          ${sizeEnabled?renderSizeChart(item.sizeType,sizes):""}
-          <div class="product-review-actions"><button type="button" class="outline-button" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
-          <div class="product-review-list">${reviewRows||'<p class="notice">No written reviews yet. Be the first to share your experience.</p>'}</div>
-          <p class="notice">Sample reviews are demo content. New reviews are saved only in this browser.</p>
-        </section>
         <section class="related-products">
           <div class="listing-grid">${allRelated.length?allRelated.map(renderGoodsCard).join(""):'<p class="notice">No other goods are available yet.</p>'}</div>
         </section>`;
