@@ -314,7 +314,7 @@
     const metadata = user.user_metadata || {};
     if (!profileResult.data || (!profile.city && metadata.city)) {
       const saved = { id:user.id, display_name:profile.display_name || metadata.display_name || user.email || "Member", country:metadata.country || "Nigeria", state:metadata.state || null, city:metadata.city || null, area:metadata.area || null };
-      const savedResult = await client.from("profiles").upsert(saved,{onConflict:"id"}).select("display_name,country,state,city,area").single();
+      const savedResult = await client.from("profiles").update({ country:saved.country, state:saved.state, city:saved.city, area:saved.area }).eq("id",user.id).select("display_name,country,state,city,area").single();
       if (!savedResult.error) profile = savedResult.data;
     }
     window.BIGWIZZ_LOCATION_CONTEXT = { source:"saved", country:profile.country||"", state:profile.state||"", city:profile.city||"", area:profile.area||"", latitude:null, longitude:null };
@@ -752,7 +752,6 @@
           });
           if (result.error) throw result.error;
           if (result.data.session) {
-            await client.from("profiles").upsert({ id: result.data.user.id, display_name: displayName, ...registrationLocation }, { onConflict: "id" });
             document.getElementById("auth-dialog").close();
             notify("Your Buyer account has been created.");
           } else {
