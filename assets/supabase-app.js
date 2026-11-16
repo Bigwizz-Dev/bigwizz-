@@ -722,7 +722,7 @@
       const form = event.target;
       const values = new FormData(form);
       const listingId = String(values.get("listingId") || "");
-      const rating = Number(selectedReviewRating || window.BIGWIZZ_PRODUCT_SELECTED_RATING || 0);
+      const rating = Number(window.BIGWIZZ_PRODUCT_SELECTED_RATING || 0);
       const body = String(values.get("review") || "").trim();
       const reviewer = String(values.get("reviewer") || "").trim();
       if (!rating) { notify("Choose a star rating before posting."); return; }
