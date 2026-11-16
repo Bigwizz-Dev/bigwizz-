@@ -10,6 +10,43 @@
   let savedListingIds = new Set();
   let remoteEditingId = null;
 
+  async function loadListingReviews(listingId) {
+    if (!listingId) return [];
+    const { data, error } = await client.from("listing_reviews")
+      .select("id,rating,body,reviewer_name,created_at")
+      .eq("listing_id", listingId).order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data || []).map(row => ({
+      id: row.id, rating: row.rating, text: row.body,
+      reviewer: row.reviewer_name || "Customer", createdAt: row.created_at, demo: false
+    }));
+  }
+
+  async function submitListingReview({ listingId, rating, text, reviewer }) {
+    if (!user) {
+      showAuth();
+      throw new Error("Please sign in to submit a review.");
+    }
+    const { error } = await client.from("listing_reviews").insert({
+      listing_id: listingId,
+      user_id: user.id,
+      rating,
+      body: text,
+      reviewer_name: reviewer || (profile && profile.display_name) || "Customer"
+    });
+    if (error) {
+      if (error.code === "23505") throw new Error("You have already reviewed this listing.");
+      throw error;
+    }
+    return loadListingReviews(listingId);
+  }
+
+  window.BIGWIZZ_BACKEND = Object.freeze({
+    loadListingReviews,
+    submitListingReview,
+    getCurrentUser: () => user
+  });
+
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
       "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
@@ -148,7 +185,7 @@
   async function loadCatalog() {
     const { data: rows, error } = await client
       .from("listings")
-      .select("id,seller_id,kind,category,title,description,seller_name,price,image_url,rating,rating_count")
+      .select("id,seller_id,kind,category,title,description,seller_name,price,image_url,rating,rating_count,seller_profiles(service_area)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (error) {
@@ -179,7 +216,8 @@
       sellerPrice: row.price,
       price: row.price === null ? "Request an estimate" : `From ${currency.format(row.price)} / service`,
       rating: row.rating === null ? "New listing" : Number(row.rating).toFixed(1),
-      provider: row.seller_name
+      provider: row.seller_name,
+      location: row.seller_profiles && row.seller_profiles.service_area || "Location not provided by this service provider"
     }));
 
     const [eventsResult, postsResult] = await Promise.all([
@@ -675,6 +713,28 @@
         submit.textContent = authMode === "signup" ? "Create account" :
           authMode === "reset" ? "Send reset link" : "Sign in";
       }
+      return;
+    }
+    if (event.target.id === "service-review-form") {
+      stop(event);
+      const form = event.target;
+      const submit = form.querySelector('[type="submit"]');
+      const values = new FormData(form);
+      const rating = Number(form.dataset.selectedRating || 0);
+      const listingId = form.dataset.listingId;
+      const reviewer = String(values.get("reviewer") || "").trim();
+      const body = String(values.get("review") || "").trim();
+      if (!rating) { notify("Please select a star rating."); return; }
+      if (!reviewer || !body) { notify("Please enter your name and review."); return; }
+      if (!listingId) { notify("This listing is not connected to the review database yet."); return; }
+      submit.disabled = true;
+      try {
+        const rows = await submitListingReview({ listingId, rating, text: body, reviewer });
+        if (typeof window.BIGWIZZ_RENDER_SERVICE_REVIEWS === "function") window.BIGWIZZ_RENDER_SERVICE_REVIEWS(rows);
+        notify("Your review is now shared with other customers.");
+      } catch (error) {
+        report(error, error.message || "Your review could not be saved.");
+      } finally { submit.disabled = false; }
       return;
     }
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
