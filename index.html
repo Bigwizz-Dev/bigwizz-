@@ -295,6 +295,41 @@
     .save svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.review-stars button[aria-pressed="true"] svg{fill:#b77914}.product-review-stars svg{fill:currentColor}
     @media(max-width:700px){.product-review-comment{margin-left:0}.product-review-head{align-items:flex-start}}
     .footer{color:#000}.searchbar button{display:grid;place-items:center;min-width:44px}.search-icon{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+    .seller-workspace{min-height:100vh;background:var(--canvas);color:var(--ink)}
+    .seller-workspace-header{height:76px;padding:0 34px;display:flex;align-items:center;justify-content:space-between;gap:18px;background:var(--paper);border-bottom:1px solid var(--line)}
+    .seller-workspace-brand{display:flex;align-items:center;gap:10px;color:var(--ink);font-size:20px;font-weight:850;text-decoration:none}
+    .seller-workspace-tag{padding:5px 8px;border-radius:7px;background:#eee7f2;color:var(--deep);font-size:9px;letter-spacing:1px}
+    .seller-workspace-actions{display:flex;gap:9px}
+    .seller-workspace-actions button{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-size:12px;font-weight:750}
+    .seller-workspace-actions .seller-switch-buyer{background:var(--deep);color:white;border-color:var(--deep)}
+    .seller-workspace-layout{max-width:1440px;min-height:calc(100vh - 76px);margin:auto;padding:28px 34px;display:grid;grid-template-columns:225px minmax(0,1fr);gap:28px}
+    .seller-sidebar{align-self:start;position:sticky;top:22px;padding:16px 12px;border:1px solid var(--line);border-radius:17px;background:var(--paper)}
+    .seller-sidebar-heading{padding:7px 10px 13px;color:var(--muted);font-size:10px;font-weight:850;letter-spacing:1.2px}
+    .seller-nav-link{width:100%;display:flex;align-items:center;gap:11px;padding:12px 10px;margin:3px 0;border:0;border-radius:10px;background:transparent;color:var(--muted);text-align:left;font-size:13px;font-weight:750}
+    .seller-nav-link span{width:22px;font-size:18px;text-align:center}
+    .seller-nav-link.active,.seller-nav-link:hover{background:#eee7f2;color:var(--deep)}
+    .seller-sidebar-note{margin:18px 8px 5px;padding-top:14px;border-top:1px solid var(--line);color:var(--muted);font-size:11px;line-height:1.6}
+    .seller-workspace-main{min-width:0}
+    .seller-workspace-main>.page{max-width:1100px;margin:0 auto}
+    .seller-workspace-main>.page.active{display:block}
+    .seller-workspace-main .seller-heading{margin-bottom:20px}
+    .seller-mobile-nav{display:none}
+    @media(max-width:700px){
+      .seller-workspace-header{height:65px;padding:0 15px}
+      .seller-workspace-brand{font-size:17px}
+      .seller-workspace-tag{font-size:8px}
+      .seller-workspace-actions{gap:6px}
+      .seller-workspace-actions button{padding:9px 10px;font-size:10px}
+      .seller-workspace-layout{display:block;min-height:calc(100vh - 65px);padding:20px 15px 95px}
+      .seller-sidebar{display:none}
+      .seller-mobile-nav{position:fixed;z-index:8;right:0;bottom:0;left:0;display:flex;justify-content:space-around;padding:9px 5px max(9px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--paper)}
+      .seller-mobile-nav button{display:grid;justify-items:center;gap:3px;padding:4px 9px;border:0;background:transparent;color:var(--muted);font-size:9px;font-weight:750}
+      .seller-mobile-nav button span{font-size:17px}
+      .seller-mobile-nav button.active{color:var(--deep)}
+    }
+    html[data-theme="dark"] .seller-nav-link.active,html[data-theme="dark"] .seller-nav-link:hover{background:#46364e;color:#f5eef7}
+    html[data-theme="dark"] .seller-workspace-tag{background:#46364e;color:#f5eef7}
   </style>
 </head>
 <body>
@@ -442,6 +477,32 @@
     <button class="active" data-audience="buyer" data-page="discover"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg></span>Discover</button><button data-audience="buyer" data-page="services"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2zM19 16v5m-2.5-2.5h5"/></svg></span>Services</button><button data-audience="buyer" data-page="community"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.3-3.7A7 7 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7zM8 12h.01M12 12h.01M16 12h.01"/></svg></span>Community</button><button data-audience="buyer" data-page="notifications"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg></span>Notifications</button><button data-audience="buyer" data-page="cart"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 8H6M10 21h.01M18 21h.01"/></svg></span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
     <button data-audience="seller" data-page="seller-studio" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 17V9l7-6 7 6v8M9 20v-6h6v6"/></svg></span>Studio</button><button data-audience="seller" data-page="messages" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 3zM8 9h8m-8 4h5"/></svg></span>Inbox</button><button data-audience="seller" data-page="seller-listings" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8m-8 4h8m-8 4h5"/></svg></span>Listings</button><button data-audience="seller" data-page="seller-progress" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V4m0 16h17M8 16l4-5 3 2 5-7"/></svg></span>Progress</button>
   </nav>
+  <section id="seller-workspace" class="seller-workspace" hidden aria-label="Seller dashboard">
+    <header class="seller-workspace-header">
+      <a class="seller-workspace-brand" href="#" data-page="seller-studio"><span class="brand-mark">b</span> bigwizz <span class="seller-workspace-tag">SELLER</span></a>
+      <div class="seller-workspace-actions">
+        <button type="button" class="seller-switch-buyer" data-account-option="buyer">Switch to Buyer</button>
+        <button type="button" class="seller-signout" data-supabase-signout>Sign out</button>
+      </div>
+    </header>
+    <div class="seller-workspace-layout">
+      <aside class="seller-sidebar" aria-label="Seller navigation">
+        <div class="seller-sidebar-heading">SELLER WORKSPACE</div>
+        <button type="button" class="seller-nav-link active" data-page="seller-studio"><span>⌂</span> Overview</button>
+        <button type="button" class="seller-nav-link" data-page="seller-listings"><span>▤</span> My listings</button>
+        <button type="button" class="seller-nav-link" data-page="seller-progress"><span>↗</span> Sales & earnings</button>
+        <button type="button" class="seller-nav-link" data-page="messages"><span>✉</span> Inbox</button>
+        <div class="seller-sidebar-note">Your shop tools and sales workspace are separate from Buyer shopping.</div>
+      </aside>
+      <main id="seller-workspace-main" class="seller-workspace-main" aria-live="polite"></main>
+    </div>
+    <nav class="seller-mobile-nav" aria-label="Seller navigation">
+      <button type="button" class="active" data-page="seller-studio"><span>⌂</span>Overview</button>
+      <button type="button" data-page="seller-listings"><span>▤</span>Listings</button>
+      <button type="button" data-page="seller-progress"><span>↗</span>Sales</button>
+      <button type="button" data-page="messages"><span>✉</span>Inbox</button>
+    </nav>
+  </section>
   <dialog id="auth-dialog" aria-labelledby="auth-title">
     <div class="dialog-content">
       <div class="dialog-head"><div><h2 id="auth-title">Sign in to Bigwizz</h2><p id="auth-summary">Use your Bigwizz account to continue to Seller Studio.</p></div><button class="dialog-close" type="button" data-auth-close aria-label="Close sign-in">×</button></div>
