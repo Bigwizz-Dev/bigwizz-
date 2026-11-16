@@ -20,6 +20,15 @@
     .service-provider-rating-stars span{color:#d9d3dc}
     .service-provider-rating strong{font-size:15px;color:var(--ink)}
     .service-provider-rating small{font-size:12px;color:var(--muted)}
+    .service-quick-rating{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:-7px 0 18px;padding:10px 13px;border-radius:12px;background:var(--canvas);border:1px solid var(--line)}
+    .service-quick-rating>span{font-size:12px;font-weight:800;color:var(--ink)}
+    .service-quick-rating-stars{display:flex;gap:5px}
+    .service-quick-rating-stars button{padding:0 2px;border:0;background:transparent;color:#cfc8d2;font-size:27px;line-height:1;cursor:pointer;transition:transform .18s ease,color .18s ease}
+    .service-quick-rating-stars button[aria-pressed="true"]{color:#e4a72d}
+    .service-quick-rating-stars button.is-animating{animation:service-star-pop .48s cubic-bezier(.2,.8,.2,1)}
+    @keyframes service-star-pop{0%{transform:scale(.65) rotate(-18deg)}45%{transform:scale(1.4) rotate(8deg)}75%{transform:scale(.92)}100%{transform:scale(1)}}
+    .service-quick-rating small{font-size:11px;color:var(--muted)}
+    @media(prefers-reduced-motion:reduce){.service-quick-rating-stars button{transition:none}.service-quick-rating-stars button.is-animating{animation:none}}
     .service-write-review-prompt{display:flex;align-items:center;justify-content:space-between;gap:14px}
     .service-write-review-prompt h3{margin:0 0 5px;font-size:16px}
     .service-write-review-prompt p{margin:0;color:var(--muted);font-size:12px}
@@ -1248,6 +1257,13 @@
             <strong>${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New"}</strong>
             <small>${totalRatingCount} ${totalRatingCount===1?"rating":"ratings"}</small>
           </div>
+          <div class="service-quick-rating">
+            <span>Rate this service</span>
+            <div class="service-quick-rating-stars" role="group" aria-label="Choose your rating">
+              ${[1,2,3,4,5].map(rating=>`<button type="button" data-service-quick-rating="${rating}" aria-label="Rate ${rating} out of 5" aria-pressed="false">★</button>`).join("")}
+            </div>
+            <small data-service-quick-rating-label>Tap a star to rate</small>
+          </div>
           <section class="service-write-review">
             <div class="service-write-review-prompt">
               <div><h3>Share your experience</h3><p>Used this service? Let others know what you think.</p></div>
@@ -1341,9 +1357,10 @@
       const accountOption=event.target.closest("[data-account-option]");if(accountOption){switchAccount(accountOption.dataset.accountOption);return}
       const openProduct=event.target.closest("[data-open-product]");if(openProduct){renderProductDetails(openProduct.dataset.openProduct);return}
       const productCard=event.target.closest("[data-product-card]");if(productCard&&!event.target.closest("[data-save]")){renderProductDetails(productCard.dataset.productCard);return}
-      const openServiceReview=event.target.closest("[data-open-service-review]");if(openServiceReview){selectedServiceReviewRating=0;const form=document.getElementById("service-review-form");if(form){form.reset();form.dataset.selectedRating="0";form.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed","false"));}document.getElementById("service-review-dialog")?.showModal();return}
+      const openServiceReview=event.target.closest("[data-open-service-review]");if(openServiceReview){const form=document.getElementById("service-review-form");if(form){form.reset();form.dataset.selectedRating=String(selectedServiceReviewRating||0);form.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=(selectedServiceReviewRating||0))));}document.getElementById("service-review-dialog")?.showModal();return}
+      const quickRating=event.target.closest("[data-service-quick-rating]");if(quickRating){selectedServiceReviewRating=Number(quickRating.dataset.serviceQuickRating);const form=document.getElementById("service-review-form");if(form)form.dataset.selectedRating=String(selectedServiceReviewRating);document.querySelectorAll("[data-service-quick-rating]").forEach(button=>{const active=Number(button.dataset.serviceQuickRating)<=selectedServiceReviewRating;button.setAttribute("aria-pressed",String(active));button.classList.remove("is-animating");if(active){void button.offsetWidth;button.classList.add("is-animating");}});document.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=selectedServiceReviewRating)));const label=document.querySelector("[data-service-quick-rating-label]");if(label)label.textContent=`You selected ${selectedServiceReviewRating} out of 5 stars`;return}
       const closeServiceReview=event.target.closest("[data-close-service-review]");if(closeServiceReview){document.getElementById("service-review-dialog")?.close();return}
-      const serviceReviewRating=event.target.closest("[data-service-review-rating]");if(serviceReviewRating){selectedServiceReviewRating=Number(serviceReviewRating.dataset.serviceReviewRating);const form=document.getElementById("service-review-form");if(form)form.dataset.selectedRating=String(selectedServiceReviewRating);document.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=selectedServiceReviewRating)));return}
+      const serviceReviewRating=event.target.closest("[data-service-review-rating]");if(serviceReviewRating){selectedServiceReviewRating=Number(serviceReviewRating.dataset.serviceReviewRating);const form=document.getElementById("service-review-form");if(form)form.dataset.selectedRating=String(selectedServiceReviewRating);document.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=selectedServiceReviewRating)));document.querySelectorAll("[data-service-quick-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceQuickRating)<=selectedServiceReviewRating)));const label=document.querySelector("[data-service-quick-rating-label]");if(label)label.textContent=`You selected ${selectedServiceReviewRating} out of 5 stars`;return}
       const reviewRating=event.target.closest("[data-review-rating]");if(reviewRating){selectedReviewRating=Number(reviewRating.dataset.reviewRating);window.BIGWIZZ_PRODUCT_SELECTED_RATING=selectedReviewRating;document.querySelectorAll("#product-review-rating [data-review-rating]").forEach(button=>{const selected=Number(button.dataset.reviewRating)<=selectedReviewRating;button.setAttribute("aria-pressed",String(selected));button.classList.remove("rating-pop");if(selected){button.style.setProperty("--star-delay",`${(Number(button.dataset.reviewRating)-1)*55}ms`);void button.offsetWidth;button.classList.add("rating-pop")}});return}
       const writeReview=event.target.closest("[data-write-review]");if(writeReview){document.getElementById("item-review-form").reset();document.getElementById("review-listing-id").value=writeReview.dataset.writeReview;document.getElementById("review-dialog-title").textContent=`Review ${writeReview.dataset.reviewTitle}`;document.getElementById("review-dialog-summary").textContent="How was this item?";document.getElementById("review-dialog").showModal();return}
       const salesRange=event.target.closest("[data-sales-range]");if(salesRange){salesRangeDays=Number(salesRange.dataset.salesRange);document.querySelectorAll("[data-sales-range]").forEach(button=>button.classList.toggle("active",button===salesRange));renderSellerSales();return}
