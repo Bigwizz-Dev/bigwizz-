@@ -475,9 +475,11 @@
     if (!pending || !pending.shopName || !pending.sellerType) return false;
 
     const { error } = await client.from("seller_profiles").upsert({
-      user_id: user.id,
-      shop_name: pending.shopName,
-      seller_type: pending.sellerType
+      user_id: user.id, shop_name: pending.shopName, seller_type: pending.sellerType,
+      city: pending.city || null, area: pending.area || null, service_area: pending.serviceArea || "",
+      latitude: pending.latitude === null || pending.latitude === "" ? null : Number(pending.latitude),
+      longitude: pending.longitude === null || pending.longitude === "" ? null : Number(pending.longitude),
+      availability_status: "available"
     }, { onConflict: "user_id" });
     if (error) throw error;
 
@@ -512,8 +514,12 @@
     }
 
     sessionStorage.setItem("bigwizz-pending-seller-studio", JSON.stringify({
-      shopName,
-      sellerType: sellerTypeValue
+      shopName, sellerType: sellerTypeValue,
+      city: String(values.get("city") || "").trim(),
+      area: String(values.get("area") || "").trim(),
+      serviceArea: String(values.get("serviceArea") || "").trim(),
+      latitude: String(values.get("latitude") || ""),
+      longitude: String(values.get("longitude") || "")
     }));
     activeAccount = "seller";
     sellerAuthVerified = false;
@@ -583,6 +589,13 @@
         ? await client.from("listings").update(row).eq("id", remoteEditingId).eq("seller_id", user.id)
         : await client.from("listings").insert(row);
       if (result.error) throw result.error;
+      if (kind === "service") {
+        const { error: profileError } = await client.from("seller_profiles").update({
+          is_public: true,
+          availability_status: String(values.get("serviceAvailability") || "available")
+        }).eq("user_id", user.id);
+        if (profileError) throw profileError;
+      }
       remoteEditingId = null;
       resetSellerListingForm();
       await Promise.all([loadMyListings(), loadCatalog()]);
@@ -611,6 +624,7 @@
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change", { bubbles: true }));
       document.getElementById("seller-listing-category").value = item.category;
       document.getElementById("seller-service-pricing-mode").value = item.pricing_mode || "fixed";
+      document.getElementById("seller-service-availability").value = "available";
       document.getElementById("seller-listing-price").value = item.price === null ? "" : String(item.price);
       document.getElementById("seller-listing-price").disabled = item.kind === "service" && item.pricing_mode === "quote";
       document.getElementById("seller-listing-description").value = item.description;
@@ -638,7 +652,8 @@
       showAuth();
       return;
     }
-    const values = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const values = new FormData(form);
     const serviceTitle = String(values.get("service") || "");
     const listing = services.find(item => item.title === serviceTitle);
     const matchingMode = String(values.get("matchingMode") || "direct");
@@ -695,7 +710,7 @@
         }
       }
     }else notify("Your request was sent to the selected provider.");
-    event.currentTarget.reset();
+    form.reset();
     document.getElementById("service-dialog").close();
     await loadBuyerServiceRequests();
   }
@@ -905,6 +920,7 @@
     if (event.target.id === "seller-setup-form") return saveSellerProfile(event);
     if (event.target.id === "seller-listing-form") return saveSellerListing(event);
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
+    if (event.target.matches("[data-service-match-response]")) return respondToServiceMatch(event);
     if (event.target.matches("[data-service-match-response]")) return respondToServiceMatch(event);
     if (event.target.id === "issue-form") return submitOrderReport(event);
     if (event.target.id === "search-form") {
