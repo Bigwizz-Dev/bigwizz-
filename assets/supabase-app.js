@@ -72,7 +72,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -592,32 +592,21 @@
   }
 
   async function submitServiceRequest(event) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    if (!user) {
-      showAuth();
-      return;
-    }
-    const values = new FormData(event.currentTarget);
-    const serviceTitle = String(values.get("service") || "");
-    const listing = services.find(item => item.title === serviceTitle);
-    const { error } = await client.from("service_requests").insert({
-      buyer_id: user.id,
-      listing_id: listing ? listing.id : null,
-      provider_id: listing ? listing.providerId : null,
-      service_title: serviceTitle,
-      request_type: String(values.get("requestType")),
-      preferred_date: String(values.get("preferredDate") || "") || null,
-      area: String(values.get("area") || "").trim(),
-      details: String(values.get("details") || "").trim()
-    });
-    if (error) {
-      report(error, "Service request could not be saved.");
-      return;
-    }
-    event.currentTarget.reset();
-    document.getElementById("service-dialog").close();
-    notify("Service request saved to your account.");
+    event.preventDefault();event.stopImmediatePropagation();
+    if(!user){showAuth();return;}
+    const form=event.currentTarget,values=new FormData(form),submit=form.querySelector('[type="submit"]');
+    const serviceTitle=String(values.get("service")||"").trim(),listing=services.find(item=>item.title===serviceTitle);
+    const area=String(values.get("area")||"").trim(),details=String(values.get("details")||"").trim();
+    if(!listing||!listing.id||!listing.providerId){notify("This service is not connected to a provider account yet. Please choose a published service.");return;}
+    if(!area||!details){notify("Please add your service location and a short description.");return;}
+    submit.disabled=true;submit.textContent="Sending request…";
+    try{
+      const {error}=await client.from("service_requests").insert({buyer_id:user.id,listing_id:listing.id,provider_id:listing.providerId,service_title:serviceTitle,request_type:String(values.get("requestType")),preferred_date:String(values.get("preferredDate")||"")||null,area,details,status:"new"});
+      if(error)throw error;
+      form.reset();document.getElementById("service-dialog").close();await loadBuyerServiceRequests();
+      notify("Your request was sent to the service provider. Track the response under Orders.");
+    }catch(error){report(error,error.message||"Service request could not be sent.");}
+    finally{submit.disabled=false;submit.innerHTML='Send service request <span aria-hidden="true">→</span>';}
   }
 
   async function submitOrderReport(event) {
@@ -642,26 +631,45 @@
     notify("Order report saved to the database. Support has not been contacted.");
   }
 
-  async function loadInbox() {
-    if (!user) {
-      showAuth();
-      return;
-    }
-    if (activeAccount !== "seller") return;
-    const { data, error } = await client.from("service_requests")
-      .select("service_title,request_type,area,details,preferred_date,created_at")
-      .eq("provider_id", user.id).order("created_at", { ascending: false });
-    if (error) {
-      report(error, "Seller service requests could not be loaded.");
-      return;
-    }
-    const requests = data.length ? `<div class="service-request-list">${data.map(item =>
-      `<article class="service-request-card"><div><h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4><p>${escapeHtml(item.details)}</p><small>${escapeHtml(item.area)}${item.preferred_date ? ` · Preferred date: ${escapeHtml(item.preferred_date)}` : ""} · ${new Date(item.created_at).toLocaleString()}</small></div></article>`
-    ).join("")}</div>` : '<p class="notice">No service requests yet.</p>';
-    document.getElementById("inbox").innerHTML =
-      `<section class="service-request-section"><h3>Service requests</h3>${requests}</section><p class="notice">Messaging is not connected yet.</p>`;
-    document.querySelector("#messages .section-head h2").textContent = "Seller inbox";
+  function serviceStatusLabel(status){return ({new:"New request",responded:"Quote / response sent",accepted:"Accepted",declined:"Declined",cancelled:"Cancelled"})[status]||status;}
+  async function loadSellerServiceRequests(){
+    const target=document.getElementById("seller-service-request-list");if(!target)return;
+    if(!user){target.innerHTML='<p class="notice">Sign in with your seller account to view customer requests.</p>';return;}
+    target.innerHTML='<p class="notice">Loading customer requests…</p>';
+    const {data,error}=await client.from("service_requests").select("id,buyer_id,service_title,request_type,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("provider_id",user.id).order("created_at",{ascending:false});
+    if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Seller service requests could not be loaded.");return;}
+    target.innerHTML=data.length?data.map(item=>`<article class="service-request-card" data-service-request-card="${escapeHtml(item.id)}"><div>
+      <h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4><span class="service-request-status status-${escapeHtml(item.status)}">${escapeHtml(serviceStatusLabel(item.status))}</span>
+      <p>${escapeHtml(item.details)}</p><small>Customer location: ${escapeHtml(item.area)}${item.preferred_date?` · Preferred date: ${escapeHtml(item.preferred_date)}`:""} · Received ${new Date(item.created_at).toLocaleString()}</small>
+      ${item.quoted_amount!==null?`<div class="service-request-response"><b>Quotation sent</b>${escapeHtml(item.quote_currency)} ${Number(item.quoted_amount).toFixed(2)}</div>`:""}
+      ${item.provider_response?`<div class="service-request-response"><b>Your response</b>${escapeHtml(item.provider_response)}</div>`:""}
+      ${["new","responded"].includes(item.status)?`<form class="seller-request-actions" data-service-response-form><input type="hidden" name="requestId" value="${escapeHtml(item.id)}"><div class="field"><label>Quotation amount (optional)</label><input name="quotedAmount" type="number" min="0" step="0.01" placeholder="Enter your price"></div><div class="field"><label>Your response to the customer</label><textarea name="providerResponse" maxlength="2000" placeholder="Explain your availability, price or next steps…" required></textarea></div><button class="primary" type="submit">Send response / quotation</button><div class="seller-request-action-row"><button class="outline-button" type="button" data-service-request-action="accepted" data-request-id="${escapeHtml(item.id)}">Accept request</button><button class="outline-button" type="button" data-service-request-action="declined" data-request-id="${escapeHtml(item.id)}">Decline</button></div></form>`:""}
+    </div></article>`).join(""):'<p class="notice">No customer service requests yet. New requests will appear here.</p>';
   }
+  async function loadBuyerServiceRequests(){
+    const target=document.getElementById("buyer-service-request-list");if(!target)return;
+    if(!user){target.innerHTML='<p class="notice">Sign in to see your service requests.</p>';return;}
+    target.innerHTML='<p class="notice">Loading your requests…</p>';
+    const {data,error}=await client.from("service_requests").select("id,service_title,request_type,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("buyer_id",user.id).order("created_at",{ascending:false});
+    if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Your service requests could not be loaded.");return;}
+    target.innerHTML=data.length?data.map(item=>`<article class="service-request-card"><div><h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4>
+      <span class="service-request-status status-${escapeHtml(item.status)}">${escapeHtml(serviceStatusLabel(item.status))}</span><p>${escapeHtml(item.details)}</p>
+      <small>Your area: ${escapeHtml(item.area)}${item.preferred_date?` · Preferred date: ${escapeHtml(item.preferred_date)}`:""} · Sent ${new Date(item.created_at).toLocaleString()}</small>
+      ${item.quoted_amount!==null?`<div class="service-request-response"><b>Provider quotation</b>${escapeHtml(item.quote_currency)} ${Number(item.quoted_amount).toFixed(2)}</div>`:""}
+      ${item.provider_response?`<div class="service-request-response"><b>Provider response</b>${escapeHtml(item.provider_response)}</div>`:""}
+    </div></article>`).join(""):'<p class="notice">You have not sent any service requests yet.</p>';
+  }
+  async function respondToServiceRequest(requestId,{status="responded",quotedAmount=null,providerResponse=""}={}){
+    if(!user){showAuth();throw new Error("Sign in with your seller account first.");}
+    const amount=quotedAmount===null||quotedAmount===""?null:Number(quotedAmount);
+    if(amount!==null&&(!Number.isFinite(amount)||amount<0))throw new Error("Enter a valid quotation amount.");
+    const patch={status,provider_response:String(providerResponse||"").trim()||null,quoted_amount:amount,responded_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+    const {data,error}=await client.from("service_requests").update(patch).eq("id",requestId).eq("provider_id",user.id).select("id").maybeSingle();
+    if(error)throw error;if(!data)throw new Error("This request is not assigned to your seller account.");
+    await Promise.all([loadSellerServiceRequests(),loadBuyerServiceRequests()]);
+    notify(status==="accepted"?"You accepted the service request.":status==="declined"?"You declined the service request.":"Your response was sent to the customer.");
+  }
+  async function loadInbox(){return loadSellerServiceRequests();}
 
   async function loadNotifications() {
     if (!user) {
@@ -803,6 +811,7 @@
       } finally { submit.disabled = false; }
       return;
     }
+    if(event.target.matches("[data-service-response-form]")){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]'),rawAmount=String(values.get("quotedAmount")||"").trim();submit.disabled=true;submit.textContent="Sending…";try{await respondToServiceRequest(String(values.get("requestId")),{status:"responded",quotedAmount:rawAmount===""?null:rawAmount,providerResponse:values.get("providerResponse")});}catch(error){report(error,error.message||"Your response could not be sent.");}finally{submit.disabled=false;submit.textContent="Send response / quotation";}return;}
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
     if(event.target.id==="community-post-form"){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]');submit.disabled=true;try{await submitCommunityPost({title:values.get("title"),category:values.get("category"),body:values.get("body")});form.reset();document.getElementById("community-compose-dialog").close();notify("Your post was submitted and is awaiting review.");}catch(error){report(error,error.message||"Your post could not be submitted.");}finally{submit.disabled=false;}return;}
     if(event.target.id==="community-comment-form"){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]'),postId=String(values.get("postId")||"");submit.disabled=true;try{const comments=await submitCommunityComment({postId,body:values.get("body")});form.reset();document.getElementById("community-comment-post-id").value=postId;renderCommunityComments(comments);notify("Your comment was submitted and is awaiting review.");}catch(error){report(error,error.message||"Your comment could not be submitted.");}finally{submit.disabled=false;}return;}
@@ -915,6 +924,7 @@
         .catch(error => report(error, "Could not update that listing."));
       return;
     }
+    const serviceRequestAction=event.target.closest("[data-service-request-action]");if(serviceRequestAction){stop(event);const nextStatus=serviceRequestAction.dataset.serviceRequestAction;if(!window.confirm(nextStatus==="accepted"?"Accept this service request?":"Decline this service request?"))return;respondToServiceRequest(serviceRequestAction.dataset.requestId,{status:nextStatus,providerResponse:nextStatus==="accepted"?"Your service request has been accepted. The provider will follow up with the next steps.":"The provider is unable to take this service request."}).catch(error=>report(error,error.message||"The request could not be updated."));return;}
     const eventRsvp = event.target.closest("[data-rsvp]");
     if (eventRsvp) {
       stop(event);
