@@ -1038,8 +1038,8 @@
       const sellerPrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
       const displayedPrice=sellerPrice?currencyFormatter.format(buyerPrice(sellerPrice)):item.price;
       const variantFields=[
-        sizes.length?`<div class="field"><label for="product-size">Size</label><select id="product-size" required><option value="">Choose a size</option>${sizes.map(size=>`<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`).join("")}</select></div>`:"",
-        colors.length?`<div class="field"><label for="product-color">Color</label><select id="product-color" required><option value="">Choose a color</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select><small id="product-color-preview-label" class="notice">Choose a color to view its product photo.</small></div>`:""
+        sizeEnabled?(sizes.length?`<div class="field"><label for="product-size">Size</label><select id="product-size" required><option value="">Choose a size</option>${sizes.map(size=>`<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`).join("")}</select></div>`:`<p class="notice">The seller has not added size choices for this item yet.</p>`):"",
+        colors.length?`<div class="field"><label for="product-color">Colour</label><select id="product-color" required><option value="">Choose a colour</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select><small id="product-color-preview-label" class="notice">Choose a colour to view its product photo.</small></div>`:`<p class="notice">No colour options have been provided by the seller for this item.</p>`
       ].filter(Boolean).join("");
       const reviewRows=reviews.slice().reverse().map(review=>{
         const date=Date.parse(review.createdAt),dateLabel=Number.isFinite(date)?new Date(date).toLocaleDateString():"Date unavailable";
@@ -1060,7 +1060,7 @@
         </article>
         <section class="product-reviews">
           <div class="section-head"><div><h3>Rating</h3>${renderProductRatingStars()}</div></div>
-          ${variantFields?`<div class="product-options-panel"><h4>Choose your options</h4><p>Select the colour and size you want before adding this item to your cart.</p><div class="product-option-grid">${variantFields}</div></div>`:""}
+          <div class="product-options-panel"><h4>Choose your options</h4><p>Select from the options provided by the seller before adding this item to your cart.</p><div class="product-option-grid">${variantFields}</div></div>
           ${sizeEnabled?renderSizeChart(item.sizeType,sizes):""}
           <div class="product-review-actions"><button type="button" class="outline-button" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
           <div class="product-review-list">${reviewRows||'<p class="notice">No written reviews yet. Be the first to share your experience.</p>'}</div>
