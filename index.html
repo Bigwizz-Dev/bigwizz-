@@ -140,21 +140,27 @@
     .product-options-panel{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}.product-options-panel h4{margin:0 0 5px;font-size:15px}.product-options-panel>p{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.5}.product-options-panel .product-option-grid{margin-top:8px}.product-review-actions{display:flex;justify-content:flex-end;margin-top:16px}.product-review-actions .outline-button{width:auto}
     .product-detail-actions{display:flex;gap:9px;margin-top:18px}
     .product-detail-actions button{flex:1}
-    .product-reviews,.related-products{margin-top:26px}
-    .product-reviews h3{margin:0 0 12px;font-size:18px}
-    .product-review-list{display:grid;gap:12px}
-    .product-review{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+    .product-reviews{margin-top:28px;padding:24px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
+    .related-products{margin-top:28px}
+    .product-reviews .section-head{align-items:center;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+    .product-reviews h3{margin:0;font-size:21px;letter-spacing:-.55px}
+    .product-reviews .review-intro{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+    .product-reviews .rating-control-label{display:block;margin-top:12px;color:var(--muted);font-size:11px;font-weight:700}
+    .product-review-list{display:grid;gap:11px}
+    .product-review{padding:16px;border:1px solid var(--line);border-radius:15px;background:white;transition:border-color .18s ease}
+    .product-review:hover{border-color:#c8d6c5}
     .product-review-head{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:11px}
-    .review-author{display:flex;align-items:center;gap:9px;color:var(--ink)}
-    .review-avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#eee7f2;color:var(--deep);font-size:10px;font-weight:850}
-    .product-review-comment{margin:10px 0 0 43px;padding:11px 13px;border-radius:4px 13px 13px 13px;background:var(--canvas)}
-    .product-review-stars{display:flex;gap:2px;color:#b77914}
-    .product-review p{margin:7px 0 0;font-size:12px;line-height:1.55}
-    .product-review-stars svg{width:14px;height:14px;fill:currentColor;stroke:currentColor}
+    .review-author{display:flex;align-items:center;gap:10px;color:var(--ink)}
+    .review-avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:#eee7f2;color:var(--deep);font-size:10px;font-weight:850}
+    .product-review-comment{margin:12px 0 0 46px;padding:0;border-radius:0;background:transparent}
+    .product-review-stars{display:flex;gap:3px;color:#a87825}
+    .product-review p{margin:7px 0 0;color:var(--ink);font-size:13px;line-height:1.65}
+    .product-review-stars svg{width:12px;height:12px;fill:currentColor;stroke:currentColor}
+    @media(max-width:600px){.product-reviews{padding:17px}.product-review-comment{margin-left:0}.product-review-head{align-items:flex-start}}
     .review-stars button.rating-pop svg{animation:star-rate-pop .42s cubic-bezier(.2,.8,.25,1) both;animation-delay:var(--star-delay,0ms)}
     @keyframes star-rate-pop{0%{transform:scale(.55) rotate(-18deg)}65%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
     @media(prefers-reduced-motion:reduce){.review-stars button.rating-pop svg{animation:none}}
-    .review-stars{display:flex;gap:5px;margin-top:8px}
+    .review-stars{display:flex;gap:4px;margin-top:7px}
     .review-stars button{padding:3px;border:0;background:transparent;color:var(--muted);font-size:28px;line-height:1}
     .review-stars button[aria-pressed="true"]{color:#b77914}
     .field>.field-label{font-size:12px;font-weight:750}
@@ -290,7 +296,7 @@
     .switch-caret{display:inline-flex;width:14px;height:14px;transition:transform .18s ease}.switch-caret svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
     .account-option-icon{color:var(--green)}.account-option-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .trust-icon svg,.seller-onboarding-mark svg,.notification-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-    .review-stars button{font-size:0}.review-stars button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}.rating svg,.product-review-stars svg{width:14px;height:14px;vertical-align:-2px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
+    .review-stars button{font-size:0}.review-stars button svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}.rating svg,.product-review-stars svg{width:14px;height:14px;vertical-align:-2px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
     .account-option-icon{color:var(--green)}.account-option-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .save svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.review-stars button[aria-pressed="true"] svg{fill:#b77914}.product-review-stars svg{fill:currentColor}
     @media(max-width:700px){.product-review-comment{margin-left:0}.product-review-head{align-items:flex-start}}
@@ -1027,7 +1033,7 @@
           </div>
         </article>
         <section class="product-reviews">
-          <div class="section-head"><div><h3>Rating</h3>${renderProductRatingStars()}</div></div>
+          <div class="section-head"><div><h3>Customer reviews</h3><p class="review-intro">Thoughtful feedback from people who have purchased this item.</p><span class="rating-control-label">Your rating</span>${renderProductRatingStars()}</div></div>
           <div class="product-options-panel"><h4>Choose your options</h4><p>Select from the options provided by the seller before adding this item to your cart.</p><div class="product-option-grid">${variantFields}</div></div>
           ${sizeEnabled?renderSizeChart(item.sizeType,sizes):""}
           <div class="product-review-actions"><button type="button" class="outline-button" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
