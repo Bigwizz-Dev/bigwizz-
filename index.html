@@ -856,7 +856,7 @@
     }
     function seedSampleReviews(){
       Object.entries(sampleReviewsByListing).forEach(([listingId,reviews])=>{
-        if(!Array.isArray(reviewsByListing[listingId])||!reviewsByListing[listingId].length)reviewsByListing[listingId]=reviews;
+        if(!Array.isArray(reviewsByListing[listingId])||!reviewsByListing[listingId].length)reviewsByListing[listingId]=reviews.map(review=>({...review,demo:true}));
       });
     }
     function saveListingReview(listingId,review){
@@ -1273,7 +1273,7 @@
       return `<details class="product-size-chart"><summary>${guide.title}</summary><table class="size-chart-table"><thead><tr>${guide.headers.map(value=>`<th scope="col">${value}</th>`).join("")}<th scope="col">Listing</th></tr></thead><tbody>${guide.rows.map(row=>`<tr>${row.map(value=>`<td>${value}</td>`).join("")}<td>${available.has(row[0].toLowerCase())?"Available":"Not listed"}</td></tr>`).join("")}</tbody></table><p class="notice">Measure your body, foot, or head and compare it with the available sizes shown. Fit can vary by brand; ask the seller if you are between sizes.</p></details>`;
     }
     function renderProductReviewSection(item){
-      const reviews=reviewsByListing[item.id]||[],count=reviews.length,average=count?reviews.reduce((sum,review)=>sum+Number(review.rating||0),0)/count:0;
+      const reviews=reviewsByListing[item.id]||[],realReviews=reviews.filter(review=>!review.demo),count=realReviews.length,average=count?realReviews.reduce((sum,review)=>sum+Number(review.rating||0),0)/count:0;
       const avg=document.querySelector("[data-product-rating-average]"),stars=document.querySelector("[data-product-rating-stars]"),countNode=document.querySelector("[data-product-rating-count]"),list=document.querySelector("[data-product-review-list]");
       if(avg)avg.textContent=count?average.toFixed(1):"—";
       if(stars)stars.textContent=count?"★".repeat(Math.round(average))+"☆".repeat(5-Math.round(average)):"☆☆☆☆☆";
@@ -1295,8 +1295,8 @@
       ].filter(Boolean).join("");
       document.getElementById("product-detail-content").innerHTML=`
         <article class="product-detail">
-          <div class="product-image-frame"><img class="product-detail-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}"></div>
-          <div class="product-image-actions"><div class="product-detail-actions"><button class="primary" type="button" data-add-to-cart="${escapeHtml(item.id)}">Add to cart</button></div></div>
+          <div class="product-media-column"><div class="product-image-frame"><img class="product-detail-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}"></div>
+          <div class="product-image-actions"><div class="product-detail-actions"><button class="primary" type="button" data-add-to-cart="${escapeHtml(item.id)}">Add to cart</button></div></div></div>
           <div class="product-detail-info">
             <div class="seller-line"><span>${escapeHtml(item.seller)}</span></div>
             <h2>${escapeHtml(item.title)}</h2>
@@ -1333,7 +1333,7 @@
       };
       if(!skipRemoteLoad&&window.BIGWIZZ_BACKEND){
         window.BIGWIZZ_BACKEND.loadProductReviews(item.id).then(rows=>{
-          reviewsByListing[item.id]=[...(sampleReviewsByListing[item.id]||[]),...rows];
+          reviewsByListing[item.id]=[...(sampleReviewsByListing[item.id]||[]).map(review=>({...review,demo:true})),...rows];
           if(currentProductId===item.id)renderProductDetails(item.id,true);
         }).catch(error=>console.error("Could not load shared product reviews.",error));
       }
