@@ -924,6 +924,15 @@
       }
       if (pageButton.dataset.page === "seller-studio" || pageButton.dataset.page === "seller-listings" || pageButton.dataset.page === "seller-progress") {
         stop(event);
+        if (!sellerAuthVerified) {
+          activeAccount = "seller";
+          updateAccountState();
+          activatePage("seller-studio");
+          showAuth("signin", "seller");
+          return;
+        }
+        activeAccount = "seller";
+        updateAccountState();
         activatePage(pageButton.dataset.page);
         return;
       }
