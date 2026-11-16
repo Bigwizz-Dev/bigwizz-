@@ -12,7 +12,7 @@
     if (page && sellerWorkspaceMain) sellerWorkspaceMain.appendChild(page);
   });
 
-  const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
+  const currency = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 2 });
   let user = null;
   let profile = null;
   let sellerAvailabilityStatus = "available";
@@ -761,7 +761,7 @@
       const item=match.service_requests||{},schedule=item.scheduled_at?new Date(item.scheduled_at).toLocaleString():"As soon as possible";
       const selected=(match.service_request_selections||[]).some(row=>row.match_id===match.id);
       return `<article class="service-request-card"><div><h4>${escapeHtml(item.service_title||"Service request")} · ${escapeHtml(selected?"Buyer selected you":match.status)}</h4><p>${escapeHtml(item.details||"")}</p><small>${escapeHtml(item.area||"")} · ${escapeHtml(schedule)} · ${escapeHtml(item.service_address||"")}${item.representative_name?" · Contact on arrival: "+escapeHtml(item.representative_name):""}</small>
-      ${match.status==="sent"||match.status==="viewed"?`<form class="service-match-response" data-service-match-response="${match.id}"><input name="quotedAmount" type="number" min="0.01" step="0.01" placeholder="Your quotation" required><input name="currency" value="USD" maxlength="3" aria-label="Currency" required><textarea name="responseNote" placeholder="Explain what is included, availability and any conditions" maxlength="2000"></textarea><button class="primary" type="submit">Send private quotation</button></form>`:match.quoted_amount?`<div class="service-quote-card">Your quotation: <strong>${escapeHtml(match.currency)} ${Number(match.quoted_amount).toLocaleString()}</strong><p>${escapeHtml(match.response_note||"")}</p></div>`:""}</div></article>`;
+      ${match.status==="sent"||match.status==="viewed"?`<form class="service-match-response" data-service-match-response="${match.id}"><input name="quotedAmount" type="number" min="0.01" step="0.01" placeholder="Your quotation" required><input name="currency" value="NGN" maxlength="3" aria-label="Currency" required><textarea name="responseNote" placeholder="Explain what is included, availability and any conditions" maxlength="2000"></textarea><button class="primary" type="submit">Send private quotation</button></form>`:match.quoted_amount?`<div class="service-quote-card">Your quotation: <strong>${escapeHtml(match.currency)} ${Number(match.quoted_amount).toLocaleString()}</strong><p>${escapeHtml(match.response_note||"")}</p></div>`:""}</div></article>`;
     }).join("")}</div>`:'<p class="notice">No nearby service requests yet. New requests from buyers in your service area will appear here.</p>';
     document.getElementById("inbox").innerHTML=`<section class="service-request-section"><h3>Nearby service requests</h3>${requests}</section><p class="notice">Send quotations privately. Buyers compare provider profiles and offers; Bigwizz does not run a public bidding contest.</p>`;
     document.querySelector("#messages .section-head h2").textContent="Seller inbox";
@@ -774,7 +774,7 @@
     if(!Number.isFinite(amount)||amount<=0){notify("Enter a valid quotation.");return;}
     const {error}=await client.from("service_request_matches").update({
       status:"quoted",quoted_amount:Math.round(amount*100)/100,
-      currency:String(values.get("currency")||"USD").toUpperCase(),
+      currency:String(values.get("currency")||"NGN").toUpperCase(),
       response_note:String(values.get("responseNote")||"").trim(),responded_at:new Date().toISOString()
     }).eq("id",form.dataset.serviceMatchResponse).eq("provider_id",user.id);
     if(error){report(error,"Your quotation could not be sent.");return;}
