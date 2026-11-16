@@ -252,9 +252,14 @@
         `${sellerType} · Manage listings, customer orders, and earnings.`;
     }
     if (!accountRoles.includes("seller") && sellerProfileReady) accountRoles.push("seller");
-    // Keep an explicitly authenticated Seller journey selected while its
-    // seller profile/role is being created or loaded.
-    if (!accountRoles.includes(activeAccount) && !(activeAccount === "seller" && sellerAuthVerified)) {
+    // A restored session must recognize an existing seller account without
+    // forcing the seller to sign in again after refreshing the page.
+    if (accountRoles.includes("seller") || sellerProfileReady) sellerAuthVerified = true;
+    // Keep the Seller journey selected while sign-in callbacks race or the
+    // seller profile is being created for an account that already signed in.
+    const sellerJourneyRequested = activeAccount === "seller" &&
+      (sellerAuthVerified || authAudience === "seller");
+    if (!accountRoles.includes(activeAccount) && !sellerJourneyRequested) {
       activeAccount = "buyer";
     }
     updateAccountState();
@@ -683,6 +688,8 @@
       accountRoles = ["buyer"];
       activeAccount = "buyer";
       sellerProfileReady = false;
+      sellerAuthVerified = false;
+      authAudience = "buyer";
       setProfileDisplay("Guest");
       updateMobileNavigation();
       return;
