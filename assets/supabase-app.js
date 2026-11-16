@@ -712,6 +712,11 @@
       sellerProfileReady = false;
       sellerAuthVerified = false;
       authAudience = "buyer";
+      if (sellerWorkspace) sellerWorkspace.hidden = true;
+      const buyerShell = document.querySelector("#marketplace-app > .shell");
+      const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
+      if (buyerShell) buyerShell.hidden = false;
+      if (buyerNav) buyerNav.hidden = false;
       setProfileDisplay("Guest");
       updateMobileNavigation();
       return;
@@ -960,7 +965,7 @@
         showAuth();
         return;
       }
-      if (pageButton.dataset.page === "seller-studio" || pageButton.dataset.page === "seller-listings" || pageButton.dataset.page === "seller-progress") {
+      if (pageButton.dataset.page === "seller-studio" || pageButton.dataset.page === "seller-listings" || pageButton.dataset.page === "seller-progress" || pageButton.dataset.page === "messages") {
         stop(event);
         if (!sellerAuthVerified) {
           activeAccount = "seller";
