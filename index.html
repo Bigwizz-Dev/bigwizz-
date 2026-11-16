@@ -462,7 +462,7 @@
               <div class="field"><label for="seller-listing-category">Category</label><select id="seller-listing-category" name="category" required></select></div>
               <div class="field" id="seller-service-pricing-field" hidden><label for="seller-service-pricing-mode">How should buyers see your service price?</label><select id="seller-service-pricing-mode" name="pricingMode"><option value="fixed">Fixed price — this is the full service price</option><option value="starting">Starting price — final price may change</option><option value="quote">Quotation required — agree the price before booking</option></select><small class="notice">Buyers will see the pricing type clearly on your service card.</small></div>
               <div class="field" id="seller-service-availability-field" hidden><label for="seller-service-availability">Accept nearby service requests?</label><select id="seller-service-availability" name="serviceAvailability"><option value="available">Available — receive nearby requests</option><option value="busy">Busy — pause new requests</option><option value="offline">Offline — do not receive requests</option></select></div>
-              <div class="field"><label id="seller-listing-price-label" for="seller-listing-price">Your price (USD)</label><input id="seller-listing-price" name="price" type="number" min="0.01" step="0.01" placeholder="25.00" required></div>
+              <div class="field"><label id="seller-listing-price-label" for="seller-listing-price">Your price (₦)</label><input id="seller-listing-price" name="price" type="number" min="0.01" step="0.01" placeholder="25.00" required></div>
               <div class="field"><label for="seller-listing-image">Upload a listing photo</label><input id="seller-listing-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="seller-listing-image-note"></div>
             </div>
               <div id="seller-variant-fields" class="seller-listing-form-grid">
@@ -630,7 +630,7 @@
       {icon:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h3"/></svg>',title:"Live event coming up",copy:"Join the small-space styling Q&A and ask a maker your questions.",time:"Yesterday Â· 9:05 AM"}
     ];
     const commissionRate=0.02;
-    const currencyFormatter=new Intl.NumberFormat("en-US",{style:"currency",currency:"USD"});
+    const currencyFormatter=new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:2});
     let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7,selectedReviewRating=0,selectedRatingProductId=null,currentProductId=null;
     let accountRoles=["buyer"],activeAccount=sessionStorage.getItem("bigwizz-active-account")==="seller"?"seller":"buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
     let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true,reviewsByListing={},reviewStorageAvailable=true,productBaseImage="",productColorImages={};
@@ -761,7 +761,7 @@
       document.getElementById("seller-product-sizing-field").hidden=type!=="goods";
       document.getElementById("seller-service-pricing-field").hidden=type!=="service";
       document.getElementById("seller-service-availability-field").hidden=type!=="service";
-      document.getElementById("seller-listing-price-label").textContent=type==="service"?"Service price (USD)":"Your price (USD)";
+      document.getElementById("seller-listing-price-label").textContent=type==="service"?"Service price (₦)":"Your price (₦)";
       const pricingMode=document.getElementById("seller-service-pricing-mode").value;
       document.getElementById("seller-listing-price").required=type!=="service"||pricingMode!=="quote";
       document.getElementById("seller-listing-price").disabled=type==="service"&&pricingMode==="quote";
