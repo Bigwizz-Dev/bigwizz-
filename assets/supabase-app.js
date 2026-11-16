@@ -596,12 +596,12 @@
     if(!user){showAuth();return;}
     const form=event.currentTarget,values=new FormData(form),submit=form.querySelector('[type="submit"]');
     const serviceTitle=String(values.get("service")||"").trim(),listing=services.find(item=>item.title===serviceTitle);
-    const area=String(values.get("area")||"").trim(),details=String(values.get("details")||"").trim();
+    const city=String(values.get("city")||"").trim(),area=String(values.get("area")||"").trim(),details=String(values.get("details")||"").trim();
     if(!listing||!listing.id||!listing.providerId){notify("This service is not connected to a provider account yet. Please choose a published service.");return;}
-    if(!area||!details){notify("Please add your service location and a short description.");return;}
+    if(!city||!area||!details){notify("Please add your city, neighbourhood and a short description.");return;}
     submit.disabled=true;submit.textContent="Sending request…";
     try{
-      const {error}=await client.from("service_requests").insert({buyer_id:user.id,listing_id:listing.id,provider_id:listing.providerId,service_title:serviceTitle,request_type:String(values.get("requestType")),preferred_date:String(values.get("preferredDate")||"")||null,area,details,status:"new"});
+      const {error}=await client.from("service_requests").insert({buyer_id:user.id,listing_id:listing.id,provider_id:listing.providerId,service_title:serviceTitle,request_type:String(values.get("requestType")),preferred_date:String(values.get("preferredDate")||"")||null,city,area,details,status:"new"});
       if(error)throw error;
       form.reset();document.getElementById("service-dialog").close();await loadBuyerServiceRequests();
       notify("Your request was sent to the service provider. Track the response under Orders.");
@@ -637,7 +637,7 @@
     if(!user){target.innerHTML='<p class="notice">Sign in with your seller account to view customer requests.</p>';return;}
     if(!accountRoles.includes("seller")){target.innerHTML='<p class="notice">This workspace is available to approved seller accounts. Switch to your seller account or complete seller setup.</p>';return;}
     target.innerHTML='<p class="notice">Loading customer requests…</p>';
-    const {data,error}=await client.from("service_requests").select("id,buyer_id,service_title,request_type,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("provider_id",user.id).order("created_at",{ascending:false});
+    const {data,error}=await client.from("service_requests").select("id,buyer_id,service_title,request_type,city,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("provider_id",user.id).order("created_at",{ascending:false});
     if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Seller service requests could not be loaded.");return;}
     target.innerHTML=data.length?data.map(item=>`<article class="service-request-card" data-service-request-card="${escapeHtml(item.id)}"><div>
       <h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4><span class="service-request-status status-${escapeHtml(item.status)}">${escapeHtml(serviceStatusLabel(item.status))}</span>
@@ -651,11 +651,11 @@
     const target=document.getElementById("buyer-service-request-list");if(!target)return;
     if(!user){target.innerHTML='<p class="notice">Sign in to see your service requests.</p>';return;}
     target.innerHTML='<p class="notice">Loading your requests…</p>';
-    const {data,error}=await client.from("service_requests").select("id,service_title,request_type,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("buyer_id",user.id).order("created_at",{ascending:false});
+    const {data,error}=await client.from("service_requests").select("id,service_title,request_type,city,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("buyer_id",user.id).order("created_at",{ascending:false});
     if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Your service requests could not be loaded.");return;}
     target.innerHTML=data.length?data.map(item=>`<article class="service-request-card"><div><h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4>
       <span class="service-request-status status-${escapeHtml(item.status)}">${escapeHtml(serviceStatusLabel(item.status))}</span><p>${escapeHtml(item.details)}</p>
-      <small>Your area: ${escapeHtml(item.area)}${item.preferred_date?` · Preferred date: ${escapeHtml(item.preferred_date)}`:""} · Sent ${new Date(item.created_at).toLocaleString()}</small>
+      <small>Your location: ${escapeHtml(item.city||"")} ${item.city&&item.area?" · ":""}${escapeHtml(item.area)}${item.preferred_date?` · Preferred date: ${escapeHtml(item.preferred_date)}`:""} · Sent ${new Date(item.created_at).toLocaleString()}</small>
       ${item.quoted_amount!==null?`<div class="service-request-response"><b>Provider quotation</b>${escapeHtml(item.quote_currency)} ${Number(item.quoted_amount).toFixed(2)}</div>`:""}
       ${item.provider_response?`<div class="service-request-response"><b>Provider response</b>${escapeHtml(item.provider_response)}</div>`:""}
     </div></article>`).join(""):'<p class="notice">You have not sent any service requests yet.</p>';
