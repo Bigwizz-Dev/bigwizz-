@@ -85,16 +85,16 @@
     resetLink.hidden = mode !== "signin";
     backLink.hidden = mode === "signin";
     if (mode === "signup") {
-      title.textContent = authAudience === "seller" ? "Create your Seller account" : "Create your Buyer account";
-      summary.textContent = authAudience === "seller" ? "Create your seller sign-in to continue to Seller Studio." : "Create your buyer sign-in to shop on Bigwizz.";
+      title.textContent = "Create your Buyer account";
+      summary.textContent = "Create your buyer sign-in to shop on Bigwizz.";
       submit.textContent = "Create account";
     } else if (mode === "reset") {
-      title.textContent = authAudience === "seller" ? "Reset Seller password" : "Reset Buyer password";
+      title.textContent = "Reset Buyer password";
       summary.textContent = "We will email you a password reset link.";
       submit.textContent = "Send reset link";
     } else {
-      title.textContent = authAudience === "seller" ? "Sign in to Seller Studio" : "Sign in to your Buyer account";
-      summary.textContent = authAudience === "seller" ? "Use your email and password to open your separate Seller sign-in journey. You can use the same email as your Buyer account." : "Sign in to continue to your Buyer account.";
+      title.textContent = "Sign in to your Buyer account";
+      summary.textContent = "Sign in to continue to your Buyer account.";
       submit.textContent = "Sign in";
     }
   }
@@ -405,66 +405,6 @@
       notify("Saved to your account.");
     }
     updateSavedButtons();
-  }
-
-  async function finalizePendingSellerStudio() {
-    if (!user || !sellerAuthVerified || activeAccount !== "seller") return false;
-    let pending;
-    try {
-      pending = JSON.parse(sessionStorage.getItem("bigwizz-pending-seller-studio") || "null");
-    } catch {
-      sessionStorage.removeItem("bigwizz-pending-seller-studio");
-      throw new Error("Your saved studio details could not be read. Please enter them again.");
-    }
-    if (!pending || !pending.shopName || !pending.sellerType) return false;
-
-    const { error } = await client.from("seller_profiles").upsert({
-      user_id: user.id,
-      shop_name: pending.shopName,
-      seller_type: pending.sellerType
-    }, { onConflict: "user_id" });
-    if (error) throw error;
-
-    sessionStorage.removeItem("bigwizz-pending-seller-studio");
-    await loadAccount();
-    if (!sellerProfileReady) {
-      throw new Error("Your Seller Studio details were submitted but could not be loaded. Please try again.");
-    }
-    activeAccount = "seller";
-    sellerAuthVerified = true;
-    sessionStorage.setItem("bigwizz-active-account", "seller");
-    updateAccountState();
-    activatePage("seller-studio");
-    notify("Seller Studio created successfully. Welcome to your Seller Dashboard.");
-    return true;
-  }
-
-  async function saveSellerProfile(event) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    const form = event.currentTarget;
-    const submit = form.querySelector('button[type="submit"]');
-    if (submit && submit.disabled) return;
-
-    const values = new FormData(form);
-    const shopName = String(values.get("shopName") || "").trim();
-    const sellerTypeValue = String(values.get("sellerType") || "").trim();
-    if (!shopName || !sellerTypeValue) {
-      notify("Enter your shop name and choose a seller type.");
-      return;
-    }
-
-    sessionStorage.setItem("bigwizz-pending-seller-studio", JSON.stringify({
-      shopName,
-      sellerType: sellerTypeValue
-    }));
-    activeAccount = "seller";
-    sellerAuthVerified = false;
-    sessionStorage.setItem("bigwizz-active-account", "seller");
-    updateAccountState();
-    showAuth("signin", "seller");
-    notify("Studio details saved. Sign in and confirm your account to finish creating your Seller Studio.");
   }
 
   async function uploadListingImage(file) {
