@@ -4,20 +4,76 @@
   if (!config || !config.url || !config.publishableKey || !supabaseApi) return;
 
   const client = supabaseApi.createClient(config.url, config.publishableKey);
-  // The Seller workspace owns its pages and navigation, outside the Buyer shell.
-  const sellerWorkspace = document.getElementById("seller-workspace");
-  const sellerWorkspaceMain = document.getElementById("seller-workspace-main");
-  ["seller-studio", "seller-listings", "seller-progress", "messages"].forEach(id => {
-    const page = document.getElementById(id);
-    if (page && sellerWorkspaceMain) sellerWorkspaceMain.appendChild(page);
-  });
-
   const currency = new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 2 });
   let user = null;
   let profile = null;
   let sellerAvailabilityStatus = "available";
   let savedListingIds = new Set();
   let remoteEditingId = null;
+
+  async function loadListingReviews(listingId) {
+    if (!listingId) return [];
+    const { data, error } = await client.from("listing_reviews")
+      .select("id,rating,body,reviewer_name,created_at")
+      .eq("listing_id", listingId).order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data || []).map(row => ({
+      id: row.id, rating: row.rating, text: row.body,
+      reviewer: row.reviewer_name || "Customer", createdAt: row.created_at, demo: false
+    }));
+  }
+
+  async function submitListingReview({ listingId, rating, text, reviewer }) {
+    if (!user) {
+      showAuth();
+      throw new Error("Please sign in to submit a review.");
+    }
+    const { error } = await client.from("listing_reviews").insert({
+      listing_id: listingId,
+      user_id: user.id,
+      rating,
+      body: text,
+      reviewer_name: reviewer || (profile && profile.display_name) || "Customer"
+    });
+    if (error) {
+      if (error.code === "23505") throw new Error("You have already reviewed this listing.");
+      throw error;
+    }
+    const rows = await loadListingReviews(listingId);
+    await loadCatalog();
+    return rows;
+  }
+
+  async function loadCommunityPosts(){
+    const query=client.from("community_posts").select("id,title,category,body,image_url,status,created_at,author_name").order("created_at",{ascending:false});
+    const {data,error}=user?await query.or(`status.eq.published,author_id.eq.${user.id}`):await query.eq("status","published");
+    if(error)throw error;
+    const rows=data||[],ids=rows.map(row=>row.id);let counts=new Map();
+    if(ids.length){const result=await client.from("community_comments").select("post_id").in("post_id",ids).eq("status","published");if(result.error)throw result.error;for(const row of result.data||[])counts.set(row.post_id,(counts.get(row.post_id)||0)+1);}
+    conversations=rows.map(row=>({id:row.id,title:row.title,meta:row.category||"Community",copy:row.body,author:row.author_name||"Community member",status:row.status,commentCount:counts.get(row.id)||0,image:row.image_url||"assets/home-repairs.jpg"}));
+    return conversations;
+  }
+  async function loadCommunityComments(postId){
+    if(!postId)return [];
+    const query=client.from("community_comments").select("id,post_id,body,status,created_at,author_name").eq("post_id",postId).order("created_at",{ascending:true});
+    const {data,error}=user?await query.or(`status.eq.published,author_id.eq.${user.id}`):await query.eq("status","published");
+    if(error)throw error;
+    return (data||[]).map(row=>({id:row.id,body:row.body,status:row.status,author:row.author_name||"Community member",createdAt:row.created_at}));
+  }
+  async function submitCommunityPost({title,category,body}){
+    if(!user){showAuth();throw new Error("Please sign in to start a conversation.");}
+    const cleanTitle=String(title||"").trim(),cleanBody=String(body||"").trim();
+    if(!cleanTitle||cleanTitle.length>160||!cleanBody||cleanBody.length>5000)throw new Error("Add a title and a message before submitting.");
+    const {error}=await client.from("community_posts").insert({author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",title:cleanTitle,category:String(category||"General").slice(0,60),body:cleanBody,status:"pending"});
+    if(error)throw error;await loadCommunityPosts();renderCommunity();
+  }
+  async function submitCommunityComment({postId,body}){
+    if(!user){showAuth();throw new Error("Please sign in to comment.");}
+    const cleanBody=String(body||"").trim();if(!postId||!cleanBody||cleanBody.length>5000)throw new Error("Write a comment before submitting.");
+    const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
+    if(error)throw error;return loadCommunityComments(postId);
+  }
+  window.BIGWIZZ_BACKEND=Object.freeze({loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -49,14 +105,13 @@
     document.getElementById("profile-avatar").textContent = initials(name);
     document.getElementById("account-switch-trigger").setAttribute(
       "aria-label",
-      user ? `Switch account. Current account: ${activeAccount === "seller" ? "Seller" : "Buyer"}` : "Switch account"
+      user ? "Switch account. Current account: Buyer" : "Switch account"
     );
     const authOpen = document.querySelector("[data-auth-open]");
     if (authOpen) {
-      // Keep the Buyer sign-in entry visible while the Seller workspace is active.
-      authOpen.hidden = Boolean(user) && activeAccount !== "seller";
-      authOpen.setAttribute("aria-label", activeAccount === "seller" ? "Buyer sign in" : "Sign in");
-      authOpen.title = activeAccount === "seller" ? "Buyer sign in" : "Sign in";
+      authOpen.hidden = false;
+      authOpen.setAttribute("aria-label", "Buyer sign in");
+      authOpen.title = "Buyer sign in";
     }
     const signOut = document.querySelector("[data-supabase-signout]");
     if (signOut) signOut.hidden = !user;
@@ -68,11 +123,11 @@
 
   let authMode = "signin";
   let authAudience = "buyer";
-  let sellerAuthVerified = false;
 
   function setAuthMode(mode) {
     authMode = mode;
     const nameField = document.getElementById("auth-name-field");
+    const locationFields = document.getElementById("auth-location-fields");
     const roleField = document.getElementById("auth-role-field");
     const passwordField = document.getElementById("auth-password-field");
     const password = document.getElementById("auth-password");
@@ -86,9 +141,10 @@
     const backLink = document.querySelector('[data-auth-mode="signin"]');
     feedback.hidden = true;
     feedback.textContent = "";
-    nameField.hidden = mode !== "signup";
+    if (nameField) nameField.hidden = mode !== "signup";
+    if (locationFields) { locationFields.hidden = mode !== "signup"; locationFields.querySelectorAll("input").forEach(input => { input.required = mode === "signup"; }); }
     roleField.hidden = mode !== "signup";
-    name.required = mode === "signup";
+    if (name) name.required = mode === "signup";
     passwordField.hidden = mode === "reset";
     password.required = mode !== "reset";
     password.autocomplete = mode === "signup" ? "new-password" : "current-password";
@@ -96,29 +152,28 @@
     resetLink.hidden = mode !== "signin";
     backLink.hidden = mode === "signin";
     if (mode === "signup") {
-      title.textContent = authAudience === "seller" ? "Create your Seller account" : "Create your Buyer account";
-      summary.textContent = authAudience === "seller" ? "Create your seller sign-in to continue to Seller Studio." : "Create your buyer sign-in to shop on Bigwizz.";
+      title.textContent = "Create your Buyer account";
+      summary.textContent = "Create your buyer sign-in to shop on Bigwizz.";
       submit.textContent = "Create account";
     } else if (mode === "reset") {
-      title.textContent = authAudience === "seller" ? "Reset Seller password" : "Reset Buyer password";
+      title.textContent = "Reset Buyer password";
       summary.textContent = "We will email you a password reset link.";
       submit.textContent = "Send reset link";
     } else {
-      title.textContent = authAudience === "seller" ? "Sign in to Seller Studio" : "Sign in to your Buyer account";
-      summary.textContent = authAudience === "seller" ? "Use your email and password to open your separate Seller sign-in journey. You can use the same email as your Buyer account." : "Sign in to continue to your Buyer account.";
+      title.textContent = "Sign in to your Buyer account";
+      summary.textContent = "Sign in to continue to your Buyer account.";
       submit.textContent = "Sign in";
     }
   }
 
-  function showAuth(mode = "signin", audience = "buyer") {
-    authAudience = audience;
+  function showAuth(mode = "signin") {
+    authAudience = "buyer";
     const dialog = document.getElementById("auth-dialog");
     if (!dialog) {
       notify("The sign-in window could not be opened.");
       return;
     }
     setAuthMode(mode);
-    if (authAudience === "seller" && mode === "signup") document.getElementById("auth-role").value = "seller";
     if (!dialog.open) dialog.showModal();
   }
 
@@ -135,38 +190,14 @@
   }
 
   function activatePage(page) {
-    const sellerPages = ["seller-studio", "seller-listings", "seller-progress", "messages"];
-    const isSellerPage = sellerPages.includes(page);
-    if (isSellerPage && page !== "seller-studio" && (!user || activeAccount !== "seller" || !sellerAuthVerified)) {
-      notify("Sign in to your Seller account to open the Seller Dashboard.");
-      return;
-    }
-    if (page === "seller-listings" && !sellerProfileReady) {
-      page = "seller-studio";
-      notify("Complete your shop profile before managing listings.");
-    }
-    if (sellerWorkspace) {
-      sellerWorkspace.hidden = !isSellerPage;
-      const buyerShell = document.querySelector("#marketplace-app > .shell");
-      if (buyerShell) buyerShell.hidden = isSellerPage;
-      const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
-      if (buyerNav) buyerNav.hidden = isSellerPage;
-    }
+    if (["seller-studio", "seller-listings", "seller-progress", "messages"].includes(page)) page = "discover";
     document.querySelectorAll(".page").forEach(section => {
       section.classList.toggle("active", section.id === page);
     });
     document.querySelectorAll("[data-page]").forEach(button => {
       button.classList.toggle("active", button.dataset.page === page);
     });
-    if (page === "seller-studio") {
-      const sellerCanOpenDashboard = sellerProfileReady && Boolean(user) &&
-        activeAccount === "seller" && sellerAuthVerified;
-      document.getElementById("seller-onboarding").hidden = sellerCanOpenDashboard;
-      document.getElementById("seller-dashboard").hidden = !sellerCanOpenDashboard;
-    }
-    if (page === "seller-listings") loadMyListings();
     if (page === "cart") loadCart();
-    if (page === "messages") loadInbox();
     if (page === "notifications") loadNotifications();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -184,12 +215,37 @@
   async function loadCatalog() {
     const { data: rows, error } = await client
       .from("listings")
-      .select("id,seller_id,kind,category,title,description,seller_name,price,pricing_mode,image_url,rating,rating_count")
+      .select("id,seller_id,kind,category,title,description,seller_name,price,image_url,rating,rating_count,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (error) {
       report(error, "Marketplace listings could not be loaded from the database.");
       return;
+    }
+    if (rows.length) {
+      const reviewResult = await client.from("listing_reviews")
+        .select("listing_id,rating").in("listing_id", rows.map(row => row.id));
+      if (reviewResult.error) report(reviewResult.error, "Shared listing ratings could not be loaded.");
+      else {
+        const grouped = new Map();
+        (reviewResult.data || []).forEach(review => {
+          const current = grouped.get(review.listing_id) || { count: 0, total: 0 };
+          current.count += 1;
+          current.total += Number(review.rating);
+          grouped.set(review.listing_id, current);
+        });
+        rows.forEach(row => {
+          const added = grouped.get(row.id);
+          if (!added || !added.count) return;
+          const oldCount = Number(row.rating_count || 0);
+          const oldRating = Number(row.rating);
+          const totalCount = oldCount + added.count;
+          row.rating = (oldCount && Number.isFinite(oldRating)
+            ? (oldRating * oldCount + added.total) / totalCount
+            : added.total / added.count);
+          row.rating_count = totalCount;
+        });
+      }
     }
 
     listings = rows.filter(row => row.kind === "goods").map(row => ({
@@ -202,6 +258,7 @@
       image: row.image_url,
       seller: row.seller_name,
       rating: row.rating === null ? "" : Number(row.rating).toFixed(1),
+      ratingCount: Number(row.rating_count || 0),
       detail: row.description
     }));
     services = rows.filter(row => row.kind === "service").map(row => ({
@@ -216,13 +273,14 @@
       pricingMode: row.pricing_mode || "fixed",
       price: row.pricing_mode === "quote" || row.price === null ? "Request a quote" : row.pricing_mode === "starting" ? `From ${currency.format(row.price)} / service` : currency.format(row.price),
       rating: row.rating === null ? "New listing" : Number(row.rating).toFixed(1),
-      provider: row.seller_name
+      ratingCount: Number(row.rating_count || 0),
+      provider: row.seller_name,
+      location: row.seller_profiles && [row.seller_profiles.area,row.seller_profiles.city,row.seller_profiles.state].filter(Boolean).join(", ") || (row.seller_profiles && row.seller_profiles.service_area) || "Location not provided by this service provider", providerCountry:row.seller_profiles?.country||"", providerState:row.seller_profiles?.state||"", providerCity:row.seller_profiles?.city||"", providerArea:row.seller_profiles?.area||"", providerLatitude:row.seller_profiles?.latitude??null, providerLongitude:row.seller_profiles?.longitude??null
     }));
 
     const [eventsResult, postsResult] = await Promise.all([
       client.from("events").select("id,title,host,starts_at").order("starts_at"),
-      client.from("community_posts").select("id,title,category,body,image_url,created_at")
-        .eq("status", "published").order("created_at", { ascending: false })
+      loadCommunityPosts().then(data=>({data,error:null})).catch(error=>({data:null,error}))
     ]);
     if (eventsResult.error) report(eventsResult.error, "Events could not be loaded from the database.");
     else {
@@ -238,17 +296,7 @@
         };
       });
     }
-    if (postsResult.error) report(postsResult.error, "Community posts could not be loaded from the database.");
-    else {
-      conversations = postsResult.data.map(item => ({
-        id: item.id,
-        title: item.title,
-        meta: item.category || "Community",
-        copy: item.body,
-        replies: "View discussion",
-        image: item.image_url || "assets/home-repairs.jpg"
-      }));
-    }
+    if(postsResult.error)report(postsResult.error,"Community posts could not be loaded from the database.");
     renderListings(document.getElementById("search-input").value);
     renderServices(document.getElementById("service-search-input").value);
     renderEvents();
@@ -257,40 +305,25 @@
 
   async function loadAccount() {
     if (!user) return;
-    const [profileResult, rolesResult, sellerResult] = await Promise.all([
-      client.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
-      client.from("user_roles").select("role").eq("user_id", user.id),
-      client.from("seller_profiles").select("shop_name,seller_type,availability_status").eq("user_id", user.id).maybeSingle()
+    const [profileResult, rolesResult] = await Promise.all([
+      client.from("profiles").select("display_name,country,state,city,area").eq("id", user.id).maybeSingle(),
+      client.from("user_roles").select("role").eq("user_id", user.id)
     ]);
     if (profileResult.error) throw profileResult.error;
     if (rolesResult.error) throw rolesResult.error;
-    if (sellerResult.error) throw sellerResult.error;
 
     profile = profileResult.data || { display_name: user.email || "Member" };
+    const metadata = user.user_metadata || {};
+    if (!profileResult.data || (!profile.city && metadata.city)) {
+      const saved = { id:user.id, display_name:profile.display_name || metadata.display_name || user.email || "Member", country:metadata.country || "Nigeria", state:metadata.state || null, city:metadata.city || null, area:metadata.area || null };
+      const savedResult = await client.from("profiles").update({ country:saved.country, state:saved.state, city:saved.city, area:saved.area }).eq("id",user.id).select("display_name,country,state,city,area").single();
+      if (!savedResult.error) profile = savedResult.data;
+    }
+    window.BIGWIZZ_LOCATION_CONTEXT = { source:"saved", country:profile.country||"", state:profile.state||"", city:profile.city||"", area:profile.area||"", latitude:null, longitude:null };
+    if (typeof window.BIGWIZZ_REFRESH_SERVICE_LOCATION === "function") window.BIGWIZZ_REFRESH_SERVICE_LOCATION();
     accountRoles = rolesResult.data.map(item => item.role);
     if (!accountRoles.includes("buyer")) accountRoles.unshift("buyer");
-    sellerProfileReady = Boolean(sellerResult.data);
-    if (sellerResult.data) {
-      sellerShopName = sellerResult.data.shop_name;
-      sellerType = sellerResult.data.seller_type;
-      sellerAvailabilityStatus = sellerResult.data.availability_status || "available";
-      const availabilitySelect = document.getElementById("seller-service-availability");
-      if (availabilitySelect) availabilitySelect.value = sellerAvailabilityStatus;
-      document.getElementById("seller-shop-title").textContent = sellerShopName;
-      document.getElementById("seller-type-label").textContent =
-        `${sellerType} · Manage listings, customer orders, and earnings.`;
-    }
-    if (!accountRoles.includes("seller") && sellerProfileReady) accountRoles.push("seller");
-    // A restored session must recognize an existing seller account without
-    // forcing the seller to sign in again after refreshing the page.
-    if (accountRoles.includes("seller") || sellerProfileReady) sellerAuthVerified = true;
-    // Keep the Seller journey selected while sign-in callbacks race or the
-    // seller profile is being created for an account that already signed in.
-    const sellerJourneyRequested = activeAccount === "seller" &&
-      (sellerAuthVerified || authAudience === "seller");
-    if (!accountRoles.includes(activeAccount) && !sellerJourneyRequested) {
-      activeAccount = "buyer";
-    }
+    activeAccount = "buyer";
     updateAccountState();
     await loadSavedListings();
   }
@@ -467,73 +500,6 @@
     updateSavedButtons();
   }
 
-  async function finalizePendingSellerStudio() {
-    if (!user || !sellerAuthVerified || activeAccount !== "seller") return false;
-    let pending;
-    try {
-      pending = JSON.parse(sessionStorage.getItem("bigwizz-pending-seller-studio") || "null");
-    } catch {
-      sessionStorage.removeItem("bigwizz-pending-seller-studio");
-      throw new Error("Your saved studio details could not be read. Please enter them again.");
-    }
-    if (!pending || !pending.shopName || !pending.sellerType) return false;
-
-    const { error } = await client.from("seller_profiles").upsert({
-      user_id: user.id, shop_name: pending.shopName, seller_type: pending.sellerType,
-      city: pending.city || null, area: pending.area || null, service_area: pending.serviceArea || "",
-      latitude: pending.latitude === null || pending.latitude === "" ? null : Number(pending.latitude),
-      longitude: pending.longitude === null || pending.longitude === "" ? null : Number(pending.longitude),
-      availability_status: pending.availabilityStatus || "available"
-    }, { onConflict: "user_id" });
-    if (error) throw error;
-
-    sessionStorage.removeItem("bigwizz-pending-seller-studio");
-    await loadAccount();
-    if (!sellerProfileReady) {
-      throw new Error("Your Seller Studio details were submitted but could not be loaded. Please try again.");
-    }
-    activeAccount = "seller";
-    sellerAuthVerified = true;
-    sessionStorage.setItem("bigwizz-active-account", "seller");
-    updateAccountState();
-    activatePage("seller-studio");
-    notify("Seller Studio created successfully. Welcome to your Seller Dashboard.");
-    return true;
-  }
-
-  async function saveSellerProfile(event) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    const form = event.currentTarget;
-    const submit = form.querySelector('button[type="submit"]');
-    if (submit && submit.disabled) return;
-
-    const values = new FormData(form);
-    const shopName = String(values.get("shopName") || "").trim();
-    const sellerTypeValue = String(values.get("sellerType") || "").trim();
-    if (!shopName || !sellerTypeValue) {
-      notify("Enter your shop name and choose a seller type.");
-      return;
-    }
-
-    sessionStorage.setItem("bigwizz-pending-seller-studio", JSON.stringify({
-      shopName, sellerType: sellerTypeValue,
-      city: String(values.get("city") || "").trim(),
-      area: String(values.get("area") || "").trim(),
-      serviceArea: String(values.get("serviceArea") || "").trim(),
-      latitude: String(values.get("latitude") || ""),
-      longitude: String(values.get("longitude") || ""),
-      availabilityStatus: String(values.get("availabilityStatus") || "available")
-    }));
-    activeAccount = "seller";
-    sellerAuthVerified = false;
-    sessionStorage.setItem("bigwizz-active-account", "seller");
-    updateAccountState();
-    showAuth("signin", "seller");
-    notify("Studio details saved. Sign in and confirm your account to finish creating your Seller Studio.");
-  }
-
   async function uploadListingImage(file) {
     if (!file) return null;
     if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
@@ -653,79 +619,21 @@
   }
 
   async function submitServiceRequest(event) {
-    event.preventDefault();
-    event.stopImmediatePropagation();
-    if (!user) {
-      showAuth();
-      return;
-    }
-    const form = event.currentTarget;
-    const values = new FormData(form);
-    const serviceTitle = String(values.get("service") || "");
-    const listing = services.find(item => item.title === serviceTitle);
-    const matchingMode = String(values.get("matchingMode") || "direct");
-    if (matchingMode === "direct" && !listing?.providerId) {
-      notify("Choose the nearby-provider option for this service so Bigwizz can find an available professional.");
-      return;
-    }
-    const scheduledAt = String(values.get("scheduledAt") || "");
-    const latitude = values.get("latitude") ? Number(values.get("latitude")) : null;
-    const longitude = values.get("longitude") ? Number(values.get("longitude")) : null;
-    const area = String(values.get("area") || "").trim();
-    const serviceAddress = String(values.get("serviceAddress") || "").trim();
-    const requestRow = {
-      buyer_id:user.id, listing_id:listing?listing.id:null,
-      provider_id:matchingMode==="direct"&&listing?listing.providerId:null,
-      service_title:serviceTitle, request_type:String(values.get("requestType")),
-      preferred_date:scheduledAt?scheduledAt.slice(0,10):null,
-      scheduled_at:scheduledAt?new Date(scheduledAt).toISOString():null,
-      matching_mode:matchingMode, service_address:serviceAddress,
-      representative_name:String(values.get("representativeName")||"").trim()||null,
-      representative_phone:String(values.get("representativePhone")||"").trim()||null,
-      area, details:String(values.get("details")||"").trim(), latitude, longitude
-    };
-    const {data:request,error}=await client.from("service_requests").insert(requestRow).select("id").single();
-    if(error){report(error,"Service request could not be saved.");return;}
-    let directMatchCreated=false;
-    if(matchingMode==="direct"&&listing?.providerId){
-      const {error:matchError}=await client.from("service_request_matches").insert({request_id:request.id,buyer_id:user.id,provider_id:listing.providerId});
-      if(matchError)report(matchError,"Request saved, but the selected provider could not be notified.");
-      else directMatchCreated=true;
-    }
-    if(matchingMode==="nearby"){
-      const {data:providers,error:providerError}=await client.from("seller_profiles")
-        .select("user_id,city,area,latitude,longitude,availability_status").eq("is_public",true).eq("availability_status","available");
-      if(providerError)report(providerError,"Request saved, but nearby providers could not be searched.");
-      else{
-        const {data:providerListings,error:listingError}=await client.from("listings")
-          .select("seller_id,category").eq("kind","service").eq("status","published");
-        if(listingError)report(listingError,"Request saved, but service categories could not be matched.");
-        else{
-          const category=listing&&listing.category;
-          const eligibleIds=new Set(providerListings.filter(item=>!category||item.category===category).map(item=>item.seller_id).filter(Boolean));
-          const radians=value=>value*Math.PI/180;
-          const distanceKm=(aLat,aLon,bLat,bLon)=>{
-            const dLat=radians(bLat-aLat),dLon=radians(bLon-aLon);
-            const value=Math.sin(dLat/2)**2+Math.cos(radians(aLat))*Math.cos(radians(bLat))*Math.sin(dLon/2)**2;
-            return 6371*2*Math.atan2(Math.sqrt(value),Math.sqrt(1-value));
-          };
-          const ranked=providers.filter(item=>item.user_id!==user.id&&eligibleIds.has(item.user_id)).map(item=>{
-            let distance=null;
-            if(latitude!==null&&longitude!==null&&item.latitude!==null&&item.longitude!==null)distance=distanceKm(latitude,longitude,item.latitude,item.longitude);
-            const sameArea=area&&[item.area,item.city].some(value=>value&&area.toLowerCase().includes(String(value).toLowerCase()));
-            return {user_id:item.user_id,distance,sameArea};
-          }).filter(item=>item.distance!==null?item.distance<=25:item.sameArea).sort((x,y)=>(x.distance??999)-(y.distance??999)).slice(0,5);
-          if(ranked.length){
-            const {error:matchError}=await client.from("service_request_matches").insert(ranked.map(item=>({request_id:request.id,buyer_id:user.id,provider_id:item.user_id})));
-            if(matchError)report(matchError,"Request saved, but provider invitations could not be sent.");
-            else notify(`Your request was sent to ${ranked.length} nearby provider${ranked.length===1?"":"s"}.`);
-          }else notify("Your request was saved. No available nearby provider matched this area yet.");
-        }
-      }
-    }else if(directMatchCreated) notify("Your request was sent to the selected provider.");
-    form.reset();
-    document.getElementById("service-dialog").close();
-    await loadBuyerServiceRequests();
+    event.preventDefault();event.stopImmediatePropagation();
+    if(!user){showAuth();return;}
+    const form=event.currentTarget,values=new FormData(form),submit=form.querySelector('[type="submit"]');
+    const serviceTitle=String(values.get("service")||"").trim(),listing=services.find(item=>item.title===serviceTitle);
+    const city=String(values.get("city")||"").trim(),area=String(values.get("area")||"").trim(),details=String(values.get("details")||"").trim();
+    if(!listing||!listing.id||!listing.providerId){notify("This service is not connected to a provider account yet. Please choose a published service.");return;}
+    if(!city||!area||!details){notify("Please add your city, neighbourhood and a short description.");return;}
+    submit.disabled=true;submit.textContent="Sending request…";
+    try{
+      const {error}=await client.from("service_requests").insert({buyer_id:user.id,listing_id:listing.id,provider_id:listing.providerId,service_title:serviceTitle,request_type:String(values.get("requestType")),preferred_date:String(values.get("preferredDate")||"")||null,city,area,latitude:((window.BIGWIZZ_LOCATION_CONTEXT||{}).latitude??null),longitude:((window.BIGWIZZ_LOCATION_CONTEXT||{}).longitude??null),details,status:"new"});
+      if(error)throw error;
+      form.reset();document.getElementById("service-dialog").close();await loadBuyerServiceRequests();
+      notify("Your request was sent to the service provider. Track the response under Orders.");
+    }catch(error){report(error,error.message||"Service request could not be sent.");}
+    finally{submit.disabled=false;submit.innerHTML='Send service request <span aria-hidden="true">→</span>';}
   }
 
   async function submitOrderReport(event) {
@@ -750,54 +658,46 @@
     notify("Order report saved to the database. Support has not been contacted.");
   }
 
-  async function loadInbox() {
-    if(!user){showAuth();return;}
-    if(activeAccount!=="seller")return;
-    const {data,error}=await client.from("service_request_matches")
-      .select("id,status,quoted_amount,currency,response_note,sent_at,service_requests(service_title,request_type,area,details,scheduled_at,service_address,representative_name),service_request_selections(match_id)")
-      .eq("provider_id",user.id).order("sent_at",{ascending:false});
-    if(error){report(error,"Nearby service requests could not be loaded.");return;}
-    const requests=data.length?`<div class="service-request-list">${data.map(match=>{
-      const item=match.service_requests||{},schedule=item.scheduled_at?new Date(item.scheduled_at).toLocaleString():"As soon as possible";
-      const selected=(match.service_request_selections||[]).some(row=>row.match_id===match.id);
-      return `<article class="service-request-card"><div><h4>${escapeHtml(item.service_title||"Service request")} · ${escapeHtml(selected?"Buyer selected you":match.status)}</h4><p>${escapeHtml(item.details||"")}</p><small>${escapeHtml(item.area||"")} · ${escapeHtml(schedule)} · ${escapeHtml(item.service_address||"")}${item.representative_name?" · Contact on arrival: "+escapeHtml(item.representative_name):""}</small>
-      ${match.status==="sent"||match.status==="viewed"?`<form class="service-match-response" data-service-match-response="${match.id}"><input name="quotedAmount" type="number" min="0.01" step="0.01" placeholder="Your quotation" required><input name="currency" value="NGN" maxlength="3" aria-label="Currency" required><textarea name="responseNote" placeholder="Explain what is included, availability and any conditions" maxlength="2000"></textarea><button class="primary" type="submit">Send private quotation</button></form>`:match.quoted_amount?`<div class="service-quote-card">Your quotation: <strong>${escapeHtml(match.currency)} ${Number(match.quoted_amount).toLocaleString()}</strong><p>${escapeHtml(match.response_note||"")}</p></div>`:""}</div></article>`;
-    }).join("")}</div>`:'<p class="notice">No nearby service requests yet. New requests from buyers in your service area will appear here.</p>';
-    document.getElementById("inbox").innerHTML=`<section class="service-request-section"><h3>Nearby service requests</h3>${requests}</section><p class="notice">Send quotations privately. Buyers compare provider profiles and offers; Bigwizz does not run a public bidding contest.</p>`;
-    document.querySelector("#messages .section-head h2").textContent="Seller inbox";
+  function serviceStatusLabel(status){return ({new:"New request",responded:"Quote / response sent",accepted:"Accepted",declined:"Declined",cancelled:"Cancelled"})[status]||status;}
+  async function loadSellerServiceRequests(){
+    const target=document.getElementById("seller-service-request-list");if(!target)return;
+    if(!user){target.innerHTML='<p class="notice">Sign in with your seller account to view customer requests.</p>';return;}
+    if(!accountRoles.includes("seller")){target.innerHTML='<p class="notice">This workspace is available to approved seller accounts. Switch to your seller account or complete seller setup.</p>';return;}
+    target.innerHTML='<p class="notice">Loading customer requests…</p>';
+    const {data,error}=await client.from("service_requests").select("id,buyer_id,service_title,request_type,city,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("provider_id",user.id).order("created_at",{ascending:false});
+    if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Seller service requests could not be loaded.");return;}
+    target.innerHTML=data.length?data.map(item=>`<article class="service-request-card" data-service-request-card="${escapeHtml(item.id)}"><div>
+      <h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4><span class="service-request-status status-${escapeHtml(item.status)}">${escapeHtml(serviceStatusLabel(item.status))}</span>
+      <p>${escapeHtml(item.details)}</p><small>Customer location: ${escapeHtml(item.city||"")} ${item.city&&item.area?" · ":""}${escapeHtml(item.area)}${item.preferred_date?` · Preferred date: ${escapeHtml(item.preferred_date)}`:""} · Received ${new Date(item.created_at).toLocaleString()}</small>
+      ${item.quoted_amount!==null?`<div class="service-request-response"><b>Quotation sent</b>${escapeHtml(item.quote_currency)} ${Number(item.quoted_amount).toFixed(2)}</div>`:""}
+      ${item.provider_response?`<div class="service-request-response"><b>Your response</b>${escapeHtml(item.provider_response)}</div>`:""}
+      ${["new","responded"].includes(item.status)?`<form class="seller-request-actions" data-service-response-form><input type="hidden" name="requestId" value="${escapeHtml(item.id)}"><div class="field"><label>Quotation amount (optional)</label><input name="quotedAmount" type="number" min="0" step="0.01" placeholder="Enter your price"></div><div class="field"><label>Your response to the customer</label><textarea name="providerResponse" maxlength="2000" placeholder="Explain your availability, price or next steps…" required></textarea></div><button class="primary" type="submit">Send response / quotation</button><div class="seller-request-action-row"><button class="outline-button" type="button" data-service-request-action="accepted" data-request-id="${escapeHtml(item.id)}">Accept request</button><button class="outline-button" type="button" data-service-request-action="declined" data-request-id="${escapeHtml(item.id)}">Decline</button></div></form>`:""}
+    </div></article>`).join(""):'<p class="notice">No customer service requests yet. New requests will appear here.</p>';
   }
-
-  async function respondToServiceMatch(event) {
-    event.preventDefault();event.stopImmediatePropagation();
-    if(!user){showAuth();return;}
-    const form=event.currentTarget,values=new FormData(form),amount=Number(values.get("quotedAmount"));
-    if(!Number.isFinite(amount)||amount<=0){notify("Enter a valid quotation.");return;}
-    const {error}=await client.from("service_request_matches").update({
-      status:"quoted",quoted_amount:Math.round(amount*100)/100,
-      currency:String(values.get("currency")||"NGN").toUpperCase(),
-      response_note:String(values.get("responseNote")||"").trim(),responded_at:new Date().toISOString()
-    }).eq("id",form.dataset.serviceMatchResponse).eq("provider_id",user.id);
-    if(error){report(error,"Your quotation could not be sent.");return;}
-    notify("Your private quotation was sent to the buyer.");await loadInbox();
+  async function loadBuyerServiceRequests(){
+    const target=document.getElementById("buyer-service-request-list");if(!target)return;
+    if(!user){target.innerHTML='<p class="notice">Sign in to see your service requests.</p>';return;}
+    target.innerHTML='<p class="notice">Loading your requests…</p>';
+    const {data,error}=await client.from("service_requests").select("id,service_title,request_type,city,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("buyer_id",user.id).order("created_at",{ascending:false});
+    if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Your service requests could not be loaded.");return;}
+    target.innerHTML=data.length?data.map(item=>`<article class="service-request-card"><div><h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4>
+      <span class="service-request-status status-${escapeHtml(item.status)}">${escapeHtml(serviceStatusLabel(item.status))}</span><p>${escapeHtml(item.details)}</p>
+      <small>Your location: ${escapeHtml(item.city||"")} ${item.city&&item.area?" · ":""}${escapeHtml(item.area)}${item.preferred_date?` · Preferred date: ${escapeHtml(item.preferred_date)}`:""} · Sent ${new Date(item.created_at).toLocaleString()}</small>
+      ${item.quoted_amount!==null?`<div class="service-request-response"><b>Provider quotation</b>${escapeHtml(item.quote_currency)} ${Number(item.quoted_amount).toFixed(2)}</div>`:""}
+      ${item.provider_response?`<div class="service-request-response"><b>Provider response</b>${escapeHtml(item.provider_response)}</div>`:""}
+    </div></article>`).join(""):'<p class="notice">You have not sent any service requests yet.</p>';
   }
-
-  async function loadBuyerServiceRequests() {
-    const panel=document.getElementById("buyer-service-request-panel"),list=document.getElementById("buyer-service-request-list");
-    if(!panel||!list||!user){if(panel)panel.hidden=true;return;}
-    const {data,error}=await client.from("service_requests")
-      .select("id,service_title,area,details,scheduled_at,created_at,service_request_matches(id,provider_id,status,quoted_amount,currency,response_note,seller_profiles(shop_name)),service_request_selections(match_id,provider_id)")
-      .eq("buyer_id",user.id).order("created_at",{ascending:false}).limit(10);
-    if(error){report(error,"Your service requests could not be loaded.");return;}
-    panel.hidden=false;
-    list.innerHTML=data.length?data.map(request=>{
-      const selected=(request.service_request_selections||[])[0];
-      const offers=(request.service_request_matches||[]).map(match=>{
-        const shop=Array.isArray(match.seller_profiles)?match.seller_profiles[0]:match.seller_profiles,isSelected=selected&&selected.match_id===match.id;
-        return `<article class="service-quote-card"><strong>${escapeHtml(shop?.shop_name||"Nearby provider")}</strong><p>${match.quoted_amount?`Quotation: ${escapeHtml(match.currency)} ${Number(match.quoted_amount).toLocaleString()}`:"Waiting for provider response"}</p><small>${escapeHtml(match.response_note||match.status)}</small>${isSelected?'<p><strong>Selected provider.</strong> Secure checkout will appear once Bigwizz payment processing is connected.</p>':match.status==="quoted"&&!selected?`<button class="primary" type="button" data-select-service-match="${match.id}" data-request-id="${request.id}" data-provider-id="${match.provider_id}">Choose this provider</button>`:""}</article>`;
-      }).join("");
-      return `<article class="service-request-card"><div><h4>${escapeHtml(request.service_title)}</h4><p>${escapeHtml(request.details)}</p><small>${escapeHtml(request.area)} · ${request.scheduled_at?new Date(request.scheduled_at).toLocaleString():"As soon as possible"}</small>${offers||'<p class="notice">Waiting for provider responses.</p>'}</div></article>`;
-    }).join(""):'<p class="notice">You have not sent a service request yet.</p>';
+  async function respondToServiceRequest(requestId,{status="responded",quotedAmount=null,providerResponse=""}={}){
+    if(!user){showAuth();throw new Error("Sign in with your seller account first.");}
+    const amount=quotedAmount===null||quotedAmount===""?null:Number(quotedAmount);
+    if(amount!==null&&(!Number.isFinite(amount)||amount<0))throw new Error("Enter a valid quotation amount.");
+    const patch={status,provider_response:String(providerResponse||"").trim()||null,quoted_amount:amount,responded_at:new Date().toISOString(),updated_at:new Date().toISOString()};
+    const {data,error}=await client.from("service_requests").update(patch).eq("id",requestId).eq("provider_id",user.id).select("id").maybeSingle();
+    if(error)throw error;if(!data)throw new Error("This request is not assigned to your seller account.");
+    await Promise.all([loadSellerServiceRequests(),loadBuyerServiceRequests()]);
+    notify(status==="accepted"?"You accepted the service request.":status==="declined"?"You declined the service request.":"Your response was sent to the customer.");
   }
+  async function loadInbox(){return loadSellerServiceRequests();}
 
   async function loadNotifications() {
     if (!user) {
@@ -820,16 +720,10 @@
     if (!user) {
       profile = null;
       accountRoles = ["buyer"];
-      const hasPendingSellerStudio = Boolean(sessionStorage.getItem("bigwizz-pending-seller-studio"));
-      activeAccount = hasPendingSellerStudio ? "seller" : "buyer";
-      sellerProfileReady = false;
-      sellerAuthVerified = false;
-      authAudience = hasPendingSellerStudio ? "seller" : "buyer";
-      if (sellerWorkspace) sellerWorkspace.hidden = true;
-      const buyerShell = document.querySelector("#marketplace-app > .shell");
-      const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
-      if (buyerShell) buyerShell.hidden = false;
-      if (buyerNav) buyerNav.hidden = false;
+      activeAccount = "buyer";
+      authAudience = "buyer";
+      sessionStorage.removeItem("bigwizz-active-account");
+      sessionStorage.removeItem("bigwizz-pending-seller-studio");
       setProfileDisplay("Guest");
       updateMobileNavigation();
       return;
@@ -838,15 +732,8 @@
       await loadAccount();
       showApp();
       await loadCatalog();
-      if (activeAccount !== "seller") await loadBuyerServiceRequests();
-      if (activeAccount === "seller" && sessionStorage.getItem("bigwizz-pending-seller-studio")) {
-        sellerAuthVerified = true;
-        await finalizePendingSellerStudio();
-      } else if (activeAccount === "seller" && sellerAuthVerified) {
-        activatePage("seller-studio");
-      } else if (!document.querySelector(".page.active")) {
-        activatePage("discover");
-      }
+      activeAccount = "buyer";
+      if (!document.querySelector(".page.active")) activatePage("discover");
       notify("Signed in. Your account data is shared across devices.");
     } catch (error) {
       report(error, "Account details could not be loaded.");
@@ -865,6 +752,7 @@
       const email = document.getElementById("auth-email").value.trim();
       const password = document.getElementById("auth-password").value;
       const displayName = document.getElementById("auth-name").value.trim();
+      const registrationLocation = { country: document.getElementById("auth-country")?.value.trim() || "Nigeria", state: document.getElementById("auth-state")?.value.trim() || "", city: document.getElementById("auth-city")?.value.trim() || "", area: document.getElementById("auth-area")?.value.trim() || "" };
       const accountType = document.getElementById("auth-role").value;
       submit.disabled = true;
       submit.textContent = "Please wait…";
@@ -875,26 +763,14 @@
             email,
             password,
             options: {
-              data: { display_name: displayName, account_type: accountType },
+              data: { display_name: displayName, account_type: accountType, country: registrationLocation.country, state: registrationLocation.state, city: registrationLocation.city, area: registrationLocation.area },
               emailRedirectTo: window.location.origin + window.location.pathname
             }
           });
           if (result.error) throw result.error;
           if (result.data.session) {
             document.getElementById("auth-dialog").close();
-            if (authAudience === "seller") {
-              sellerAuthVerified = true;
-              activeAccount = "seller";
-              await handleSession(result.data.user);
-              activeAccount = "seller";
-              updateAccountState();
-              activatePage("seller-studio");
-              notify(sellerProfileReady
-                ? "Seller account created. Opening Seller Studio."
-                : "Seller account created. Complete your shop profile in Seller Studio.");
-            } else {
-              notify("Your Buyer account has been created.");
-            }
+            notify("Your Buyer account has been created.");
           } else {
             showAuthFeedback("Account created. Check your email for a confirmation link, then return here to sign in.");
           }
@@ -908,19 +784,7 @@
           result = await client.auth.signInWithPassword({ email, password });
           if (result.error) throw result.error;
           document.getElementById("auth-dialog").close();
-          if (authAudience === "seller") {
-            sellerAuthVerified = true;
-            activeAccount = "seller";
-            await handleSession(result.data.user);
-            activeAccount = "seller";
-            updateAccountState();
-            activatePage("seller-studio");
-            notify(sellerProfileReady
-              ? "Seller sign-in successful. Opening Seller Studio."
-              : "Seller sign-in successful. Complete your shop profile in Seller Studio.");
-          } else {
-            notify("You are signed in to your Buyer account.");
-          }
+          notify("You are signed in to your Buyer account.");
         }
       } catch (error) {
         showAuthFeedback(error.message || "Authentication failed. Please try again.", true);
@@ -931,11 +795,55 @@
       }
       return;
     }
-    if (event.target.id === "seller-setup-form") return saveSellerProfile(event);
-    if (event.target.id === "seller-listing-form") return saveSellerListing(event);
+    if (event.target.id === "item-review-form") {
+      stop(event);
+      const form = event.target;
+      const values = new FormData(form);
+      const listingId = String(values.get("listingId") || "");
+      const rating = Number(window.BIGWIZZ_PRODUCT_SELECTED_RATING || 0);
+      const body = String(values.get("review") || "").trim();
+      const reviewer = String(values.get("reviewer") || "").trim();
+      if (!rating) { notify("Choose a star rating before posting."); return; }
+      if (!body) { notify("Write a review before posting."); return; }
+      const submit = form.querySelector('[type="submit"]');
+      submit.disabled = true;
+      try {
+        const rows = await submitListingReview({ listingId, rating, text: body, reviewer });
+        document.getElementById("review-dialog").close();
+        form.reset();
+        if (typeof window.BIGWIZZ_PRODUCT_REVIEWS_UPDATED === "function") window.BIGWIZZ_PRODUCT_REVIEWS_UPDATED(rows);
+        notify("Your review is now shared with other customers.");
+      } catch (error) {
+        report(error, error.message || "Your product review could not be saved.");
+      } finally { submit.disabled = false; }
+      return;
+    }
+    if (event.target.id === "service-review-form") {
+      stop(event);
+      const form = event.target;
+      const submit = form.querySelector('[type="submit"]');
+      const values = new FormData(form);
+      const rating = Number(form.dataset.selectedRating || 0);
+      const listingId = form.dataset.listingId;
+      const reviewer = String(values.get("reviewer") || "").trim();
+      const body = String(values.get("review") || "").trim();
+      if (!rating) { notify("Please select a star rating."); return; }
+      if (!reviewer || !body) { notify("Please enter your name and review."); return; }
+      if (!listingId) { notify("This listing is not connected to the review database yet."); return; }
+      submit.disabled = true;
+      try {
+        const rows = await submitListingReview({ listingId, rating, text: body, reviewer });
+        if (typeof window.BIGWIZZ_RENDER_SERVICE_REVIEWS === "function") window.BIGWIZZ_RENDER_SERVICE_REVIEWS(rows);
+        notify("Your review is now shared with other customers.");
+      } catch (error) {
+        report(error, error.message || "Your review could not be saved.");
+      } finally { submit.disabled = false; }
+      return;
+    }
+    if(event.target.matches("[data-service-response-form]")){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]'),rawAmount=String(values.get("quotedAmount")||"").trim();submit.disabled=true;submit.textContent="Sending…";try{await respondToServiceRequest(String(values.get("requestId")),{status:"responded",quotedAmount:rawAmount===""?null:rawAmount,providerResponse:values.get("providerResponse")});}catch(error){report(error,error.message||"Your response could not be sent.");}finally{submit.disabled=false;submit.textContent="Send response / quotation";}return;}
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
-    if (event.target.matches("[data-service-match-response]")) return respondToServiceMatch(event);
-    if (event.target.matches("[data-service-match-response]")) return respondToServiceMatch(event);
+    if(event.target.id==="community-post-form"){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]');submit.disabled=true;try{await submitCommunityPost({title:values.get("title"),category:values.get("category"),body:values.get("body")});form.reset();document.getElementById("community-compose-dialog").close();notify("Your post was submitted and is awaiting review.");}catch(error){report(error,error.message||"Your post could not be submitted.");}finally{submit.disabled=false;}return;}
+    if(event.target.id==="community-comment-form"){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]'),postId=String(values.get("postId")||"");submit.disabled=true;try{const comments=await submitCommunityComment({postId,body:values.get("body")});form.reset();document.getElementById("community-comment-post-id").value=postId;renderCommunityComments(comments);notify("Your comment was submitted and is awaiting review.");}catch(error){report(error,error.message||"Your comment could not be submitted.");}finally{submit.disabled=false;}return;}
     if (event.target.id === "issue-form") return submitOrderReport(event);
     if (event.target.id === "search-form") {
       stop(event);
@@ -953,9 +861,8 @@
     if (authOpen) {
       stop(event);
       activeAccount = "buyer";
-      sellerAuthVerified = false;
       updateAccountState();
-      showAuth("signin", "buyer");
+      showAuth("signin");
       return;
     }
     const authClose = event.target.closest("[data-auth-close]");
@@ -976,7 +883,6 @@
     const signOut = event.target.closest("[data-supabase-signout]");
     if (signOut) {
       stop(event);
-      sellerAuthVerified = false;
       sessionStorage.removeItem("bigwizz-active-account");
       client.auth.signOut().then(({ error }) => {
         if (error) report(error, "Could not sign out.");
@@ -989,22 +895,12 @@
     }
     const accountChoice = event.target.closest("[data-account-option]");
     if (accountChoice) {
-      if (accountChoice.dataset.accountOption === "seller") {
-        stop(event);
-        activeAccount = "seller";
-        sellerAuthVerified = false;
-        sessionStorage.setItem("bigwizz-active-account", "seller");
-        updateAccountState();
-        activatePage("seller-studio");
-        return;
-      }
       if (!user) return;
       stop(event);
-      sellerAuthVerified = false;
       activeAccount = "buyer";
       sessionStorage.setItem("bigwizz-active-account", "buyer");
       updateAccountState();
-      activatePage(activeAccount === "seller" ? "seller-studio" : "discover");
+      activatePage("discover");
       return;
     }
     const category = event.target.closest("[data-category]");
@@ -1057,6 +953,7 @@
         .catch(error => report(error, "Could not update that listing."));
       return;
     }
+    const serviceRequestAction=event.target.closest("[data-service-request-action]");if(serviceRequestAction){stop(event);const nextStatus=serviceRequestAction.dataset.serviceRequestAction;if(!window.confirm(nextStatus==="accepted"?"Accept this service request?":"Decline this service request?"))return;respondToServiceRequest(serviceRequestAction.dataset.requestId,{status:nextStatus,providerResponse:nextStatus==="accepted"?"Your service request has been accepted. The provider will follow up with the next steps.":"The provider is unable to take this service request."}).catch(error=>report(error,error.message||"The request could not be updated."));return;}
     const eventRsvp = event.target.closest("[data-rsvp]");
     if (eventRsvp) {
       stop(event);
@@ -1077,29 +974,14 @@
       return;
     }
     const pageButton = event.target.closest("[data-page]");
-    if (pageButton && ["seller-studio", "seller-listings", "seller-progress", "cart", "messages", "notifications"].includes(pageButton.dataset.page)) {
-      if (!user && pageButton.dataset.page !== "seller-studio") {
+    if (pageButton && ["cart", "notifications"].includes(pageButton.dataset.page)) {
+      if (!user) {
         stop(event);
         showAuth();
         return;
       }
-      if (pageButton.dataset.page === "seller-studio" || pageButton.dataset.page === "seller-listings" || pageButton.dataset.page === "seller-progress" || pageButton.dataset.page === "messages") {
-        stop(event);
-        if (!sellerAuthVerified) {
-          activeAccount = "seller";
-          updateAccountState();
-          activatePage("seller-studio");
-          showAuth("signin", "seller");
-          return;
-        }
-        activeAccount = "seller";
-        updateAccountState();
-        activatePage(pageButton.dataset.page);
-        return;
-      }
       window.setTimeout(() => {
         if (pageButton.dataset.page === "cart") loadCart();
-        if (pageButton.dataset.page === "messages") loadInbox();
         if (pageButton.dataset.page === "notifications") loadNotifications();
       }, 0);
     }
@@ -1125,6 +1007,12 @@
   client.auth.onAuthStateChange((_event, session) => {
     window.setTimeout(() => handleSession(session && session.user), 0);
   });
+  client.channel("bigwizz-community-live")
+    .on("postgres_changes",{event:"*",schema:"public",table:"community_posts"},async()=>{try{await loadCommunityPosts();renderCommunity();}catch(error){console.error("Community live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"community_comments"},async()=>{try{await loadCommunityPosts();renderCommunity();const postId=document.getElementById("community-comment-post-id")?.value;if(postId&&document.getElementById("community-thread-dialog")?.open)renderCommunityComments(await loadCommunityComments(postId));}catch(error){console.error("Community comment live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"service_requests"},async payload=>{try{if(!user)return;const row=payload.new||payload.old;if(row?.buyer_id===user.id)await loadBuyerServiceRequests();if(row?.provider_id===user.id)await loadSellerServiceRequests();}catch(error){console.error("Service request live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"notifications"},async payload=>{try{if(user&&(payload.new||payload.old)?.user_id===user.id&&document.getElementById("notifications")?.classList.contains("active"))await loadNotifications();}catch(error){console.error("Notification live refresh failed.",error);}})
+    .subscribe();
   client.auth.getSession().then(({ data, error }) => {
     if (error) report(error, "Could not check the current sign-in session.");
     else handleSession(data.session && data.session.user);

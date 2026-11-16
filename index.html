@@ -14,7 +14,107 @@
     .section{margin-top:37px}.section-head{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:17px}.section-head h2{margin:0;font-size:22px;letter-spacing:-.65px}.section-head p{margin:5px 0 0;color:var(--muted);font-size:13px}.text-button{border:0;background:transparent;color:var(--green);padding:7px 0;font-weight:800}.category-row{display:grid;grid-template-columns:repeat(6,1fr);gap:13px}.category{border:1px solid var(--line);border-radius:16px;padding:17px 14px;background:white;text-align:left;transition:.18s ease}.category:hover,.category.selected{border-color:#93bd55;transform:translateY(-2px);box-shadow:var(--shadow)}.category-image{width:42px;height:42px;display:block;border-radius:13px;object-fit:cover;background:#f3f5ef}.category strong{display:block;margin-top:13px;font-size:13px}.category small{color:var(--muted);display:block;margin-top:4px;font-size:11px}
     .content-grid{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:22px;align-items:start}.listing-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}.listing{overflow:hidden;background:white;border:1px solid var(--line);border-radius:17px;transition:.2s ease;cursor:pointer}.listing:hover{transform:translateY(-3px);box-shadow:var(--shadow)}.listing-photo{height:155px;position:relative;overflow:hidden;background:#e8eee1}.listing-photo img{width:100%;height:100%;display:block;object-fit:cover;transition:transform .35s ease}.listing:hover .listing-photo img{transform:scale(1.04)}.listing:nth-child(3n+2) .listing-photo{background:#f4e5d8}.listing:nth-child(3n) .listing-photo{background:#e3eaf0}.tag{position:absolute;z-index:1;left:11px;top:11px;padding:5px 8px;background:white;border-radius:99px;color:var(--green);font-size:9px;font-weight:850}.save{position:absolute;z-index:1;right:10px;top:9px;width:30px;height:30px;border:0;border-radius:50%;background:white;color:#68736b;font-size:17px}.save.saved{color:#e06752}.listing-body{padding:13px}.listing-title{display:flex;justify-content:space-between;gap:8px;align-items:start}.listing-title h3{margin:0;font-size:13px;line-height:1.4}.price{color:var(--deep);font-size:14px;font-weight:850;white-space:nowrap}.seller-line{display:flex;justify-content:space-between;gap:6px;align-items:center;margin-top:11px;color:var(--muted);font-size:10px}.seller-name{display:flex;align-items:center;gap:6px}.mini-avatar{width:21px;height:21px;display:grid;place-items:center;background:#ece5d7;color:#695443;border-radius:50%;font-size:9px;font-weight:800}.verified{display:inline-flex;width:15px;height:15px;align-items:center;justify-content:center;color:var(--green)}.verified svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.inline-status-icon{display:inline-block;width:15px;height:15px;margin-left:4px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.rating{color:#96702d;font-weight:750;white-space:nowrap}
     .side-stack{display:grid;gap:14px}.side-card{padding:19px;border:1px solid var(--line);border-radius:17px;background:white}.side-card h3{margin:0;font-size:15px;letter-spacing:-.3px}.side-card p{color:var(--muted);font-size:12px;line-height:1.55;margin:8px 0 13px}.trust-card{background:#edf4e9;border:0}.trust-icon,.service-icon{width:42px;height:42px;display:grid;place-items:center;margin-bottom:13px;background:white;border-radius:13px;font-size:20px}.outline-button{width:100%;border:1px solid #dfe5da;border-radius:10px;padding:10px;background:white;color:var(--green);font-size:12px;font-weight:800}.message-card{border:0;background:#fbf0e9}.message-row{display:flex;gap:9px;align-items:center;margin-top:13px}.message-row div:last-child{min-width:0;flex:1}.message-row b{display:block;font-size:11px}.message-row small{display:block;overflow:hidden;color:var(--muted);font-size:10px;white-space:nowrap;text-overflow:ellipsis}.pill{float:right;padding:3px 6px;border-radius:99px;background:#ff866a;color:white;font-size:9px;font-weight:850}
-    .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.service-card{padding:17px;border:1px solid var(--line);background:white;border-radius:17px}.service-image{width:100%;height:125px;display:block;margin-bottom:14px;border-radius:12px;object-fit:cover;background:#f1eaf4}.service-top{display:flex;justify-content:space-between;align-items:start}.service-card h3{margin:14px 0 5px;font-size:14px}.service-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.5;min-height:34px}.service-foot{display:flex;justify-content:space-between;align-items:center;gap:5px;margin-top:15px;padding-top:12px;border-top:1px solid var(--line);font-size:11px}.service-foot b{color:var(--deep);white-space:nowrap}.event-list,.community-list{display:grid;gap:12px}.event-card,.community-card{display:flex;gap:16px;align-items:center;padding:17px;border:1px solid var(--line);border-radius:16px;background:white}.community-image{width:48px;height:48px;flex:0 0 48px;border-radius:12px;object-fit:cover;background:#f1eaf4}.event-date{flex:0 0 55px;padding:10px 5px;border-radius:12px;background:#eff4e8;text-align:center;color:var(--green);font-weight:850}.event-date small{display:block;font-size:9px;text-transform:uppercase}.event-card h3,.community-card h3{margin:0;font-size:14px}.event-card p,.community-card p{margin:5px 0 0;color:var(--muted);font-size:11px}.event-card .outline-button{width:auto;margin-left:auto;padding:9px 13px}
+    .service-role-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:20px 0}.service-role-button{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink);text-align:left}.service-role-button strong{font-size:13px}.service-role-button small{color:var(--muted);font-size:11px}.service-role-button.active{border-color:var(--deep);background:#eee7f2}.service-provider-placeholder{max-width:760px;margin:18px auto}.service-provider-panel{padding:30px;border:1px solid var(--line);border-radius:18px;background:var(--paper)}.service-provider-kicker{color:var(--green);font-size:10px;font-weight:850;letter-spacing:1.5px}.service-provider-panel h3{margin:12px 0 8px;font-size:22px}.service-provider-panel>p{color:var(--muted);font-size:13px;line-height:1.65}.service-provider-next{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:20px 0}.service-provider-next span{padding:13px 8px;border:1px solid var(--line);border-radius:11px;text-align:center;font-size:11px;font-weight:750}@media(max-width:520px){.service-role-switch{grid-template-columns:1fr}.service-provider-panel{padding:20px}.service-provider-next{grid-template-columns:1fr}}\n    .service-write-review{margin-top:24px;padding:20px;border:1px solid var(--line);border-radius:17px;background:var(--canvas)}
+    .service-provider-rating{display:flex;align-items:center;gap:9px;margin:14px 0 18px;padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:var(--canvas)}
+    .service-provider-rating-stars{color:#e0a52e;font-size:19px;letter-spacing:1px;white-space:nowrap}
+    .service-provider-rating-stars span{color:#d9d3dc}
+    .service-provider-rating strong{font-size:15px;color:var(--ink)}
+    .service-provider-rating small{font-size:12px;color:var(--muted)}
+    .service-quick-rating{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin:-7px 0 18px;padding:10px 13px;border-radius:12px;background:var(--canvas);border:1px solid var(--line)}
+    .service-quick-rating>span{font-size:12px;font-weight:800;color:var(--ink)}
+    .service-quick-rating-stars{display:flex;gap:5px}
+    .service-quick-rating-stars button{padding:0 2px;border:0;background:transparent;color:#cfc8d2;font-size:27px;line-height:1;cursor:pointer;transition:transform .18s ease,color .18s ease}
+    .service-quick-rating-stars button[aria-pressed="true"]{color:#e4a72d}
+    .service-quick-rating-stars button.is-animating{animation:service-star-pop .48s cubic-bezier(.2,.8,.2,1)}
+    @keyframes service-star-pop{0%{transform:scale(.65) rotate(-18deg)}45%{transform:scale(1.4) rotate(8deg)}75%{transform:scale(.92)}100%{transform:scale(1)}}
+    .service-quick-rating small{font-size:11px;color:var(--muted)}
+    @media(prefers-reduced-motion:reduce){.service-quick-rating-stars button{transition:none}.service-quick-rating-stars button.is-animating{animation:none}}
+    .service-write-review-prompt{display:flex;align-items:center;justify-content:space-between;gap:14px}
+    .service-write-review-prompt h3{margin:0 0 5px;font-size:16px}
+    .service-write-review-prompt p{margin:0;color:var(--muted);font-size:12px}
+    .service-review-open{flex:0 0 auto;min-height:42px;padding:0 16px;border:0;border-radius:11px;background:var(--deep);color:#fff;font-size:12px;font-weight:850}
+    html[data-theme="dark"] .service-review-open{background:var(--lime);color:#34203f}
+    .service-review-dialog{width:min(520px,calc(100% - 28px));max-width:520px;max-height:min(88vh,760px);padding:0;border:1px solid var(--line);border-radius:20px;background:var(--paper);color:var(--ink);box-shadow:0 24px 80px #17102055}
+    .service-review-dialog::backdrop{background:#17102099;backdrop-filter:blur(3px)}
+    .service-review-dialog .dialog-content{padding:22px;overflow:auto;max-height:min(88vh,760px)}
+    .service-review-dialog .dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px}
+    .service-review-dialog .dialog-head h2{margin:0 0 5px;font-size:20px}
+    .service-review-dialog .dialog-head p{margin:0;color:var(--muted);font-size:12px}
+    .service-review-dialog .dialog-close{width:36px;height:36px;border:0;border-radius:50%;background:var(--canvas);color:var(--ink);font-size:23px}
+    .service-review-dialog #service-review-form{display:grid;gap:9px}
+    .service-review-dialog #service-review-form label,.service-review-dialog .service-review-form-label{color:var(--ink);font-size:12px;font-weight:800}
+    .service-review-dialog #service-review-form input,.service-review-dialog #service-review-form textarea{width:100%;min-height:45px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px}
+    .service-review-dialog #service-review-form textarea{min-height:110px;resize:vertical;line-height:1.5}
+    .service-review-dialog .service-review-rating-picker{display:flex;gap:7px;margin:0 0 6px}
+    .service-review-dialog .service-review-rating-picker button{width:39px;height:39px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:#c9c2cc;font-size:25px;line-height:1}
+    .service-review-dialog .service-review-rating-picker button[aria-pressed="true"]{color:#e4a72d;border-color:#e4a72d;background:#fff9e9}
+
+    .service-review-dialog .service-review-submit{width:100%}
+    @media(max-width:480px){.service-write-review-prompt{align-items:flex-start;flex-direction:column}.service-review-open{width:100%}}
+    .service-write-review h3{margin:0 0 6px;font-size:18px}
+    .service-write-review>p{margin:0 0 16px;color:var(--muted);font-size:12px}
+    .service-write-review form{display:grid;gap:9px}
+    .service-write-review label,.service-review-form-label{color:var(--ink);font-size:12px;font-weight:800}
+    .service-write-review input,.service-write-review textarea{width:100%;min-height:45px;padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px}
+    .service-write-review textarea{min-height:100px;resize:vertical;line-height:1.5}
+    .service-review-rating-picker{display:flex;gap:7px;margin:0 0 6px}
+    .service-review-rating-picker button{width:39px;height:39px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:#c9c2cc;font-size:25px;line-height:1}
+    .service-review-rating-picker button[aria-pressed="true"]{color:#e4a72d;border-color:#e4a72d;background:#fff9e9}
+    .service-review-submit{min-height:47px;margin-top:5px;border:0;border-radius:11px;background:var(--deep);color:#fff;font-size:13px;font-weight:850}
+    html[data-theme="dark"] .service-review-submit{background:var(--lime);color:#34203f}
+    .service-provider-location{display:block;margin-top:7px;color:var(--muted);font-size:12px}
+    .service-reviews-section{margin-top:25px;padding-top:22px;border-top:1px solid var(--line)}
+    .service-reviews-section h3{margin:0 0 14px;font-size:18px}
+    .service-rating-summary{display:flex;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:15px}
+    .service-rating-summary>strong{font-size:25px;letter-spacing:-.5px}
+    .service-rating-stars,.service-review-stars{color:#e4a72d;font-size:17px;letter-spacing:1px}
+    .service-rating-stars>span,.service-review-stars>span{color:#d9d4dc}
+    .service-rating-summary small{color:var(--muted);font-size:11px}
+    .service-review-list{display:grid;gap:10px}
+    .service-review-item{padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--paper)}
+    .service-review-top{display:flex;justify-content:space-between;align-items:center;gap:10px}
+    .service-review-top strong{font-size:12px}
+    .service-review-stars{font-size:13px;white-space:nowrap}
+    .service-review-item p{margin:8px 0;color:var(--ink);font-size:12px;line-height:1.6}
+    .service-review-item small,.service-review-disclaimer{color:var(--muted);font-size:10px}
+    .service-review-disclaimer{margin:12px 0 0;line-height:1.5}
+    .service-detail-kicker{display:block;margin-bottom:7px;color:var(--green);font-size:10px;font-weight:850;letter-spacing:1.5px}
+    .service-detail-layout{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(250px,.8fr);gap:22px;align-items:start}
+    .service-detail-main,.service-detail-aside{padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--paper);box-shadow:var(--shadow)}
+    .service-detail-image{display:block;width:100%;max-height:340px;aspect-ratio:16/9;object-fit:cover;border-radius:15px;background:#eee7f2}
+    .service-detail-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin:18px 0 10px;color:var(--muted);font-size:12px}
+    .service-detail-main h3{margin:8px 0;font-size:clamp(23px,4vw,30px);letter-spacing:-.6px}
+    .service-detail-description{color:var(--muted);font-size:14px;line-height:1.75}
+    .service-detail-provider{padding:15px;margin-top:18px;border-radius:13px;background:var(--canvas)}
+    .service-detail-provider strong{display:block;margin-bottom:5px}
+    .service-detail-provider span{color:var(--muted);font-size:12px}
+    .service-detail-aside h3{margin:0 0 8px;font-size:17px}
+    .service-detail-price{display:block;margin:12px 0 18px;color:var(--ink);font-size:21px;font-weight:900}
+    .service-request-inline{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:14px 0 18px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--canvas)}
+    .service-request-inline .service-detail-price{margin:0;font-size:clamp(18px,4vw,23px);font-weight:900}
+    .service-request-inline .service-detail-request{flex:0 0 auto;min-width:150px}
+    @media(max-width:420px){.service-request-inline{gap:10px;padding:12px}.service-request-inline .service-detail-request{min-width:0;padding-inline:12px}}
+    .service-request-compact{display:flex;flex-direction:column;gap:16px}
+    .service-request-compact .service-detail-price{margin:0}
+    .service-detail-request{width:100%;min-height:49px;border:0;border-radius:12px;background:var(--deep);color:white;font-size:14px;font-weight:850}
+    .service-detail-aside .notice{margin-top:13px;font-size:11px;line-height:1.55}
+    html[data-theme="dark"] .service-detail-request{background:var(--lime);color:#34203f}
+    @media(max-width:700px){.service-detail-layout{grid-template-columns:1fr}.service-detail-main,.service-detail-aside{padding:17px}}
+    .service-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px}.service-card{padding:17px;border:1px solid var(--line);background:white;border-radius:17px}.service-image{width:100%;height:125px;display:block;margin-bottom:14px;border-radius:12px;object-fit:cover;background:#f1eaf4}.service-top{display:flex;justify-content:space-between;align-items:start}.service-card h3{margin:14px 0 5px;font-size:14px}.service-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.5;min-height:34px}.service-foot{display:flex;justify-content:space-between;align-items:center;gap:5px;margin-top:15px;padding-top:12px;border-top:1px solid var(--line);font-size:11px}.service-foot b{color:var(--deep);white-space:nowrap}.event-list,.community-list{display:grid;gap:12px}.event-card,.community-card{display:flex;gap:16px;align-items:center;padding:17px;border:1px solid var(--line);border-radius:16px;background:white}.community-dialog{width:min(620px,calc(100% - 28px));max-width:620px;max-height:88vh;padding:0;border:1px solid var(--line);border-radius:20px;background:var(--paper);color:var(--ink);box-shadow:0 24px 80px #17102055}
+    .community-dialog::backdrop{background:#17102099;backdrop-filter:blur(3px)}
+    .community-dialog .dialog-content{padding:22px;overflow:auto;max-height:88vh}
+    .community-dialog .dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+    .community-dialog .dialog-head h2{margin:0 0 5px;font-size:20px}
+    .community-dialog .dialog-head p{margin:0;color:var(--muted);font-size:12px}
+    .community-dialog .dialog-close{width:36px;height:36px;border:0;border-radius:50%;background:var(--canvas);color:var(--ink);font-size:23px}
+    .community-dialog .field textarea{min-height:100px;resize:vertical}
+    .community-dialog .dialog-submit{width:100%;margin-top:14px}
+    .community-post-author,.community-post-status{font-size:11px;color:var(--muted)}
+    .community-post-status{display:inline-block;margin-top:8px;padding:4px 8px;border-radius:20px;background:var(--canvas)}
+    .community-comments{display:grid;gap:10px;margin:18px 0}
+    .community-comment{padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--canvas)}
+    .community-comment b{font-size:12px}.community-comment p{margin:6px 0 0;font-size:13px;line-height:1.5;color:var(--ink)}
+    .community-image{width:48px;height:48px;flex:0 0 48px;border-radius:12px;object-fit:cover;background:#f1eaf4}.event-date{flex:0 0 55px;padding:10px 5px;border-radius:12px;background:#eff4e8;text-align:center;color:var(--green);font-weight:850}.event-date small{display:block;font-size:9px;text-transform:uppercase}.event-card h3,.community-card h3{margin:0;font-size:14px}.event-card p,.community-card p{margin:5px 0 0;color:var(--muted);font-size:11px}.event-card .outline-button{width:auto;margin-left:auto;padding:9px 13px}
     .issue-wrap{max-width:720px;padding:28px;border:1px solid var(--line);border-radius:18px;background:white}.issue-wrap h3{margin:0;font-size:18px}.issue-wrap>p{color:var(--muted);font-size:13px;line-height:1.6}    .field{display:grid;gap:7px;margin-top:17px}.field label{font-size:12px;font-weight:750}.field input,.field select,.field textarea{width:100%;min-height:43px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink)}.field textarea{min-height:88px;resize:vertical}.offering-group{min-width:0;padding:14px;border:1px solid var(--line);border-radius:12px}.offering-group legend{padding:0 6px;font-size:12px;font-weight:750}.offering-group .field{margin-top:8px}.issue-wrap .primary{margin-top:18px;background:var(--green);color:white}.notice{margin-top:13px;color:var(--muted);font-size:11px}.empty{grid-column:1/-1;padding:38px;border:1px dashed #cbd4c8;border-radius:16px;background:white;color:var(--muted);text-align:center}.toast{position:fixed;z-index:10;right:24px;bottom:24px;max-width:min(390px,calc(100vw - 32px));padding:13px 17px;border-radius:13px;background:var(--deep);color:white;box-shadow:var(--shadow);font-size:13px;opacity:0;transform:translateY(10px);pointer-events:none;transition:.2s ease}.toast.show{opacity:1;transform:translateY(0)}.mobile-nav{display:none}.footer{margin-top:42px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:11px}
     @media(max-width:1020px){.shell{padding:0 25px 40px}.topnav{gap:16px;margin-left:10px}.content-grid{grid-template-columns:minmax(0,1fr) 265px}.listing-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.category-row{grid-template-columns:repeat(3,1fr)}}
     @media(max-width:700px){.shell{padding:0 16px 87px}.topbar{height:66px}.topnav,.profile{display:none}.brand{font-size:19px}.top-actions{gap:7px}.hero{grid-template-columns:1fr;min-height:auto}.hero-copy{padding:32px 22px 18px}.hero h1{font-size:40px;letter-spacing:-1.7px}.hero p{font-size:13px}.searchbar{margin-top:19px}.searchbar button{padding:11px 13px}.hero-art{min-height:210px}.hero-art:before{width:230px;height:230px;right:16%;top:-5px}.hero-art:after{width:170px;height:170px;right:25%;top:25px}.art-main{width:137px;height:158px;top:19px;right:33%;padding:8px}.product-hero-image{height:99px}.art-main strong{margin-top:6px;font-size:10px}.art-main span{font-size:9px}.art-note{right:7%;bottom:28px;padding:10px 12px}.art-badge{left:7%;bottom:32px;padding:9px 10px;font-size:9px}.section{margin-top:29px}.section-head h2{font-size:19px}.category-row{display:flex;overflow:auto;margin-right:-16px;padding:0 16px 6px 0;scrollbar-width:none}.category{min-width:137px}.content-grid{grid-template-columns:1fr}.side-stack{grid-template-columns:repeat(2,1fr)}.listing-grid,.service-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.listing-photo{height:126px}.service-image{height:100px}.listing-body{padding:10px}.listing-title h3{font-size:11px}.price{font-size:12px}.seller-line{font-size:9px}.side-card{padding:15px}.event-card,.community-card{gap:11px;padding:13px}.event-card .outline-button{padding:8px;font-size:10px}.issue-wrap{padding:20px}.mobile-nav{position:fixed;z-index:5;right:0;bottom:0;left:0;display:flex;justify-content:space-around;padding:9px 8px max(9px,env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fffffff5;backdrop-filter:blur(12px)}.mobile-nav button{display:grid;justify-items:center;gap:3px;padding:4px 10px;font-size:9px}.mobile-nav span:first-child{font-size:17px}.footer{margin-top:30px}}
@@ -32,7 +132,11 @@
     .listing-photo{background:#eee7f2}
     .listing:nth-child(3n+2) .listing-photo{background:#f3e8db}
     .listing:nth-child(3n) .listing-photo{background:#e8e4ef}
-    .service-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}
+    .service-workspace-link{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:0 0 12px;color:var(--muted);font-size:11px}
+    .service-workspace-link .outline-button{width:auto;padding:9px 12px}
+    @media(max-width:520px){.service-workspace-link{justify-content:space-between;gap:8px}.service-workspace-link .outline-button{font-size:11px}}
+
+    .service-location-bar{display:flex;align-items:center;justify-content:space-between;gap:14px;margin:18px 0 12px;padding:14px 16px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}.service-location-copy{display:grid;gap:4px}.service-location-copy strong{font-size:13px}.service-location-copy span{color:var(--muted);font-size:11px}.service-location-bar button{width:auto;flex:0 0 auto}.auth-location-field{display:grid;gap:7px}.auth-location-field label{margin-top:5px;font-size:12px;font-weight:750}.auth-location-field input{width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}@media(max-width:520px){.service-location-bar{align-items:flex-start;flex-direction:column}.service-location-bar button{width:100%}}
     .service-search{flex:1 1 270px;display:flex;gap:8px;padding:6px;border:1px solid var(--line);border-radius:13px;background:white}
     .service-search input{flex:1;min-width:0;padding:8px 11px;border:0;outline:0;background:transparent;color:var(--ink)}
     .service-search button{border:0;border-radius:9px;padding:9px 14px;background:var(--deep);color:white;font-weight:750}
@@ -49,6 +153,33 @@
     dialog{width:min(520px,calc(100vw - 28px));max-height:90vh;padding:0;border:1px solid var(--line);border-radius:20px;background:var(--paper);color:var(--ink);box-shadow:0 24px 80px #1b102c55}
     dialog::backdrop{background:#21152fb3;backdrop-filter:blur(3px)}
     .dialog-content{padding:24px}
+    #service-dialog{width:min(560px,calc(100vw - 24px));max-height:min(92vh,860px);overflow:auto;border:0;border-radius:24px;background:var(--paper);box-shadow:0 28px 90px #1b102c66}
+    #service-dialog::backdrop{background:#1b102ccc;backdrop-filter:blur(6px)}
+    #service-dialog .service-request-content{padding:0}
+    #service-dialog .service-request-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:26px 26px 22px;background:linear-gradient(135deg,#f1e8f5 0%,#f8f3fa 62%,#edf2e9 100%);border-bottom:1px solid var(--line)}
+    #service-dialog .service-request-eyebrow{display:inline-block;margin-bottom:9px;color:#765684;font-size:9px;font-weight:900;letter-spacing:1.7px}
+    #service-dialog .service-request-heading h2{margin:0;color:#30213a;font-size:clamp(22px,5vw,27px);line-height:1.15;letter-spacing:-.8px}
+    #service-dialog .service-request-heading p{margin:9px 0 0;color:#716477;font-size:12px;line-height:1.55}
+    #service-dialog .service-request-close{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid #e1d5e7;border-radius:50%;background:#fff;color:#4a3455}
+    #service-dialog .service-request-close svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+    #service-dialog .service-request-form{display:grid;gap:17px;padding:23px 26px 25px}
+    #service-dialog .service-request-field{display:grid;gap:8px;min-width:0}
+    #service-dialog .service-request-field label{color:var(--ink);font-size:12px;font-weight:800}
+    #service-dialog .service-request-field label span{margin-left:5px;color:var(--muted);font-size:10px;font-weight:500}
+    #service-dialog .service-request-field input,#service-dialog .service-request-field select,#service-dialog .service-request-field textarea{width:100%;min-height:49px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px;outline:none;transition:border-color .18s,box-shadow .18s}
+    #service-dialog .service-request-field textarea{min-height:112px;resize:vertical;line-height:1.5}
+    #service-dialog .service-request-field input:focus,#service-dialog .service-request-field select:focus,#service-dialog .service-request-field textarea:focus{border-color:#9475a2;box-shadow:0 0 0 3px #9475a21c}
+    #service-dialog .service-request-submit{display:flex;justify-content:center;align-items:center;gap:10px;min-height:52px;margin-top:2px;border:0;border-radius:13px;background:var(--deep);color:#fff;font-size:14px;font-weight:850}
+    #service-dialog .service-request-submit span{font-size:19px;line-height:1}
+    #service-dialog .service-request-note{margin: -5px 0 0;color:var(--muted);font-size:10px;line-height:1.5;text-align:center}
+    html[data-theme="dark"] #service-dialog .service-request-header{background:linear-gradient(135deg,#382b41,#2a2331)}
+    html[data-theme="dark"] #service-dialog .service-request-heading h2{color:var(--ink)}
+    html[data-theme="dark"] #service-dialog .service-request-heading p{color:var(--muted)}
+    html[data-theme="dark"] #service-dialog .service-request-eyebrow{color:#d4b8e3}
+    html[data-theme="dark"] #service-dialog .service-request-close{border-color:var(--line);background:#44374b;color:var(--ink)}
+    html[data-theme="dark"] #service-dialog .service-request-submit{background:var(--lime);color:#34203f}
+    @media(max-width:520px){#service-dialog{width:calc(100vw - 20px);max-height:92vh;border-radius:20px}#service-dialog .service-request-header{padding:22px 19px 18px}#service-dialog .service-request-form{gap:15px;padding:19px 19px 22px}}
+
     .dialog-head{display:flex;justify-content:space-between;align-items:start;gap:16px}
     .dialog-head h2{margin:0;font-size:21px}
     .dialog-head p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
@@ -140,21 +271,27 @@
     .product-options-panel{margin-top:18px;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}.product-options-panel h4{margin:0 0 5px;font-size:15px}.product-options-panel>p{margin:0 0 10px;color:var(--muted);font-size:12px;line-height:1.5}.product-options-panel .product-option-grid{margin-top:8px}.product-review-actions{display:flex;justify-content:flex-end;margin-top:16px}.product-review-actions .outline-button{width:auto}
     .product-detail-actions{display:flex;gap:9px;margin-top:18px}
     .product-detail-actions button{flex:1}
-    .product-reviews,.related-products{margin-top:26px}
-    .product-reviews h3{margin:0 0 12px;font-size:18px}
-    .product-review-list{display:grid;gap:12px}
-    .product-review{padding:14px;border:1px solid var(--line);border-radius:14px;background:var(--paper)}
+    .product-reviews{margin-top:28px;padding:24px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
+    .related-products{margin-top:28px}
+    .product-reviews .section-head{align-items:center;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+    .product-reviews h3{margin:0;font-size:21px;letter-spacing:-.55px}
+    .product-reviews .review-intro{margin:6px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
+    .product-reviews .rating-control-label{display:block;margin-top:12px;color:var(--muted);font-size:11px;font-weight:700}
+    .product-review-list{display:grid;gap:11px}
+    .product-review{padding:16px;border:1px solid var(--line);border-radius:15px;background:white;transition:border-color .18s ease}
+    .product-review:hover{border-color:#c8d6c5}
     .product-review-head{display:flex;justify-content:space-between;align-items:center;gap:12px;color:var(--muted);font-size:11px}
-    .review-author{display:flex;align-items:center;gap:9px;color:var(--ink)}
-    .review-avatar{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#eee7f2;color:var(--deep);font-size:10px;font-weight:850}
-    .product-review-comment{margin:10px 0 0 43px;padding:11px 13px;border-radius:4px 13px 13px 13px;background:var(--canvas)}
-    .product-review-stars{display:flex;gap:2px;color:#b77914}
-    .product-review p{margin:7px 0 0;font-size:12px;line-height:1.55}
-    .product-review-stars svg{width:14px;height:14px;fill:currentColor;stroke:currentColor}
+    .review-author{display:flex;align-items:center;gap:10px;color:var(--ink)}
+    .review-avatar{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:#eee7f2;color:var(--deep);font-size:10px;font-weight:850}
+    .product-review-comment{margin:12px 0 0 46px;padding:0;border-radius:0;background:transparent}
+    .product-review-stars{display:flex;gap:3px;color:#a87825}
+    .product-review p{margin:7px 0 0;color:var(--ink);font-size:13px;line-height:1.65}
+    .product-review-stars svg{width:12px;height:12px;fill:currentColor;stroke:currentColor}
+    @media(max-width:600px){.product-reviews{padding:17px}.product-review-comment{margin-left:0}.product-review-head{align-items:flex-start}}
     .review-stars button.rating-pop svg{animation:star-rate-pop .42s cubic-bezier(.2,.8,.25,1) both;animation-delay:var(--star-delay,0ms)}
     @keyframes star-rate-pop{0%{transform:scale(.55) rotate(-18deg)}65%{transform:scale(1.25) rotate(8deg)}100%{transform:scale(1) rotate(0)}}
     @media(prefers-reduced-motion:reduce){.review-stars button.rating-pop svg{animation:none}}
-    .review-stars{display:flex;gap:5px;margin-top:8px}
+    .review-stars{display:flex;gap:4px;margin-top:7px}
     .review-stars button{padding:3px;border:0;background:transparent;color:var(--muted);font-size:28px;line-height:1}
     .review-stars button[aria-pressed="true"]{color:#b77914}
     .field>.field-label{font-size:12px;font-weight:750}
@@ -229,6 +366,23 @@
     .notification-card h3{margin:1px 0 5px;font-size:13px}
     .notification-card p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
     .notification-card small{display:block;margin-top:7px;color:var(--muted);font-size:10px}
+    .buyer-service-tracking{margin:0 0 22px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--paper)}
+    .service-request-status{display:inline-flex;align-items:center;padding:4px 9px;border-radius:99px;background:var(--canvas);color:var(--deep);font-size:10px;font-weight:850;text-transform:capitalize}
+    .service-request-status.status-accepted{background:#e8f3e8;color:#28603b}
+    .service-request-status.status-declined{background:#fbeaea;color:#9a3434}
+    .service-request-status.status-responded{background:#fff3d8;color:#815a13}
+    .service-request-response{margin-top:10px;padding:11px 12px;border-radius:11px;background:var(--canvas);font-size:12px;line-height:1.55}
+    .service-request-response b{display:block;margin-bottom:4px}
+    .seller-request-actions{display:grid;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+    .seller-request-actions .field{margin:0}
+    .seller-request-actions textarea{width:100%;min-height:76px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:12px}
+    .seller-request-actions input{width:100%;min-height:42px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font:inherit;font-size:12px}
+    .seller-request-action-row{display:flex;gap:8px;flex-wrap:wrap}
+    .seller-request-action-row button{flex:1;min-width:110px}
+    .service-request-card{align-items:flex-start}
+    .service-request-card>div{min-width:0;flex:1}
+    .service-request-card .service-request-status{margin-top:6px}
+    @media(max-width:520px){.seller-request-action-row{flex-direction:column}.seller-request-action-row button{width:100%}}
     .service-request-section,.seller-message-section{margin-bottom:20px}
     .service-request-section>h3,.seller-message-section>h3{margin:0 0 11px;font-size:15px}
     .service-request-list{display:grid;gap:10px}
@@ -297,7 +451,7 @@
     .switch-caret{display:inline-flex;width:14px;height:14px;transition:transform .18s ease}.switch-caret svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
     .account-option-icon{color:var(--green)}.account-option-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .trust-icon svg,.seller-onboarding-mark svg,.notification-icon svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-    .review-stars button{font-size:0}.review-stars button svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}.rating svg,.product-review-stars svg{width:14px;height:14px;vertical-align:-2px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
+    .review-stars button{font-size:0}.review-stars button svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}.rating svg,.product-review-stars svg{width:14px;height:14px;vertical-align:-2px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linejoin:round}
     .account-option-icon{color:var(--green)}.account-option-icon svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
     .save svg{width:17px;height:17px;display:block;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.review-stars button[aria-pressed="true"] svg{fill:#b77914}.product-review-stars svg{fill:currentColor}
     @media(max-width:700px){.product-review-comment{margin-left:0}.product-review-head{align-items:flex-start}}
@@ -356,8 +510,6 @@
           </button>
           <div class="account-menu" id="account-switch-menu" hidden>
             <button type="button" data-account-option="buyer" aria-pressed="true"><span class="account-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10 12 3l9 7v10H3zM9 20v-6h6v6"/></svg></span><span><b>Buyer account</b><small>Discover goods and manage purchases</small></span><span class="account-check" id="buyer-account-check"></span></button>
-            <button type="button" data-account-option="seller" aria-pressed="false"><span class="account-option-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 10h18l-2-6H5zM5 10v10h14V10M9 20v-6h6v6"/></svg></span><span><b>Seller account</b><small id="seller-account-description">Set up your shop or services</small></span><span class="account-check" id="seller-account-check"></span></button>
-            <p>One sign-in can include both buyer and seller accounts.</p>
           </div>
         </div>
       </div>
@@ -391,8 +543,9 @@
         <div id="product-detail-content"></div>
       </section>
       <section id="services" class="page">
-        <div class="section-head"><div><h2>Services for your home, work & daily life</h2><p>Find a professional, compare the details, then send a clear request.</p></div></div>
-        <div class="service-intro"><strong>Dedicated service space</strong><br>Explore and request services here. Purchases and â€œordered vs. receivedâ€ reports are managed separately in <strong>Orders</strong>.</div>
+        <div id="service-buyer-interface">
+
+        <div class="service-location-bar" id="service-location-bar"><div class="service-location-copy"><strong id="service-location-title">Find services near you</strong><span id="service-location-caption">Sign in to use your saved location, or choose a temporary GPS location.</span></div><button type="button" class="outline-button" id="service-use-gps">⌖ Use my current location</button></div>
         <div class="service-toolbar">
           <form class="service-search" id="service-search-form"><input id="service-search-input" type="search" placeholder="Search a service or provider" aria-label="Search services"><button type="submit">Search</button></form>
           <div class="service-filters" aria-label="Filter services">
@@ -400,88 +553,41 @@
           </div>
         </div>
         <div class="service-grid" id="service-grid"></div>
-        <section class="section" id="buyer-service-request-panel" hidden><div class="section-head"><div><h2>Your service requests</h2><p>Review provider responses and choose who you want to book.</p></div></div><div class="service-request-list" id="buyer-service-request-list"></div></section>
+        </div>
+        <section id="service-provider-placeholder" class="service-provider-placeholder" hidden>
+          <div class="service-provider-panel">
+            <span class="service-provider-kicker">BIGWIZZ SELLER STUDIO</span>
+            <h3>Your service requests</h3>
+            <p>Review customer requests, send a quotation or response, and update the customer when you can take the job.</p>
+            <div id="seller-service-request-list" class="service-request-list"><p class="notice">Loading your requests…</p></div>
+            <button type="button" class="outline-button" data-service-role="buyer">Back to finding services</button>
+          </div>
+        </section>
       </section>
-      <section id="community" class="page"><div class="section-head"><div><h2>Community conversations</h2><p>Ask for recommendations, share ideas, and learn from your local community.</p></div><button class="primary" id="new-post">ï¼‹ Start a conversation</button></div><div class="community-list" id="community-list"></div></section>
+      <section id="service-details" class="page">
+        <div class="section-head service-detail-nav"><div><span class="service-detail-kicker">BIGWIZZ SERVICES</span><h2>Service details</h2><p>Explore the provider and decide what you need before sending a request.</p></div><button class="outline-button" type="button" style="width:auto" data-page="services">← Back to services</button></div>
+        <div id="service-detail-content"></div>
+      </section>
+      <section id="community" class="page"><div class="section-head"><div><h2>Community conversations</h2><p>Ask for recommendations, share ideas, and learn from your local community.</p></div><button class="primary" id="new-post">＋ Start a conversation</button></div><div class="community-list" id="community-list"></div></section>
+  <dialog class="community-dialog" id="community-compose-dialog"><div class="dialog-content">
+    <div class="dialog-head"><div><h2>Start a conversation</h2><p>Share a question, recommendation or idea with the Bigwizz community.</p></div><button type="button" class="dialog-close" data-close-community-dialog aria-label="Close">×</button></div>
+    <form id="community-post-form"><div class="field"><label for="community-post-title">Title</label><input id="community-post-title" name="title" maxlength="160" placeholder="What would you like to talk about?" required></div>
+      <div class="field"><label for="community-post-category">Category</label><select id="community-post-category" name="category"><option value="General">General</option><option value="Recommendations">Recommendations</option><option value="Services">Services</option><option value="Shopping">Shopping</option><option value="Ideas">Ideas</option></select></div>
+      <div class="field"><label for="community-post-body">Write something</label><textarea id="community-post-body" name="body" maxlength="5000" rows="5" placeholder="Share the details with the community..." required></textarea></div>
+      <button class="primary dialog-submit" type="submit">Submit post</button><p class="notice">New posts are sent for review before appearing publicly.</p>
+    </form></div></dialog>
+  <dialog class="community-dialog" id="community-thread-dialog"><div class="dialog-content">
+    <div class="dialog-head"><div><h2 id="community-thread-title">Community discussion</h2><p id="community-thread-meta"></p></div><button type="button" class="dialog-close" data-close-community-dialog aria-label="Close">×</button></div>
+    <div id="community-thread-body"></div><div class="community-comments" id="community-comments"></div>
+    <form id="community-comment-form"><input type="hidden" name="postId" id="community-comment-post-id"><div class="field"><label for="community-comment-body">Write a comment</label><textarea id="community-comment-body" name="body" maxlength="5000" rows="3" placeholder="Add to the conversation..." required></textarea></div>
+      <button class="primary dialog-submit" type="submit">Post comment</button><p class="notice">Comments are reviewed before appearing publicly.</p>
+    </form></div></dialog>
       <section id="notifications" class="page"><div class="section-head"><div><h2>App notifications</h2><p>Updates about orders, messages, and the community.</p></div></div><div class="notification-list" id="notification-list"></div></section>
       <section id="cart" class="page"><div class="section-head"><div><h2>Your cart</h2><p>Review your goods and the Bigwizz fee before checkout.</p></div></div><div class="cart-layout"><div class="cart-items" id="cart-items"></div><aside class="cart-summary" id="cart-summary"></aside></div></section>
-      <section id="seller-studio" class="page">
-        <div id="seller-onboarding" class="seller-onboarding">
-          <div class="seller-onboarding-mark" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 1.6 7.4L21 12l-7.4 1.6L12 21l-1.6-7.4L3 12l7.4-2.6zM19 2v4m-2-2h4"/></svg></div><h2>Set up your seller studio</h2>
-          <p>Keep your buyer account and add a shop or professional profile. Your seller tools, sales, and fees will live in this separate workspace.</p>
-          <form id="seller-setup-form">
-            <div class="field"><label for="shop-name">Shop or business name</label><input id="shop-name" name="shopName" placeholder="e.g. Northwood Works" required></div>
-            <div class="field"><label for="seller-type">Seller type</label><select id="seller-type" name="sellerType" required><option value="Goods and services">Goods and services</option><option value="Quality goods">Quality goods</option><option value="Professional services">Professional services</option><option value="Other (describe below)">Other (describe below)</option></select></div>
-            <div class="field"><label for="seller-city">Your city</label><input id="seller-city" name="city" placeholder="e.g. Warri"></div>
-            <div class="field"><label for="seller-area">Your area or neighbourhood</label><input id="seller-area" name="area" placeholder="e.g. GRA, Effurun"></div>
-            <div class="field"><label for="seller-service-area">Areas you serve</label><input id="seller-service-area" name="serviceArea" placeholder="e.g. Warri, Effurun, Uvwie"></div>
-            <div class="field"><button type="button" class="outline-button" id="seller-use-location">Use GPS for provider location</button><small class="notice" id="seller-location-status">Add your city and service area. GPS helps buyers find you nearby.</small></div>
-            <input type="hidden" id="seller-latitude" name="latitude"><input type="hidden" id="seller-longitude" name="longitude">
-            <fieldset class="offering-group">
-              <legend>What do you offer?</legend>
-              <div class="field"><label for="seller-offering">Describe your goods or services</label><textarea id="seller-offering" name="offeringDescription" maxlength="500" placeholder="Include specific items or services, especially anything not listed above." required></textarea></div>
-            </fieldset>
-            <button class="primary" type="submit">Create seller studio</button>
-          </form>
-          <p class="notice">Seller Studio has a separate sign-in step from Buyer. You can use the same email address, then create your shop profile here.</p>
-        </div>
-        <div id="seller-dashboard" hidden>
-          <div class="seller-heading"><div><span class="seller-mode-label">SELLER ACCOUNT</span><h2 id="seller-shop-title">Your seller studio</h2><p id="seller-type-label">Track settled sales, platform fees, and estimated proceeds in one place.</p><p id="seller-offering-label"></p></div><button class="outline-button" style="width:auto" data-account-option="buyer">Switch to buyer account</button></div>
-          <div class="seller-fee-note"><strong>Bigwizz fee: 2% added to the buyer-facing price.</strong> For a $100 seller price, the buyer pays $102 and you receive $100 before payment processing, tax, shipping, refunds, and your own costs. Estimated proceeds are not the same as profit.</div>
-          <div class="seller-studio-actions"><button class="outline-button" data-page="seller-listings">Manage listings</button><button class="outline-button" data-page="messages">Seller inbox</button><button class="outline-button" data-page="seller-progress">Sales progress</button><button class="outline-button" data-page="orders">Order support</button></div>
-        </div>
       </section>
-      <section id="seller-progress" class="page">
-        <div class="section-head"><div><h2>Sales progress</h2><p>Track seller prices, buyer fees, and completed sales.</p></div></div>
-        <div class="seller-toolbar"><div class="seller-ranges" aria-label="Sales date range"><button class="active" data-sales-range="7">7 days</button><button data-sales-range="30">30 days</button><button data-sales-range="90">90 days</button></div></div>
-        <div class="seller-stats">
-          <article class="seller-stat"><span>Seller prices</span><strong id="seller-gross">$0</strong><small>Completed sale amounts before buyer fee</small></article>
-          <article class="seller-stat"><span>Buyer fees Â· 2%</span><strong id="seller-fees">$0</strong><small>Added to the buyer-facing price</small></article>
-          <article class="seller-stat featured"><span>Estimated seller proceeds</span><strong id="seller-net">$0</strong><small>Your listed price before other costs</small></article>
-          <article class="seller-stat"><span>Orders to complete</span><strong id="seller-open-orders">0</strong><small>Payment received, work in progress</small></article>
-        </div>
-        <section class="seller-panel">
-          <div class="seller-panel-heading"><div><h3>Sales activity</h3><p id="sales-range-label">Last 7 days</p></div><span class="seller-settled-label">Settled sales only</span></div>
-          <div class="seller-table-wrap"><table class="seller-table"><thead><tr><th>Order / buyer</th><th>Item or service</th><th>Seller price</th><th>Buyer fee Â· 2%</th><th>Est. proceeds</th><th>Status</th></tr></thead><tbody id="seller-sales-rows"></tbody></table></div>
-          <p class="notice">Processing orders appear in the table but aren't included in seller prices, buyer fees, or estimated proceeds until completed.</p>
-        </section>
-        <section id="seller-chart-panel" class="seller-panel seller-chart-panel">
-          <div class="seller-panel-heading"><div><h3>Sales progress chart</h3><p>Completed seller prices before the 2% buyer fee</p></div><span class="seller-settled-label">Seller prices</span></div>
-          <div class="seller-chart" id="seller-chart" role="img" aria-label="Bar chart of completed sales"></div>
-        </section>
-      </section>
-      <section id="seller-listings" class="page">
-        <div class="section-head"><div><h2>Manage listings</h2><p>Create and update the goods or services shown in the marketplace.</p></div><button class="outline-button" style="width:auto" data-page="seller-studio">Seller studio</button></div>
-        <section id="seller-listings-panel" class="seller-panel seller-listings-panel" aria-labelledby="seller-listings-title">
-          <div class="seller-panel-heading"><div><h3 id="seller-listings-title">Your listings</h3><p>Create goods or service listings, then publish or pause them.</p></div></div>
-          <form id="seller-listing-form" class="seller-listing-form">
-            <div class="seller-listing-form-grid">
-              <div class="field"><label for="seller-listing-title">Listing title</label><input id="seller-listing-title" name="title" maxlength="80" placeholder="e.g. Handcrafted oak shelf" required></div>
-              <div class="field"><label for="seller-listing-type">What are you listing?</label><select id="seller-listing-type" name="type"><option value="goods">Goods</option><option value="service">Service</option></select></div>
-              <div class="field" id="seller-product-sizing-field"><label for="seller-listing-size-type">Product sizing</label><select id="seller-listing-size-type" name="sizeType"><option value="other">No apparel size chart</option><option value="clothing">Clothing</option><option value="shoes">Shoes</option><option value="caps">Caps / hats</option></select></div>
-              <div class="field"><label for="seller-listing-category">Category</label><select id="seller-listing-category" name="category" required></select></div>
-              <div class="field" id="seller-service-pricing-field" hidden><label for="seller-service-pricing-mode">How should buyers see your service price?</label><select id="seller-service-pricing-mode" name="pricingMode"><option value="fixed">Fixed price — this is the full service price</option><option value="starting">Starting price — final price may change</option><option value="quote">Quotation required — agree the price before booking</option></select><small class="notice">Buyers will see the pricing type clearly on your service card.</small></div>
-              <div class="field" id="seller-service-availability-field" hidden><label for="seller-service-availability">Accept nearby service requests?</label><select id="seller-service-availability" name="serviceAvailability"><option value="available">Available — receive nearby requests</option><option value="busy">Busy — pause new requests</option><option value="offline">Offline — do not receive requests</option></select></div>
-              <div class="field"><label id="seller-listing-price-label" for="seller-listing-price">Your price (₦)</label><input id="seller-listing-price" name="price" type="number" min="0.01" step="0.01" placeholder="25.00" required></div>
-              <div class="field"><label for="seller-listing-image">Upload a listing photo</label><input id="seller-listing-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="seller-listing-image-note"></div>
-            </div>
-              <div id="seller-variant-fields" class="seller-listing-form-grid">
-                <div class="field"><label for="seller-listing-sizes">Available sizes (optional)</label><input id="seller-listing-sizes" name="sizes" maxlength="200" placeholder="Choose a product sizing type first"><small class="notice" id="seller-size-guidance">Size charts are shown only for clothing, shoes, and caps.</small><div id="seller-size-guide-preview" class="seller-size-guide-preview" aria-live="polite"></div></div>
-                <div class="field"><label for="seller-listing-colors">Available colors (optional)</label><input id="seller-listing-colors" name="colors" maxlength="200" placeholder="e.g. Natural, Navy, Sage"><small class="notice">Add one clear product photo for every color.</small></div>
-              </div>
-            <div id="seller-color-photo-fields" class="variant-photo-list" aria-live="polite"></div>
-            <div class="field"><label for="seller-listing-description">Description</label><textarea id="seller-listing-description" name="description" maxlength="240" placeholder="Share useful details buyers should know." required></textarea></div>
-            <p class="notice" id="seller-listing-image-note">Use a JPG, PNG, or WebP image up to 5 MB. New listings need a photo; when editing, leave this blank to keep the current one.</p>
-            <p class="notice" id="seller-listing-price-preview" aria-live="polite">Enter your price to preview the buyer-facing total with the 2% Bigwizz fee.</p>
-            <div class="seller-listing-form-actions"><button class="primary" id="seller-listing-submit" type="submit">Publish listing</button><button class="outline-button" id="seller-listing-cancel" type="button" hidden>Cancel edit</button></div>
-          </form>
-          <p class="notice">Listings are shared through Bigwizz. Orders and payments are not connected yet.</p>
-          <div class="seller-listings" id="seller-listing-items" aria-live="polite"></div>
-        </section>
-      </section>
-      <section id="messages" class="page"><div class="section-head"><div><h2>Your inbox</h2><p>Prioritized by order and booking questions, so important requests are easier to spot.</p></div></div><div class="side-card" id="inbox"></div></section>
-      <section id="orders" class="page"><div class="section-head"><div><h2>Order support</h2><p>What arrived should match what you agreed to buy. Start a report if it doesn't.</p></div></div>
-        <div class="issue-wrap"><h3>Report an order that doesn't match</h3><p>Share the order reference and what went wrong. Keep the packaging and any photos while the seller or support team reviews it. Reports are saved to your Bigwizz account; support is not contacted.</p>
+      <section id="orders" class="page"><div class="section-head"><div><h2>Orders & service requests</h2><p>Track customer service requests and get help with an order.</p></div></div>
+        <section class="service-request-section buyer-service-tracking"><h3>My service requests</h3><div id="buyer-service-request-list" class="service-request-list"><p class="notice">Sign in to see your service requests.</p></div></section>
+        <div class="issue-wrap"><h3>Report an order that doesn't match</h3><p>Share the order reference and what went wrong. Keep the packaging and any photos while the seller or support team reviews it. Reports are saved to your Bigwizz account; support is not contacted.</p><h3>Report an order that doesn't match</h3><p>Share the order reference and what went wrong. Keep the packaging and any photos while the seller or support team reviews it. Reports are saved to your Bigwizz account; support is not contacted.</p>
           <form id="issue-form"><div class="field"><label for="order-ref">Order reference</label><input id="order-ref" name="order" placeholder="e.g. BW-10482" required></div><div class="field"><label for="issue-type">What was different?</label><select id="issue-type" name="issue" required><option value="">Choose an issue</option><option>Item is damaged</option><option>Item is materially different from the listing</option><option>Something is missing</option><option>Service was not completed as agreed</option><option>Other order concern</option></select></div><div class="field"><label for="issue-notes">A few details</label><input id="issue-notes" name="notes" placeholder="Describe what you expected and what arrived" required></div><button class="primary" type="submit">Save report</button></form>
           <div class="notice">This prototype does not process payments, contact a seller, or open a real support case.</div></div>
       </section>
@@ -490,40 +596,16 @@
   </div>
   <nav class="mobile-nav" aria-label="Main navigation">
     <button class="active" data-audience="buyer" data-page="discover"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg></span>Discover</button><button data-audience="buyer" data-page="services"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2zM19 16v5m-2.5-2.5h5"/></svg></span>Services</button><button data-audience="buyer" data-page="community"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.3-3.7A7 7 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7zM8 12h.01M12 12h.01M16 12h.01"/></svg></span>Community</button><button data-audience="buyer" data-page="notifications"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg></span>Notifications</button><button data-audience="buyer" data-page="cart"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 8H6M10 21h.01M18 21h.01"/></svg></span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
-    <button data-audience="seller" data-page="seller-studio" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 20h18M5 17V9l7-6 7 6v8M9 20v-6h6v6"/></svg></span>Studio</button><button data-audience="seller" data-page="messages" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v12H8l-4 3zM8 9h8m-8 4h5"/></svg></span>Inbox</button><button data-audience="seller" data-page="seller-listings" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4zM8 8h8m-8 4h8m-8 4h5"/></svg></span>Listings</button><button data-audience="seller" data-page="seller-progress" hidden><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20V4m0 16h17M8 16l4-5 3 2 5-7"/></svg></span>Progress</button>
+
   </nav>
-  <section id="seller-workspace" class="seller-workspace" hidden aria-label="Seller dashboard">
-    <header class="seller-workspace-header">
-      <a class="seller-workspace-brand" href="#" data-page="seller-studio"><span class="brand-mark">b</span> bigwizz <span class="seller-workspace-tag">SELLER</span></a>
-      <div class="seller-workspace-actions">
-        <button type="button" class="seller-switch-buyer" data-account-option="buyer">Switch to Buyer</button>
-        <button type="button" class="seller-signout" data-supabase-signout>Sign out</button>
-      </div>
-    </header>
-    <div class="seller-workspace-layout">
-      <aside class="seller-sidebar" aria-label="Seller navigation">
-        <div class="seller-sidebar-heading">SELLER WORKSPACE</div>
-        <button type="button" class="seller-nav-link active" data-page="seller-studio"><span>⌂</span> Overview</button>
-        <button type="button" class="seller-nav-link" data-page="seller-listings"><span>▤</span> My listings</button>
-        <button type="button" class="seller-nav-link" data-page="seller-progress"><span>↗</span> Sales & earnings</button>
-        <button type="button" class="seller-nav-link" data-page="messages"><span>✉</span> Inbox</button>
-        <div class="seller-sidebar-note">Your shop tools and sales workspace are separate from Buyer shopping.</div>
-      </aside>
-      <main id="seller-workspace-main" class="seller-workspace-main" aria-live="polite"></main>
-    </div>
-    <nav class="seller-mobile-nav" aria-label="Seller navigation">
-      <button type="button" class="active" data-page="seller-studio"><span>⌂</span>Overview</button>
-      <button type="button" data-page="seller-listings"><span>▤</span>Listings</button>
-      <button type="button" data-page="seller-progress"><span>↗</span>Sales</button>
-      <button type="button" data-page="messages"><span>✉</span>Inbox</button>
-    </nav>
-  </section>
   <dialog id="auth-dialog" aria-labelledby="auth-title">
     <div class="dialog-content">
-      <div class="dialog-head"><div><h2 id="auth-title">Sign in to Bigwizz</h2><p id="auth-summary">Use your Bigwizz account to continue to Seller Studio.</p></div><button class="dialog-close" type="button" data-auth-close aria-label="Close sign-in">×</button></div>
+      <div class="dialog-head"><div><h2 id="auth-title">Sign in to Bigwizz</h2><p id="auth-summary">Sign in to continue to your Buyer account.</p></div><button class="dialog-close" type="button" data-auth-close aria-label="Close sign-in">×</button></div>
       <form id="auth-form">
-        <div class="field" id="auth-name-field" hidden><label for="auth-name">Your name</label><input id="auth-name" name="displayName" type="text" autocomplete="name" maxlength="80"></div>
-        <div class="field" id="auth-role-field" hidden><label for="auth-role">Account type</label><select id="auth-role" name="accountType"><option value="buyer">Buyer — shop and purchase</option><option value="seller">Seller — create a shop or offer services</option></select></div>
+
+        <div class="field" id="auth-name-field" hidden><label for="auth-name">Full name</label><input id="auth-name" name="displayName" type="text" autocomplete="name" placeholder="Your full name" required></div>
+        <div class="field auth-location-field" id="auth-location-fields" hidden><label for="auth-country">Country</label><input id="auth-country" name="country" value="Nigeria" autocomplete="country-name" required><label for="auth-state">State</label><input id="auth-state" name="state" placeholder="e.g. Delta" autocomplete="address-level1" required><label for="auth-city">City</label><input id="auth-city" name="city" placeholder="e.g. Sapele" autocomplete="address-level2" required><label for="auth-area">Neighbourhood / area</label><input id="auth-area" name="area" placeholder="Your neighbourhood" autocomplete="address-line2"></div>
+        <div class="field" id="auth-role-field" hidden><label for="auth-role">Account type</label><select id="auth-role" name="accountType"><option value="buyer">Buyer — shop and purchase</option></select></div>
         <div class="field" id="auth-email-field"><label for="auth-email">Email address</label><input id="auth-email" name="email" type="email" autocomplete="email" required></div>
         <div class="field" id="auth-password-field"><label id="auth-password-label" for="auth-password">Password</label><input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="8" required></div>
         <p class="notice auth-feedback" id="auth-feedback" role="status" aria-live="polite" hidden></p>
@@ -533,22 +615,43 @@
     </div>
   </dialog>
   <dialog id="service-dialog" aria-labelledby="service-dialog-title">
-    <div class="dialog-content">
-      <div class="dialog-head"><div><h2 id="service-dialog-title">Request a service</h2><p id="service-dialog-summary"></p></div><button class="dialog-close" type="button" aria-label="Close service request">Ã—</button></div>
-      <form id="service-request-form">
+    <div class="dialog-content service-request-content">
+      <div class="service-request-header">
+        <div class="service-request-heading">
+          <span class="service-request-eyebrow">BIGWIZZ SERVICES</span>
+          <h2 id="service-dialog-title">Request a service</h2>
+          <p id="service-dialog-summary"></p>
+        </div>
+        <button class="service-request-close" type="button" aria-label="Close service request"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      </div>
+      <form id="service-request-form" class="service-request-form">
         <input type="hidden" name="service" id="service-request-name">
-        <div class="field"><label for="request-type">What do you need?</label><select id="request-type" name="requestType" required><option value="Request a quote">Request a quote</option><option value="Ask a question">Ask a question</option><option value="Request a time">Request a time</option></select></div>
-        <div class="field"><label for="request-matching-mode">How should Bigwizz find your provider?</label><select id="request-matching-mode" name="matchingMode"><option value="direct">Contact this provider</option><option value="nearby">Send my request to suitable nearby providers</option></select><small class="notice">Nearby requests go to a limited number of available providers. They respond privately; there is no public bidding.</small></div>
-        <div class="field"><label for="request-scheduled-at">When do you need the service?</label><input id="request-scheduled-at" type="datetime-local" name="scheduledAt"><small class="notice">Leave blank if you want the earliest available appointment.</small></div>
-        <div class="field"><label for="request-area">Your area or city</label><input id="request-area" name="area" placeholder="e.g. GRA, Warri" required></div>
-        <div class="field"><label for="request-address">Service address or meeting point</label><input id="request-address" name="serviceAddress" placeholder="Enter the address where the work will happen" required></div>
-        <div class="field"><button type="button" class="outline-button" id="request-use-location">Use my current GPS location</button><small class="notice" id="request-location-status">GPS is optional; you can enter your address manually.</small></div>
-        <input type="hidden" name="latitude" id="request-latitude"><input type="hidden" name="longitude" id="request-longitude">
-        <div class="field"><label for="request-representative-name">Authorised representative (optional)</label><input id="request-representative-name" name="representativeName" placeholder="Name of the person who can receive the provider"></div>
-        <div class="field"><label for="request-representative-phone">Representative phone (optional)</label><input id="request-representative-phone" name="representativePhone" type="tel" placeholder="Phone number"></div>
-        <div class="field"><label for="request-details">Details for the provider</label><textarea id="request-details" name="details" placeholder="Describe the job, questions, or timing that would help the provider respond." required></textarea></div>
-        <button class="primary dialog-submit" type="submit">Send service request</button>
-        <p class="notice">Sending a request is free. You will review the provider's quotation and the 3% buyer fee before confirming a paid booking. No payment is taken at this stage.</p>
+        <div class="service-request-field">
+          <label for="request-type">How can the provider help?</label>
+          <select id="request-type" name="requestType" required><option value="Request a quote">Request a quote</option><option value="Ask a question">Ask a question</option><option value="Request a time">Request a time</option></select>
+        </div>
+        <div class="service-request-field">
+          <label for="request-date">Preferred date <span>Optional</span></label>
+          <input id="request-date" type="date" name="preferredDate">
+        </div>
+        <div class="service-request-field">
+          <label for="request-city">City</label>
+          <input id="request-city" name="city" list="bigwizz-city-options" placeholder="Search or enter your city" autocomplete="address-level2" required>
+          <button type="button" class="outline-button" id="request-use-gps" style="width:auto;margin-top:8px">Use current GPS location for this request</button>
+          <datalist id="bigwizz-city-options">
+            <option value="Lagos"><option value="Abuja"><option value="Port Harcourt"><option value="Ibadan"><option value="Benin City"><option value="Warri"><option value="Sapele"><option value="Asaba"><option value="Uyo"><option value="Calabar"><option value="Enugu"><option value="Onitsha"><option value="Aba"><option value="Owerri"><option value="Awka"><option value="Jos"><option value="Kaduna"><option value="Kano"><option value="Maiduguri"><option value="Ilorin"><option value="Abeokuta"><option value="Akure"><option value="Lokoja"><option value="Makurdi"><option value="Yenagoa"><option value="Sokoto"><option value="Minna"><option value="Gombe"><option value="Bauchi"><option value="Damaturu"><option value="Jalingo"><option value="Birnin Kebbi"><option value="Dutse"><option value="Katsina"><option value="Lafia"><option value="Abakaliki"><option value="Ogbomoso"><option value="Ife"><option value="Umuahia"><option value="Ekpoma">
+          </datalist>
+        </div>
+        <div class="service-request-field">
+          <label for="request-area">Neighbourhood / area</label>
+          <input id="request-area" name="area" placeholder="Enter your neighbourhood or area" autocomplete="address-line2" required>
+        </div>
+        <div class="service-request-field">
+          <label for="request-details">Tell the provider a little more</label>
+          <textarea id="request-details" name="details" placeholder="Share what you need, any questions, and useful details about the job." required></textarea>
+        </div>
+        <button class="service-request-submit" type="submit">Send service request <span aria-hidden="true">→</span></button>
+        <p class="service-request-note">Your request is sent to the provider's Bigwizz inbox. This does not confirm a booking; wait for the provider's response.</p>
       </form>
     </div>
   </dialog>
@@ -561,7 +664,7 @@
         <div class="field"><label for="review-author">Display name (optional)</label><input id="review-author" name="reviewer" maxlength="50" placeholder="Buyer"></div>
         <div class="field"><label for="review-text">Your comment</label><textarea id="review-text" name="review" maxlength="500" placeholder="Write a comment about quality, fit, or your experience." required></textarea></div>
         <button class="primary dialog-submit" type="submit">Post review</button>
-        <p class="notice">Reviews are saved in this browser for this prototype and are not verified or shared with the seller.</p>
+        <p class="notice">Reviews are saved to Bigwizz and shared with other customers. Sign in is required to post a review.</p>
       </form>
     </div>
   </dialog>
@@ -578,25 +681,44 @@
     const sampleReviewsByListing={
       "seed-0":[
         {reviewer:"Nina C.",rating:5,text:"Beautiful stitching and a lovely everyday size. It arrived just as pictured.",createdAt:"2026-11-12T10:00:00.000Z"},
-        {reviewer:"Omar K.",rating:5,text:"The fabric feels sturdy and the seller packed it with care.",createdAt:"2026-11-09T10:00:00.000Z"}
+        {reviewer:"Omar K.",rating:5,text:"The fabric feels sturdy and the seller packed it with care.",createdAt:"2026-11-09T10:00:00.000Z"},
+        {reviewer:"Tara M.",rating:5,text:"I have been using this tote every day. The finish is lovely and it holds more than I expected.",createdAt:"2026-11-05T10:00:00.000Z"}
       ],
       "seed-1":[
         {reviewer:"Avery L.",rating:5,text:"Solid craftsmanship and the oak finish looks great in our living room.",createdAt:"2026-11-11T10:00:00.000Z"},
-        {reviewer:"Mina R.",rating:4,text:"A beautiful table with clear updates while it was being made.",createdAt:"2026-11-07T10:00:00.000Z"}
+        {reviewer:"Mina R.",rating:4,text:"A beautiful table with clear updates while it was being made.",createdAt:"2026-11-07T10:00:00.000Z"},
+        {reviewer:"Chris D.",rating:5,text:"Sturdy, well made, and exactly the right size beside our sofa.",createdAt:"2026-11-04T10:00:00.000Z"}
       ],
       "seed-2":[
         {reviewer:"Sofia P.",rating:5,text:"Soft, comfortable linen and easy to care for. I would order again.",createdAt:"2026-11-10T10:00:00.000Z"},
-        {reviewer:"Jordan W.",rating:4,text:"The colors are true to the photos and the set fits perfectly.",createdAt:"2026-11-06T10:00:00.000Z"}
+        {reviewer:"Jordan W.",rating:4,text:"The colors are true to the photos and the set fits perfectly.",createdAt:"2026-11-06T10:00:00.000Z"},
+        {reviewer:"Leah B.",rating:5,text:"A simple way to make the room feel warmer. The fabric feels lovely.",createdAt:"2026-11-03T10:00:00.000Z"}
+      ],
+      "seed-3":[
+        {reviewer:"Maya T.",rating:5,text:"The glaze is beautiful and each piece feels carefully finished. A lovely breakfast set.",createdAt:"2026-11-13T10:00:00.000Z"},
+        {reviewer:"Ethan P.",rating:5,text:"Arrived safely packed and looks even better in person.",createdAt:"2026-11-08T10:00:00.000Z"}
+      ],
+      "seed-4":[
+        {reviewer:"Amara J.",rating:5,text:"The colors are rich and the scarf is soft without feeling too delicate.",createdAt:"2026-11-14T10:00:00.000Z"},
+        {reviewer:"Noah S.",rating:4,text:"A thoughtful gift and the natural dye has a lovely finish.",createdAt:"2026-11-08T10:00:00.000Z"}
       ]
     };
     let services=[
-      {category:"Home care",image:"assets/home-cleaning.jpg",title:"Home cleaning",description:"Recurring or one-time cleans with a written checklist and clear scope.",price:"From $45 / visit",rating:"4.9",provider:"Bright Nest Co."},
-      {category:"Home care",image:"assets/pest-control.jpg",title:"Pest control",description:"Licensed local specialists explain the treatment, safety steps, and follow-up.",price:"Request an estimate",rating:"4.8",provider:"ClearHome Pest Care"},
-      {category:"Repairs",image:"assets/home-repairs.jpg",title:"Home repairs",description:"Book a vetted professional for small repairs, installation, and assembly.",price:"From $35 / hour",rating:"4.8",provider:"Fixwell Services"},
-      {category:"Wellness",image:"assets/plant-care.jpg",title:"Plant care",description:"Get practical help keeping your indoor plants healthy and thriving.",price:"From $30 / visit",rating:"4.9",provider:"Green Thumb Home"},
-      {category:"Creative",image:"assets/product-photography.jpg",title:"Product photography",description:"Work with local creatives on a brief, delivery date, and usage rights.",price:"From $90 / project",rating:"5.0",provider:"Frame & Light Studio"},
-      {category:"Wellness",image:"assets/wellness-coaching.jpg",title:"Wellness coaching",description:"Explore a qualified provider's experience and agree on goals before booking.",price:"From $55 / session",rating:"4.9",provider:"Grounded Practice"}
+      {category:"Home care",image:"assets/home-cleaning.jpg",title:"Home cleaning",description:"Recurring or one-time cleans with a written checklist and clear scope.",price:"From $45 / visit",rating:"4.9",provider:"Bright Nest Co.",location:"Lekki, Lagos (demo location)"},
+      {category:"Home care",image:"assets/pest-control.jpg",title:"Pest control",description:"Licensed local specialists explain the treatment, safety steps, and follow-up.",price:"Request an estimate",rating:"4.8",provider:"ClearHome Pest Care",location:"Ikeja, Lagos (demo location)"},
+      {category:"Repairs",image:"assets/home-repairs.jpg",title:"Home repairs",description:"Book a vetted professional for small repairs, installation, and assembly.",price:"From $35 / hour",rating:"4.8",provider:"Fixwell Services",location:"Surulere, Lagos (demo location)"},
+      {category:"Wellness",image:"assets/plant-care.jpg",title:"Plant care",description:"Get practical help keeping your indoor plants healthy and thriving.",price:"From $30 / visit",rating:"4.9",provider:"Green Thumb Home",location:"Yaba, Lagos (demo location)"},
+      {category:"Creative",image:"assets/product-photography.jpg",title:"Product photography",description:"Work with local creatives on a brief, delivery date, and usage rights.",price:"From $90 / project",rating:"5.0",provider:"Frame & Light Studio",location:"Victoria Island, Lagos (demo location)"},
+      {category:"Wellness",image:"assets/wellness-coaching.jpg",title:"Wellness coaching",description:"Explore a qualified provider's experience and agree on goals before booking.",price:"From $55 / session",rating:"4.9",provider:"Grounded Practice",location:"Abuja (demo location)"}
     ];
+    const sampleServiceReviews={
+      "Home cleaning":[{reviewer:"Tomi A.",rating:5,text:"The team was punctual, thorough, and left the house spotless."},{reviewer:"Ada N.",rating:5,text:"Very professional service. I appreciated the clear checklist."}],
+      "Pest control":[{reviewer:"Chika O.",rating:5,text:"They explained the treatment and aftercare clearly."},{reviewer:"David E.",rating:4,text:"Good communication and arrived on time."}],
+      "Home repairs":[{reviewer:"Musa K.",rating:5,text:"The repair was completed neatly and everything was explained."},{reviewer:"Lara P.",rating:5,text:"Reliable service and fair communication from start to finish."}],
+      "Plant care":[{reviewer:"Zainab R.",rating:5,text:"My plants look healthier already. Helpful practical advice."},{reviewer:"Ben T.",rating:5,text:"Friendly and knowledgeable. Would recommend."}],
+      "Product photography":[{reviewer:"Nneka I.",rating:5,text:"Beautiful product photos and a smooth, professional process."},{reviewer:"Sam D.",rating:5,text:"Great lighting and attention to detail."}],
+      "Wellness coaching":[{reviewer:"Miriam C.",rating:5,text:"A thoughtful session with practical steps I could follow."},{reviewer:"Femi B.",rating:4,text:"Supportive and easy to communicate with."}]
+    };
     const listingCategories={
       goods:[{value:"Home",label:"Home & living"},{value:"Style",label:"Style & craft"}],
       service:[{value:"Home care",label:"Home care"},{value:"Repairs",label:"Repairs"},{value:"Wellness",label:"Wellness"},{value:"Creative",label:"Creative"}]
@@ -632,7 +754,7 @@
     const commissionRate=0.02;
     const currencyFormatter=new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",maximumFractionDigits:2});
     let activeCategory="All",activeServiceCategory="All",toastTimer,salesRangeDays=7,selectedReviewRating=0,selectedRatingProductId=null,currentProductId=null;
-    let accountRoles=["buyer"],activeAccount=sessionStorage.getItem("bigwizz-active-account")==="seller"?"seller":"buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
+    let accountRoles=["buyer"],activeAccount="buyer",sellerProfileReady=false,sellerShopName="",sellerType="",sellerOfferingDescription="";
     let customListings=[],listingStorageAvailable=true,editingListingId=null,cartItems=[],cartStorageAvailable=true,reviewsByListing={},reviewStorageAvailable=true,productBaseImage="",productColorImages={};
     function showToast(message){const toast=document.getElementById("toast");toast.textContent=message;toast.classList.add("show");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("show"),2800)}
     const starIcon=filled=>`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-3-5.6 3 1.1-6.2L3 9.6l6.2-.9z"${filled?' fill="currentColor"':''}/></svg>`;
@@ -930,35 +1052,22 @@
       if(wrap)wrap.classList.remove("is-open");
     }
     function renderAccountMenu(){
-      const currentName=activeAccount==="seller"?"Seller account":"Buyer account";
-      document.getElementById("account-switch-trigger").setAttribute("aria-label",`Switch account. Current account: ${currentName}`);
-      document.getElementById("buyer-account-check").innerHTML=activeAccount==="buyer"?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l1 13H4zM9 8V6a3 3 0 0 1 6 0v2"/></svg>`:"";
-      document.getElementById("seller-account-check").innerHTML=activeAccount==="seller"?`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10h18v10H3zM2 10l2-6h16l2 6M8 20v-6h8v6"/></svg>`:"";
-      document.querySelectorAll("#account-switch-menu [data-account-option]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.accountOption===activeAccount)));
-      document.getElementById("seller-account-description").textContent=sellerProfileReady?`${sellerShopName} Â· Sales and requests`:accountRoles.includes("seller")?"Finish seller setup":"Create seller profile";
+      document.getElementById("account-switch-trigger").setAttribute("aria-label","Switch account. Current account: Buyer");
+      const buyerCheck=document.getElementById("buyer-account-check");
+      if(buyerCheck)buyerCheck.innerHTML='<span aria-hidden="true">✓</span>';
+      document.querySelectorAll("#account-switch-menu [data-account-option]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.accountOption==="buyer")));
     }
     function updateMobileNavigation(){
-      document.querySelectorAll(".mobile-nav [data-audience]").forEach(button=>{button.hidden=button.dataset.audience!==activeAccount});
+      document.querySelectorAll(".mobile-nav [data-audience]").forEach(button=>{button.hidden=button.dataset.audience!=="buyer"});
     }
     function switchAccount(account){
       closeAccountMenu();
-      if(account==="buyer"){
-        activeAccount="buyer";
-        sessionStorage.setItem("bigwizz-active-account","buyer");
-        updateMobileNavigation();
-        renderAccountMenu();
-        setPage("discover");
-        showToast("Switched to your Buyer account.");
-        return;
-      }
-      if(account==="seller"){
-        activeAccount="seller";
-        sessionStorage.setItem("bigwizz-active-account","seller");
-        updateMobileNavigation();
-        renderAccountMenu();
-        setPage("seller-studio");
-        showToast(sellerProfileReady?"Switched to your Seller account.":"Seller demo mode enabled. Complete the profile to publish listings.");
-      }
+      activeAccount="buyer";
+      sessionStorage.setItem("bigwizz-active-account","buyer");
+      updateMobileNavigation();
+      renderAccountMenu();
+      setPage("discover");
+      showToast("Buyer account selected.");
     }
     function setPage(page,focusTarget=null,mobileNavButton=null){
       if(!document.getElementById(page))return;
@@ -968,15 +1077,9 @@
         const isMobileButton=Boolean(button.closest(".mobile-nav"));
         button.classList.toggle("active",isMobileButton&&mobileNavButton?button===mobileNavButton:button.dataset.page===page);
       });
-      if(page==="seller-studio"){
-        document.getElementById("seller-onboarding").hidden=sellerProfileReady;
-        document.getElementById("seller-dashboard").hidden=!sellerProfileReady;
-      }
-      if(page==="seller-listings")renderSellerListings();
-      if(page==="seller-progress")renderSellerSales();
       if(page==="notifications")renderNotifications();
       if(page==="cart")renderCart();
-      if(page==="messages")renderInbox();
+      if(page==="orders")window.BIGWIZZ_BACKEND?.loadBuyerServiceRequests?.();
       if(focusTarget){document.getElementById(focusTarget).scrollIntoView({behavior:"smooth",block:"start"})}
       else window.scrollTo({top:0,behavior:"smooth"});
     }
@@ -1068,8 +1171,7 @@
       document.getElementById("seller-sales-rows").innerHTML=rows.length?rows.join(""):'<tr><td colspan="6">No sales in this period.</td></tr>';
     }
     function getGoodsListings(){
-      const sellerGoods=customListings.filter(item=>item.type==="goods"&&item.status==="published").map(item=>({...item,kind:"Goods",detail:item.description,sellerDescription:sellerOfferingDescription,verified:false,basePrice:item.price}));
-      return [...listings.map((item,index)=>({...item,id:item.id||`seed-${index}`})),...sellerGoods].filter(item=>item.kind==="Goods");
+        return listings.map((item,index)=>({...item,id:item.id||`seed-${index}`})).filter(item=>item.kind==="Goods");
     }
     function getGoodsListing(listingId){
       return getGoodsListings().find(item=>String(item.id)===String(listingId));
@@ -1133,7 +1235,7 @@
       const available=new Set(listedSizes.map(value=>String(value).trim().toLowerCase()));
       return `<details class="product-size-chart"><summary>${guide.title}</summary><table class="size-chart-table"><thead><tr>${guide.headers.map(value=>`<th scope="col">${value}</th>`).join("")}<th scope="col">Listing</th></tr></thead><tbody>${guide.rows.map(row=>`<tr>${row.map(value=>`<td>${value}</td>`).join("")}<td>${available.has(row[0].toLowerCase())?"Available":"Not listed"}</td></tr>`).join("")}</tbody></table><p class="notice">Measure your body, foot, or head and compare it with the available sizes shown. Fit can vary by brand; ask the seller if you are between sizes.</p></details>`;
     }
-    function renderProductDetails(listingId){
+    function renderProductDetails(listingId,skipRemoteLoad=false){
       const item=getGoodsListing(listingId);
       if(!item){setPage("discover");showToast("This item is no longer available.");return}
       if(selectedRatingProductId!==String(item.id)){selectedRatingProductId=String(item.id);selectedReviewRating=0}
@@ -1165,7 +1267,7 @@
           </div>
         </article>
         <section class="product-reviews">
-          <div class="section-head"><div><h3>Rating</h3>${renderProductRatingStars()}</div></div>
+          <div class="section-head"><div><h3>Customer reviews</h3><p class="review-intro">Thoughtful feedback from people who have purchased this item.</p><span class="rating-control-label">Your rating</span>${renderProductRatingStars()}</div></div>
           <div class="product-options-panel"><h4>Choose your options</h4><p>Select from the options provided by the seller before adding this item to your cart.</p><div class="product-option-grid">${variantFields}</div></div>
           ${sizeEnabled?renderSizeChart(item.sizeType,sizes):""}
           <div class="product-review-actions"><button type="button" class="outline-button" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
@@ -1178,6 +1280,17 @@
       if(typeof updateSavedButtons==="function")updateSavedButtons();
       currentProductId=item.id;
       setPage("product-details");
+      window.BIGWIZZ_PRODUCT_REVIEWS_UPDATED=rows=>{
+        reviewsByListing[item.id]=[...(sampleReviewsByListing[item.id]||[]),...rows];
+        renderListings(document.getElementById("search-input").value);
+        if(currentProductId===item.id)renderProductDetails(item.id,true);
+      };
+      if(!skipRemoteLoad&&window.BIGWIZZ_BACKEND){
+        window.BIGWIZZ_BACKEND.loadListingReviews(item.id).then(rows=>{
+          reviewsByListing[item.id]=[...(sampleReviewsByListing[item.id]||[]),...rows];
+          if(currentProductId===item.id)renderProductDetails(item.id,true);
+        }).catch(error=>console.error("Could not load shared product reviews.",error));
+      }
     }
     function renderListings(query=""){
       const container=document.getElementById("listing-grid"),normalized=query.trim().toLowerCase();
@@ -1198,19 +1311,123 @@
       if(!basePrice)return value;
       return String(value).replace(/\$[\d,]+(?:\.\d{1,2})?/,currencyFormatter.format(buyerPrice(basePrice)));
     }
+    function serviceDistanceKm(a,b,c,d){const r=v=>v*Math.PI/180,x=r(c-a),y=r(d-b),h=Math.sin(x/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(y/2)**2;return 6371*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));}
+    function serviceLocationScore(item,ctx){const norm=v=>String(v||"").trim().toLowerCase(),same=(a,b)=>norm(a)!==""&&norm(a)===norm(b),mentions=(text,value)=>norm(value)!==""&&norm(text).includes(norm(value));if(ctx.latitude!==null&&ctx.latitude!==undefined&&ctx.longitude!==null&&ctx.longitude!==undefined&&item.providerLatitude!==null&&item.providerLatitude!==undefined&&item.providerLongitude!==null&&item.providerLongitude!==undefined&&Number.isFinite(Number(ctx.latitude))&&Number.isFinite(Number(ctx.longitude))&&Number.isFinite(Number(item.providerLatitude))&&Number.isFinite(Number(item.providerLongitude))){const km=serviceDistanceKm(Number(ctx.latitude),Number(ctx.longitude),Number(item.providerLatitude),Number(item.providerLongitude));return {score:100000-km,distance:km};}if(same(ctx.area,item.providerArea))return {score:4000,distance:null};if(same(ctx.city,item.providerCity))return {score:3000,distance:null};if(same(ctx.state,item.providerState))return {score:2000,distance:null};if(same(ctx.country,item.providerCountry))return {score:1000,distance:null};if(mentions(item.location,ctx.area))return {score:3900,distance:null};if(mentions(item.location,ctx.city))return {score:2900,distance:null};if(mentions(item.location,ctx.state))return {score:1900,distance:null};return {score:0,distance:null};}
+    function refreshServiceLocationUI(){const c=window.BIGWIZZ_LOCATION_CONTEXT||{},t=document.getElementById("service-location-title"),d=document.getElementById("service-location-caption");if(!t||!d)return;const place=[c.area,c.city,c.state,c.country].filter(Boolean).join(", ");t.textContent=c.source==="gps"?"Using your current GPS location":place||"Set your location to find nearby services";d.textContent=c.source==="gps"?"Providers with GPS coordinates are sorted by distance. Your saved address has not changed.":place?"Matching providers in your saved area, city and state first.":"Add your location during registration or use GPS to find nearby services.";if(typeof renderServices==="function")renderServices(document.getElementById("service-search-input")?.value||"");}
+    window.BIGWIZZ_REFRESH_SERVICE_LOCATION=refreshServiceLocationUI;
+    function requestCurrentLocation(event){if(!navigator.geolocation){showToast("Location services are not available in this browser.");return;}const b=event&&event.currentTarget?event.currentTarget:null;if(b){b.disabled=true;b.textContent="Finding your location…";}navigator.geolocation.getCurrentPosition(p=>{const old=window.BIGWIZZ_LOCATION_CONTEXT||{};window.BIGWIZZ_LOCATION_CONTEXT={...old,source:"gps",latitude:p.coords.latitude,longitude:p.coords.longitude};if(b&&b.id==="request-use-gps"){document.getElementById("request-city").value="GPS location";document.getElementById("request-area").value="Exact GPS pin attached";}refreshServiceLocationUI();showToast("GPS selected for this search/request. Your saved address has not changed.");if(b){b.disabled=false;b.textContent=b.id==="request-use-gps"?"Use current GPS location for this request":"⌖ Use my current location";}},e=>{showToast(e.code===1?"Location permission denied. Allow it in browser settings.":"Could not determine your location. Please try again.");if(b){b.disabled=false;b.textContent=b.id==="request-use-gps"?"Use current GPS location for this request":"⌖ Use my current location";}},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});}
+    document.getElementById("service-use-gps")?.addEventListener("click",requestCurrentLocation);document.getElementById("request-use-gps")?.addEventListener("click",requestCurrentLocation);
     function renderServices(query=""){
       const normalized=query.trim().toLowerCase();
       const sellerServices=customListings.filter(item=>item.type==="service"&&item.status==="published").map(item=>({...item,provider:item.seller,sellerPrice:item.price,pricingMode:item.pricingMode||"starting",price:item.pricingMode==="quote"?"Request a quote":item.pricingMode==="starting"?`From ${currencyFormatter.format(item.price)} / service`:currencyFormatter.format(item.price),rating:"New listing",requestId:`custom-${item.id}`}));
       const results=[...services.map((item,index)=>{const mode=item.pricingMode||(String(item.price).startsWith("Request")?"quote":String(item.price).startsWith("From")?"starting":"fixed"),base=item.sellerPrice===undefined?sellerPriceFrom(item.price):item.sellerPrice;return {...item,sellerPrice:base,pricingMode:mode,price:mode==="quote"?"Request a quote":mode==="starting"?(base?`From ${currencyFormatter.format(base)} / service`:item.price):base?currencyFormatter.format(base):item.price,requestId:item.requestId||item.id||String(index)}}),...sellerServices].filter(item=>(activeServiceCategory==="All"||item.category===activeServiceCategory)&&(!normalized||[item.title,item.description,item.provider,item.category].join(" ").toLowerCase().includes(normalized)));
+      const ctx=window.BIGWIZZ_LOCATION_CONTEXT||{};results.forEach(item=>{const rank=serviceLocationScore(item,ctx);item._locationScore=rank.score;item._distanceKm=rank.distance;});results.sort((a,b)=>b._locationScore-a._locationScore);
       const container=document.getElementById("service-grid");
       if(!results.length){container.innerHTML='<div class="empty">No services match yet. Try another search or category.</div>';return}
-      container.innerHTML=results.map(item=>`<article class="service-card"><img class="service-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div class="service-top"><span class="service-provider">${escapeHtml(item.category)}</span><span class="rating">${item.rating==="New listing"?escapeHtml(item.rating):`${starIcon(true)} ${escapeHtml(item.rating)}`}</span></div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><div class="service-foot"><span>${escapeHtml(item.provider)}${item.rating==="New listing"?"":' <span class="verified" aria-label="Verified provider"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v16H5zM9 5V3h6v2m-6 6h8m-8 4h5"/></svg></span>'}</span><span><b>${escapeHtml(item.price)}</b></span></div><button class="outline-button" style="margin-top:13px" data-service-request="${escapeHtml(item.requestId)}">View details & request</button></article>`).join("");
+      container.innerHTML=results.map(item=>`<article class="service-card"><img class="service-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div class="service-top"><span class="service-provider">${escapeHtml(item.category)}</span><span class="rating">${escapeHtml(item.rating)}</span></div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p><small class="service-provider">${item._distanceKm!==null?`${item._distanceKm.toFixed(1)} km away`:escapeHtml(item.location||"Location not provided")}</small><div class="service-foot"><span>${escapeHtml(item.provider)}${item.rating==="New listing"?"":' <span class="verified" aria-label="Verified provider"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5h14v16H5zM9 5V3h6v2m-6 6h8m-8 4h5"/></svg></span>'}</span><span><b>${escapeHtml(item.price)}</b></span></div><button class="outline-button" style="margin-top:13px" data-service-request="${escapeHtml(item.requestId)}">View details & request</button></article>`).join("");
+    }
+    let selectedServiceDetail=null;
+    let selectedServiceReviewRating=0;
+    let serviceReviewsByListing={};
+    function renderServiceDetails(service,skipRemoteLoad=false){
+      selectedServiceDetail=service;
+      const container=document.getElementById("service-detail-content");
+      if(!container)return;
+      const sampleReviews=sampleServiceReviews[service.title]||[];
+      const customerReviews=Array.isArray(serviceReviewsByListing[service.id])?serviceReviewsByListing[service.id]:[];
+      const allReviews=[...sampleReviews,...customerReviews];
+      const storedCount=Number(service.ratingCount||0);
+      const storedRating=Number.parseFloat(service.rating);
+      const newCount=customerReviews.length;
+      const totalRatingCount=storedCount+newCount;
+      const accumulatedRating=totalRatingCount?((Number.isFinite(storedRating)?storedRating*storedCount:0)+customerReviews.reduce((sum,review)=>sum+Number(review.rating||0),0))/totalRatingCount:NaN;
+      const stars=Number.isFinite(accumulatedRating)?Math.round(accumulatedRating):0;
+      const reviewMarkup=allReviews.length?allReviews.map(review=>`<article class="service-review-item"><div class="service-review-top"><strong>${escapeHtml(review.reviewer||"Customer")}</strong><span class="service-review-stars" aria-label="${review.rating} out of 5 stars">${"★".repeat(review.rating)}<span>${"★".repeat(5-review.rating)}</span></span></div><p>${escapeHtml(review.text)}</p><small>${review.demo?"Prototype review":"Customer review"}</small></article>`).join(""):'<p class="service-detail-description">No customer reviews yet. Be the first to share your experience.</p>';
+      container.innerHTML=`<div class="service-detail-layout">
+        <article class="service-detail-main">
+          <img class="service-detail-image" src="${escapeHtml(service.image||"")}" alt="${escapeHtml(service.title)}">
+          <div class="service-detail-meta"><span>${escapeHtml(service.category||"Service")}</span><span>★ ${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New listing"}</span></div>
+          <h3>${escapeHtml(service.title)}</h3>
+          <div class="service-request-compact service-request-inline">
+            <span class="service-detail-price">${escapeHtml(service.price||"Request an estimate")}</span>
+            <button type="button" class="service-detail-request" data-service-detail-request>Request this service</button>
+          </div>
+          <p class="service-detail-description">${escapeHtml(service.description||"Contact the provider to discuss the service and your requirements.")}</p>
+          <div class="service-detail-provider"><strong>${escapeHtml(service.provider||"Independent provider")}</strong><span class="service-provider-location">⌖ ${escapeHtml(service.location||"Location not provided by this service provider")}</span></div>
+          <div class="service-provider-rating" aria-label="Service rating">
+            <span class="service-provider-rating-stars" aria-label="${stars} out of 5 stars">${"★".repeat(stars)}<span>${"★".repeat(5-stars)}</span></span>
+            <strong>${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New"}</strong>
+            <small>${totalRatingCount} ${totalRatingCount===1?"rating":"ratings"}</small>
+          </div>
+          <div class="service-quick-rating">
+            <span>Rate this service</span>
+            <div class="service-quick-rating-stars" role="group" aria-label="Choose your rating">
+              ${[1,2,3,4,5].map(rating=>`<button type="button" data-service-quick-rating="${rating}" aria-label="Rate ${rating} out of 5" aria-pressed="false">★</button>`).join("")}
+            </div>
+            <small data-service-quick-rating-label>Tap a star to rate</small>
+          </div>
+          <section class="service-write-review">
+            <div class="service-write-review-prompt">
+              <div><h3>Share your experience</h3><p>Used this service? Let others know what you think.</p></div>
+              <button type="button" class="service-review-open" data-open-service-review>Write a review</button>
+            </div>
+          </section>
+          <dialog class="service-review-dialog" id="service-review-dialog" aria-labelledby="service-review-dialog-title">
+            <div class="dialog-content">
+              <div class="dialog-head"><div><h2 id="service-review-dialog-title">Write a review</h2><p>Rate and review this service provider.</p></div><button class="dialog-close" type="button" data-close-service-review aria-label="Close review form">×</button></div>
+            <form id="service-review-form" data-listing-id="${escapeHtml(service.id||"")}" data-selected-rating="0">
+              <label for="service-review-name">Your name</label>
+              <input id="service-review-name" name="reviewer" maxlength="50" placeholder="Enter your name" required>
+              <span class="service-review-form-label">Your rating</span>
+              <div class="service-review-rating-picker" role="group" aria-label="Choose a star rating">
+                ${[1,2,3,4,5].map(rating=>`<button type="button" data-service-review-rating="${rating}" aria-label="Rate ${rating} stars" aria-pressed="false">★</button>`).join("")}
+              </div>
+              <label for="service-review-comment">Your review</label>
+              <textarea id="service-review-comment" name="review" maxlength="1200" placeholder="Share your experience with this provider..." required></textarea>
+              <button class="service-review-submit" type="submit">Submit review</button>
+              <small class="service-review-disclaimer">Sign in to submit. Your review will be saved to Bigwizz and visible to other customers.</small>
+            </form>
+            </div>
+          </dialog>
+          <section class="service-reviews-section">
+            <h3>Customer rating & reviews</h3>
+            <div class="service-rating-summary"><strong>${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New"}</strong><span class="service-rating-stars" aria-label="${stars} out of 5 stars">${"★".repeat(stars)}<span>${"★".repeat(5-stars)}</span></span><small>${totalRatingCount} ratings</small></div>
+            <div class="service-review-list">${reviewMarkup}</div>
+            <p class="service-review-disclaimer">Prototype examples are labelled. Submitted customer reviews are shared through Bigwizz.</p>
+          </section>
+
+        </article>
+
+      </div>`;
+      setPage("service-details");
+      window.BIGWIZZ_RENDER_SERVICE_REVIEWS=rows=>{
+        serviceReviewsByListing[service.id]=rows;
+        renderServiceDetails(service,true);
+      };
+      if(!skipRemoteLoad&&service.id&&window.BIGWIZZ_BACKEND){
+        window.BIGWIZZ_BACKEND.loadListingReviews(service.id).then(rows=>{
+          serviceReviewsByListing[service.id]=rows;
+          if(selectedServiceDetail&&selectedServiceDetail.id===service.id)renderServiceDetails(service,true);
+        }).catch(error=>{console.error("Could not load shared service reviews.",error);showToast("Customer reviews could not be loaded right now.");});
+      }
     }
     function renderNotifications(){
       document.getElementById("notification-list").innerHTML=appNotifications.map(item=>`<article class="notification-card"><span class="notification-icon" aria-hidden="true">${item.icon}</span><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.copy)}</p><small>${escapeHtml(item.time)}</small></div></article>`).join("");
     }
     function renderEvents(){const list=document.getElementById("event-list");if(!list)return;list.innerHTML=events.map(item=>`<article class="event-card"><div class="event-date"><small>${escapeHtml(item.month)}</small>${escapeHtml(item.day)}</div><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.host)} Â· ${escapeHtml(item.time)}</p></div><button class="outline-button" data-rsvp="${escapeHtml(item.id||item.title)}">I'm interested</button></article>`).join("")}
-    function renderCommunity(){document.getElementById("community-list").innerHTML=conversations.map(item=>`<article class="community-card"><img class="community-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div style="flex:1"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.meta)} Â· ${escapeHtml(item.copy)}</p></div><button class="text-button" data-reply="${escapeHtml(item.title)}">${escapeHtml(item.replies)} â†’</button></article>`).join("")}
+    async function openCommunityThread(postId){
+      const post=conversations.find(item=>String(item.id)===String(postId));if(!post)return;
+      document.getElementById("community-thread-title").textContent=post.title;
+      document.getElementById("community-thread-meta").textContent=`${post.meta} · By ${post.author||"Community member"}`;
+      document.getElementById("community-thread-body").textContent=post.copy;
+      document.getElementById("community-comment-post-id").value=post.id;
+      document.getElementById("community-comments").innerHTML='<p class="notice">Loading comments…</p>';
+      document.getElementById("community-thread-dialog").showModal();
+      try{renderCommunityComments(await window.BIGWIZZ_BACKEND.loadCommunityComments(post.id));}
+      catch(error){document.getElementById("community-comments").innerHTML='<p class="notice">Comments could not be loaded. Please try again.</p>';console.error(error);}
+    }
+    function renderCommunityComments(comments){const target=document.getElementById("community-comments");target.innerHTML=comments.length?comments.map(item=>`<article class="community-comment"><b>${escapeHtml(item.author||"Community member")}</b><p>${escapeHtml(item.body)}</p>${item.status==="pending"?'<small class="community-post-status">Awaiting moderation</small>':""}</article>`).join(""):'<p class="notice">No comments yet. Start the conversation.</p>';}
+    function renderCommunity(){document.getElementById("community-list").innerHTML=conversations.length?conversations.map(item=>`<article class="community-card"><img class="community-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div style="flex:1;min-width:0"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.meta)} · ${escapeHtml(item.copy)}</p><small class="community-post-author">By ${escapeHtml(item.author||"Community member")}</small>${item.status==="pending"?'<span class="community-post-status">Awaiting moderation</span>':""}</div><button class="text-button" data-open-community-post="${escapeHtml(item.id)}">Comments · ${Number(item.commentCount||0)} →</button></article>`).join(""):'<p class="notice">No community conversations yet. Start the first one.</p>'}
     function loadServiceRequests(){
       try{
         const saved=localStorage.getItem("bigwizz-service-requests");
@@ -1235,19 +1452,27 @@
         if(!requests.length)return '<section class="service-request-section"><h3>Service requests</h3><p class="notice">No service requests yet. New requests from this browser will appear here.</p></section>';
         return `<section class="service-request-section"><h3>Service requests</h3><div class="service-request-list">${requests.slice().reverse().map(item=>{
           const created=Date.parse(item.createdAt),received=Number.isFinite(created)?new Date(created).toLocaleString():"Date unavailable";
-          return `<article class="service-request-card"><div><h4>${escapeHtml(item.service)} Â· ${escapeHtml(item.requestType)}</h4><p>${escapeHtml(item.details)}</p><small>${escapeHtml(item.area)}${item.preferredDate?` Â· Preferred date: ${escapeHtml(item.preferredDate)}`:""} Â· ${escapeHtml(received)}</small></div><button class="outline-button" type="button" data-reply-to="${escapeHtml(item.service)}">Respond</button></article>`;
+          return `<article class="service-request-card"><div><h4>${escapeHtml(item.service)} Â· ${escapeHtml(item.requestType)}</h4><p>${escapeHtml(item.details)}</p><small>${escapeHtml(item.city||"")} ${item.city&&item.area?" · ":""}${escapeHtml(item.area)}${item.preferredDate?` Â· Preferred date: ${escapeHtml(item.preferredDate)}`:""} Â· ${escapeHtml(received)}</small></div><button class="outline-button" type="button" data-reply-to="${escapeHtml(item.service)}">Respond</button></article>`;
         }).join("")}</div></section>`;
       })():"";
       const messageSection=`<section class="seller-message-section"><h3>${sellerInbox?"Buyer messages":"Recent messages"}</h3>${threads.map((item,index)=>`<div class="message-row" style="padding:12px 4px;border-bottom:1px solid var(--line)"><span class="avatar" style="background:${item.color}">${item.initials}</span><div><span class="pill" style="${index===2?"background:#c9d3ca;color:#45574a":""}">${item.priority}</span><b>${item.name}</b><small>${item.context}</small><small>${item.preview}</small></div><button class="outline-button" style="width:auto" data-reply-to="${item.name}">Reply</button></div>`).join("")}</section>`;
       document.getElementById("inbox").innerHTML=`${requestSection}${messageSection}<p class="notice">${sellerInbox?"Service requests and messages are prototype data saved in this browser; responding does not contact the buyer.":"Priority labels are a demo. Real message sorting needs user controls, consent, and a reliable backend."}</p>`;
     }
     document.addEventListener("click",event=>{
+      if(event.target.closest("#new-post")){if(!window.BIGWIZZ_BACKEND?.getCurrentUser()){window.BIGWIZZ_BACKEND?.requireSignIn();return}document.getElementById("community-post-form").reset();document.getElementById("community-compose-dialog").showModal();return}
+      const closeCommunity=event.target.closest("[data-close-community-dialog]");if(closeCommunity){closeCommunity.closest("dialog")?.close();return}
+      const openCommunityPost=event.target.closest("[data-open-community-post]");if(openCommunityPost){openCommunityThread(openCommunityPost.dataset.openCommunityPost);return}
       if(!event.target.closest(".account-switch-wrap"))closeAccountMenu();
       const accountMenuToggle=event.target.closest("[data-account-menu-toggle]");if(accountMenuToggle){const menu=document.getElementById("account-switch-menu");const wrap=document.querySelector(".account-switch-wrap");const isOpen=!menu.hidden;menu.hidden=isOpen;accountMenuToggle.setAttribute("aria-expanded",String(!isOpen));if(wrap){wrap.classList.toggle("is-open",!isOpen)};return}
+      const serviceRole=event.target.closest("[data-service-role]");if(serviceRole){const role=serviceRole.dataset.serviceRole;document.getElementById("service-buyer-interface").hidden=role!=="buyer";document.getElementById("service-provider-placeholder").hidden=role!=="seller";document.querySelectorAll(".service-role-button").forEach(button=>{const selected=button.dataset.serviceRole===role;button.classList.toggle("active",selected);button.setAttribute("aria-pressed",String(selected))});if(role==="seller")window.BIGWIZZ_BACKEND?.loadSellerServiceRequests?.();return}
       const accountOption=event.target.closest("[data-account-option]");if(accountOption){switchAccount(accountOption.dataset.accountOption);return}
       const openProduct=event.target.closest("[data-open-product]");if(openProduct){renderProductDetails(openProduct.dataset.openProduct);return}
       const productCard=event.target.closest("[data-product-card]");if(productCard&&!event.target.closest("[data-save]")){renderProductDetails(productCard.dataset.productCard);return}
-      const reviewRating=event.target.closest("[data-review-rating]");if(reviewRating){selectedReviewRating=Number(reviewRating.dataset.reviewRating);document.querySelectorAll("#product-review-rating [data-review-rating]").forEach(button=>{const selected=Number(button.dataset.reviewRating)<=selectedReviewRating;button.setAttribute("aria-pressed",String(selected));button.classList.remove("rating-pop");if(selected){button.style.setProperty("--star-delay",`${(Number(button.dataset.reviewRating)-1)*55}ms`);void button.offsetWidth;button.classList.add("rating-pop")}});return}
+      const openServiceReview=event.target.closest("[data-open-service-review]");if(openServiceReview){const form=document.getElementById("service-review-form");if(form){form.reset();form.dataset.selectedRating=String(selectedServiceReviewRating||0);form.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=(selectedServiceReviewRating||0))));}document.getElementById("service-review-dialog")?.showModal();return}
+      const quickRating=event.target.closest("[data-service-quick-rating]");if(quickRating){selectedServiceReviewRating=Number(quickRating.dataset.serviceQuickRating);const form=document.getElementById("service-review-form");if(form)form.dataset.selectedRating=String(selectedServiceReviewRating);document.querySelectorAll("[data-service-quick-rating]").forEach(button=>{const active=Number(button.dataset.serviceQuickRating)<=selectedServiceReviewRating;button.setAttribute("aria-pressed",String(active));button.classList.remove("is-animating");if(active){void button.offsetWidth;button.classList.add("is-animating");}});document.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=selectedServiceReviewRating)));const label=document.querySelector("[data-service-quick-rating-label]");if(label)label.textContent=`You selected ${selectedServiceReviewRating} out of 5 stars`;return}
+      const closeServiceReview=event.target.closest("[data-close-service-review]");if(closeServiceReview){document.getElementById("service-review-dialog")?.close();return}
+      const serviceReviewRating=event.target.closest("[data-service-review-rating]");if(serviceReviewRating){selectedServiceReviewRating=Number(serviceReviewRating.dataset.serviceReviewRating);const form=document.getElementById("service-review-form");if(form)form.dataset.selectedRating=String(selectedServiceReviewRating);document.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=selectedServiceReviewRating)));document.querySelectorAll("[data-service-quick-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceQuickRating)<=selectedServiceReviewRating)));const label=document.querySelector("[data-service-quick-rating-label]");if(label)label.textContent=`You selected ${selectedServiceReviewRating} out of 5 stars`;return}
+      const reviewRating=event.target.closest("[data-review-rating]");if(reviewRating){selectedReviewRating=Number(reviewRating.dataset.reviewRating);window.BIGWIZZ_PRODUCT_SELECTED_RATING=selectedReviewRating;document.querySelectorAll("#product-review-rating [data-review-rating]").forEach(button=>{const selected=Number(button.dataset.reviewRating)<=selectedReviewRating;button.setAttribute("aria-pressed",String(selected));button.classList.remove("rating-pop");if(selected){button.style.setProperty("--star-delay",`${(Number(button.dataset.reviewRating)-1)*55}ms`);void button.offsetWidth;button.classList.add("rating-pop")}});return}
       const writeReview=event.target.closest("[data-write-review]");if(writeReview){document.getElementById("item-review-form").reset();document.getElementById("review-listing-id").value=writeReview.dataset.writeReview;document.getElementById("review-dialog-title").textContent=`Review ${writeReview.dataset.reviewTitle}`;document.getElementById("review-dialog-summary").textContent="How was this item?";document.getElementById("review-dialog").showModal();return}
       const salesRange=event.target.closest("[data-sales-range]");if(salesRange){salesRangeDays=Number(salesRange.dataset.salesRange);document.querySelectorAll("[data-sales-range]").forEach(button=>button.classList.toggle("active",button===salesRange));renderSellerSales();return}
       const listingAction=event.target.closest("[data-seller-listing-action]");if(listingAction){
@@ -1268,22 +1493,24 @@
       const addCartButton=event.target.closest("[data-add-to-cart]");if(addCartButton){addToCart(addCartButton.dataset.addToCart,{size:document.getElementById("product-size")?.value||"",color:document.getElementById("product-color")?.value||""});return}
       const cartAction=event.target.closest("[data-cart-action]");if(cartAction){updateCartItem(cartAction.dataset.cartId,cartAction.dataset.cartAction);return}
       if(event.target.closest("[data-checkout-demo]")){showToast("Checkout and payments aren't connected in this prototype.");return}
+      const serviceDetailRequest=event.target.closest("[data-service-detail-request]");if(serviceDetailRequest&&selectedServiceDetail){
+        const service=selectedServiceDetail;
+        document.getElementById("service-dialog-title").textContent=`Request ${service.title.toLowerCase()}`;
+        document.getElementById("service-dialog-summary").innerHTML=`${escapeHtml(service.provider)} &middot; ${escapeHtml(service.price)} &middot; ${escapeHtml(service.rating||"New listing")}`;
+        document.getElementById("service-request-name").value=service.title;
+        const savedLocation=window.BIGWIZZ_LOCATION_CONTEXT||{};
+        if(!document.getElementById("request-city").value)document.getElementById("request-city").value=savedLocation.city||"";
+        if(!document.getElementById("request-area").value)document.getElementById("request-area").value=savedLocation.area||"";
+        document.getElementById("request-date").min=new Date().toISOString().slice(0,10);
+        document.getElementById("service-dialog").showModal();return
+      }
       const requestButton=event.target.closest("[data-service-request]");if(requestButton){
         const requestId=requestButton.dataset.serviceRequest;
         const custom=requestId.startsWith("custom-")?customListings.find(item=>item.id===requestId.slice(7)):null;
         const original=custom?null:services.find(item=>item.id===requestId)||services[Number(requestId)];
         const service=custom?{title:custom.title,provider:custom.seller,price:custom.pricingMode==="quote"?"Request a quote":custom.pricingMode==="starting"?`From ${currencyFormatter.format(custom.price)} / service`:currencyFormatter.format(custom.price),rating:"New listing",sellerPrice:custom.price,pricingMode:custom.pricingMode||"starting"}:original?{...original,price:original.price,sellerPrice:original.sellerPrice===undefined?sellerPriceFrom(original.price):original.sellerPrice}:null;
         if(!service)return;
-        const rating=service.rating==="New listing"?"New listing":`${starIcon(true)} ${service.rating}`;
-        document.getElementById("service-dialog-title").textContent=`Request ${service.title.toLowerCase()}`;
-        document.getElementById("service-dialog-summary").innerHTML=`${escapeHtml(service.provider)} &middot; ${escapeHtml(service.price)} &middot; ${service.rating==="New listing"?"New listing":rating}`;
-        document.getElementById("service-request-name").value=service.title;
-        document.getElementById("request-matching-mode").value=original&&original.providerId?"direct":"nearby";
-        document.getElementById("request-scheduled-at").min=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16);
-        document.getElementById("request-latitude").value="";
-        document.getElementById("request-longitude").value="";
-        document.getElementById("request-location-status").textContent="GPS is optional; you can enter your address manually.";
-        document.getElementById("service-dialog").showModal();return
+        renderServiceDetails({...service,category:custom?custom.category:original.category,image:custom?custom.image:original.image,description:custom?custom.description:original.description});return
       }
       if(event.target.closest("[data-reply], [data-reply-to]"))showToast("Replying is a demo; connect an inbox to send real messages.");
     });
@@ -1310,101 +1537,9 @@
       if(currentProductId)renderProductDetails(currentProductId);
       showToast("Review saved in this browser.");
     });
-    document.getElementById("seller-listing-type").addEventListener("change",event=>updateSellerListingOptions(event.currentTarget.value));
-    document.getElementById("seller-listing-size-type").addEventListener("change",event=>updateSellerListingOptions("goods",document.getElementById("seller-listing-category").value,event.currentTarget.value,true));
-    document.getElementById("seller-listing-sizes").addEventListener("input",()=>updateSellerListingOptions("goods",document.getElementById("seller-listing-category").value,document.getElementById("seller-listing-size-type").value));
-    document.getElementById("seller-listing-colors").addEventListener("change",event=>renderSellerColorPhotoFields(parseVariantOptions(event.currentTarget.value),customListings.find(item=>item.id===editingListingId)?.colorImages||{}));
-    document.getElementById("seller-listing-price").addEventListener("input",updateSellerListingPricePreview);
-    document.getElementById("seller-service-pricing-mode").addEventListener("change",()=>{updateSellerListingOptions(document.getElementById("seller-listing-type").value);updateSellerListingPricePreview()});
-    document.getElementById("seller-use-location").addEventListener("click",()=>{
-      const status=document.getElementById("seller-location-status");
-      if(!navigator.geolocation){status.textContent="GPS is not available in this browser.";return}
-      status.textContent="Getting your location…";
-      navigator.geolocation.getCurrentPosition(position=>{
-        document.getElementById("seller-latitude").value=String(position.coords.latitude);
-        document.getElementById("seller-longitude").value=String(position.coords.longitude);
-        status.textContent="Your provider location has been added.";
-      },()=>{status.textContent="GPS access was unavailable. You can still enter your city and area."},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
-    });
-    document.getElementById("request-use-location").addEventListener("click",()=>{
-      const status=document.getElementById("request-location-status");
-      if(!navigator.geolocation){status.textContent="GPS is not available in this browser. Enter your address manually.";return}
-      status.textContent="Getting your location…";
-      navigator.geolocation.getCurrentPosition(position=>{
-        document.getElementById("request-latitude").value=String(position.coords.latitude);
-        document.getElementById("request-longitude").value=String(position.coords.longitude);
-        status.textContent="Location added. Bigwizz can use it to find nearby providers.";
-      },()=>{status.textContent="We couldn't access GPS. You can still submit using your address."},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
-    });
-    document.getElementById("seller-listing-cancel").addEventListener("click",resetSellerListingForm);
-    document.getElementById("seller-listing-form").addEventListener("submit",async event=>{
-      event.preventDefault();
-      const form=event.currentTarget,submitButton=document.getElementById("seller-listing-submit");
-      submitButton.disabled=true;
-      try{
-        const values=new FormData(form),existing=customListings.find(item=>item.id===editingListingId);
-        const title=String(values.get("title")||"").trim(),description=String(values.get("description")||"").trim();
-        const type=String(values.get("type")),category=String(values.get("category")),sizeType=type==="goods"?String(values.get("sizeType")||"other"):"other",pricingMode=type==="service"?String(values.get("pricingMode")||"fixed"):"fixed";
-        const rawPrice=String(values.get("price")||"").trim(),price=pricingMode==="quote"&&type==="service"?null:Number(rawPrice);
-        if(!title||!description||(price!==null&&(!Number.isFinite(price)||price<=0))||(price===null&&!(type==="service"&&pricingMode==="quote"))){showToast("Enter a valid price or choose quotation required.");return}
-        const sizes=type==="goods"&&sizeType!=="other"?parseVariantOptions(values.get("sizes")):[],colors=type==="goods"?parseVariantOptions(values.get("colors")):[];
-        if(sizeType!=="other"&&!sizes.length)throw new Error("Add the sizes buyers can choose for this clothing, shoe, or cap listing.");
-        const selectedFile=document.getElementById("seller-listing-image").files[0];
-        const image=selectedFile?await prepareListingImage(selectedFile):existing&&existing.image;
-        if(!image){showToast("Upload a product photo before publishing.");return}
-        const colorImages={...(existing&&existing.colorImages||{})};
-        Object.keys(colorImages).forEach(color=>{if(!colors.includes(color))delete colorImages[color]});
-        for(const input of document.querySelectorAll("[data-color-image]")){
-          const file=input.files&&input.files[0];if(file)colorImages[input.dataset.colorImage]=await prepareListingImage(file);
-        }
-        const missingColorPhoto=colors.find(color=>!colorImages[color]);
-        if(missingColorPhoto)throw new Error(`Upload a product photo for the ${missingColorPhoto} color.`);
-        const item={
-          id:existing?existing.id:`listing-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}`,
-          title,description,type,category,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,pricingMode,image,
-          sizeType,sizes,colors,colorImages,
-          seller:existing?existing.seller:sellerShopName||document.getElementById("profile-name").textContent,
-          status:existing?existing.status:"published"
-        };
-        if(!isCustomListing(item)){showToast("Check the listing details and try again.");return}
-        const nextListings=existing?customListings.map(listing=>listing.id===existing.id?item:listing):[...customListings,item];
-        if(saveCustomListings(nextListings)){
-          resetSellerListingForm();
-          renderSellerListings();
-          renderListings(document.getElementById("search-input").value);
-          renderServices(document.getElementById("service-search-input").value);
-          showToast(existing?"Listing updated.":"Listing published. Service fees are shown separately before a booking is paid.");
-        }
-      }catch(error){
-        console.error("Could not prepare the seller listing.",error);
-        showToast(error instanceof Error?error.message:"Listing could not be prepared. Try another image.");
-      }finally{
-        submitButton.disabled=false;
-      }
-    });
-    document.querySelector(".dialog-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
+    document.querySelector(".service-request-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
     document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");requests.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();document.getElementById("service-dialog").close();showToast("Demo request saved locally. Sign in to send a real request through Bigwizz.")});
     document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
-    document.getElementById("seller-setup-form").addEventListener("submit",event=>{
-      event.preventDefault();
-      const profile=Object.fromEntries(new FormData(event.currentTarget).entries());
-      const savedProfile={shopName:String(profile.shopName).trim(),sellerType:String(profile.sellerType)||"Goods and services",offeringDescription:String(profile.offeringDescription).trim()};
-      if(!saveSellerProfile(savedProfile))return;
-      sellerShopName=savedProfile.shopName;
-      sellerType=savedProfile.sellerType;
-      sellerOfferingDescription=savedProfile.offeringDescription;
-      sellerProfileReady=true;
-      if(!accountRoles.includes("seller"))accountRoles.push("seller");
-      activeAccount="seller";
-      updateMobileNavigation();
-      document.getElementById("seller-shop-title").textContent=sellerShopName;
-      document.getElementById("seller-type-label").textContent=`${sellerType} Â· Manage listings, customer orders, and earnings.`;
-      document.getElementById("seller-offering-label").textContent=sellerOfferingDescription;
-      event.currentTarget.reset();
-      renderAccountMenu();
-      setPage("seller-studio");
-      showToast("Seller account set up. You can switch accounts from your profile menu.");
-    });
     document.getElementById("new-post").addEventListener("click",()=>showToast("Community posting is a demo. Sign-in and moderation are needed before launch."));
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});
     setTimeout(()=>{
@@ -1416,9 +1551,6 @@
     },matchMedia("(prefers-reduced-motion: reduce)").matches?250:1250);
     document.getElementById("clear-filter").addEventListener("click",()=>{activeCategory="All";document.getElementById("search-input").value="";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderListings()});
     document.getElementById("issue-form").addEventListener("submit",event=>{event.preventDefault();const reports=JSON.parse(localStorage.getItem("bigwizz-order-reports")||"[]");reports.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-order-reports",JSON.stringify(reports));event.currentTarget.reset();showToast("Report saved in this browser. No real support case was created.")});
-    updateSellerListingOptions("goods");
-    loadCustomListings();
-    loadSellerProfile();
     loadCart();
     loadReviews();
     seedSampleReviews();
