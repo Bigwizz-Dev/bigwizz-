@@ -770,7 +770,7 @@
     function addToCart(listingId,options={}){
       const item=getGoodsListing(listingId);
       if(!item){showToast("This listing is no longer available.");return}
-      const sizes=Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
+      const sizeEnabled=["clothing","shoes","caps"].includes(item.sizeType),sizes=sizeEnabled&&Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
       if(sizes.length&&!options.size||colors.length&&!options.color){showToast("Choose the available options before adding this item.");return}
       const selectedItem={listingId,title:item.title,seller:item.seller,image:(item.colorImages&&item.colorImages[options.color])||item.image,sellerPrice:sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice||item.price),size:options.size||"",color:options.color||""};
       const key=cartItemKey(selectedItem),existing=cartItems.find(cartItem=>cartItemKey(cartItem)===key);
@@ -1061,7 +1061,7 @@
         <section class="product-reviews">
           <div class="section-head"><div><h3>Rating</h3>${renderProductRatingStars()}</div></div>
           ${variantFields?`<div class="product-options-panel"><h4>Choose your options</h4><p>Select the colour and size you want before adding this item to your cart.</p><div class="product-option-grid">${variantFields}</div></div>`:""}
-          ${renderSizeChart(item.sizeType||"other",sizes)}
+          ${sizeEnabled?renderSizeChart(item.sizeType,sizes):""}
           <div class="product-review-actions"><button type="button" class="outline-button" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button></div>
           <div class="product-review-list">${reviewRows||'<p class="notice">No written reviews yet. Be the first to share your experience.</p>'}</div>
           <p class="notice">Sample reviews are demo content. New reviews are saved only in this browser.</p>
