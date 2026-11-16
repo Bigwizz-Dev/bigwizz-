@@ -183,7 +183,7 @@
   async function loadCatalog() {
     const { data: rows, error } = await client
       .from("listings")
-      .select("id,seller_id,kind,category,title,description,seller_name,price,image_url,rating,rating_count")
+      .select("id,seller_id,kind,category,title,description,seller_name,price,pricing_mode,image_url,rating,rating_count")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (error) {
@@ -212,7 +212,8 @@
       description: row.description,
       providerId: row.seller_id,
       sellerPrice: row.price,
-      price: row.price === null ? "Request an estimate" : `From ${currency.format(row.price)} / service`,
+      pricingMode: row.pricing_mode || "fixed",
+      price: row.pricing_mode === "quote" || row.price === null ? "Request a quote" : row.pricing_mode === "starting" ? `From ${currency.format(row.price)} / service` : currency.format(row.price),
       rating: row.rating === null ? "New listing" : Number(row.rating).toFixed(1),
       provider: row.seller_name
     }));
@@ -314,7 +315,7 @@
   async function loadMyListings() {
     if (!user || !sellerProfileReady) return;
     const { data, error } = await client.from("listings")
-      .select("id,kind,category,title,description,price,image_url,status,seller_name")
+      .select("id,kind,category,title,description,price,pricing_mode,image_url,status,seller_name")
       .eq("seller_id", user.id)
       .order("created_at", { ascending: false });
     if (error) {
@@ -552,9 +553,11 @@
       const description = String(values.get("description") || "").trim();
       const kind = String(values.get("type") || "");
       const category = String(values.get("category") || "");
-      const price = Number(values.get("price"));
-      if (!title || !description || !Number.isFinite(price) || price <= 0) {
-        throw new Error("Enter a title, description, and valid price.");
+      const pricingMode = kind === "service" ? String(values.get("pricingMode") || "fixed") : "fixed";
+      const rawPrice = String(values.get("price") || "").trim();
+      const price = kind === "service" && pricingMode === "quote" ? null : Number(rawPrice);
+      if (!title || !description || (price !== null && (!Number.isFinite(price) || price <= 0)) || (price === null && !(kind === "service" && pricingMode === "quote"))) {
+        throw new Error("Enter a valid price or select quotation required.");
       }
       const { data: existing, error: existingError } = remoteEditingId
         ? await client.from("listings").select("id,status,image_url")
@@ -571,7 +574,8 @@
         title,
         description,
         seller_name: sellerShopName,
-        price: Math.round((price + Number.EPSILON) * 100) / 100,
+        price: price === null ? null : Math.round((price + Number.EPSILON) * 100) / 100,
+        pricing_mode: pricingMode,
         image_url: imageUrl,
         status: existing ? existing.status : "published"
       };
@@ -596,7 +600,7 @@
       return;
     }
     const row = await client.from("listings")
-      .select("id,title,kind,category,description,price,image_url,status")
+      .select("id,title,kind,category,description,price,pricing_mode,image_url,status")
       .eq("id", listingId).eq("seller_id", user.id).single();
     if (row.error) throw row.error;
     if (action === "edit") {
@@ -606,7 +610,9 @@
       document.getElementById("seller-listing-type").value = item.kind;
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change", { bubbles: true }));
       document.getElementById("seller-listing-category").value = item.category;
-      document.getElementById("seller-listing-price").value = String(item.price);
+      document.getElementById("seller-service-pricing-mode").value = item.pricing_mode || "fixed";
+      document.getElementById("seller-listing-price").value = item.price === null ? "" : String(item.price);
+      document.getElementById("seller-listing-price").disabled = item.kind === "service" && item.pricing_mode === "quote";
       document.getElementById("seller-listing-description").value = item.description;
       document.getElementById("seller-listing-submit").textContent = "Save changes";
       document.getElementById("seller-listing-cancel").hidden = false;
@@ -635,23 +641,63 @@
     const values = new FormData(event.currentTarget);
     const serviceTitle = String(values.get("service") || "");
     const listing = services.find(item => item.title === serviceTitle);
-    const { error } = await client.from("service_requests").insert({
-      buyer_id: user.id,
-      listing_id: listing ? listing.id : null,
-      provider_id: listing ? listing.providerId : null,
-      service_title: serviceTitle,
-      request_type: String(values.get("requestType")),
-      preferred_date: String(values.get("preferredDate") || "") || null,
-      area: String(values.get("area") || "").trim(),
-      details: String(values.get("details") || "").trim()
-    });
-    if (error) {
-      report(error, "Service request could not be saved.");
-      return;
+    const matchingMode = String(values.get("matchingMode") || "direct");
+    const scheduledAt = String(values.get("scheduledAt") || "");
+    const latitude = values.get("latitude") ? Number(values.get("latitude")) : null;
+    const longitude = values.get("longitude") ? Number(values.get("longitude")) : null;
+    const area = String(values.get("area") || "").trim();
+    const serviceAddress = String(values.get("serviceAddress") || "").trim();
+    const requestRow = {
+      buyer_id:user.id, listing_id:listing?listing.id:null,
+      provider_id:matchingMode==="direct"&&listing?listing.providerId:null,
+      service_title:serviceTitle, request_type:String(values.get("requestType")),
+      preferred_date:scheduledAt?scheduledAt.slice(0,10):null,
+      scheduled_at:scheduledAt?new Date(scheduledAt).toISOString():null,
+      matching_mode:matchingMode, service_address:serviceAddress,
+      representative_name:String(values.get("representativeName")||"").trim()||null,
+      representative_phone:String(values.get("representativePhone")||"").trim()||null,
+      area, details:String(values.get("details")||"").trim(), latitude, longitude
+    };
+    const {data:request,error}=await client.from("service_requests").insert(requestRow).select("id").single();
+    if(error){report(error,"Service request could not be saved.");return;}
+    if(matchingMode==="direct"&&listing?.providerId){
+      const {error:matchError}=await client.from("service_request_matches").insert({request_id:request.id,buyer_id:user.id,provider_id:listing.providerId});
+      if(matchError)report(matchError,"Request saved, but the selected provider could not be notified.");
     }
+    if(matchingMode==="nearby"){
+      const {data:providers,error:providerError}=await client.from("seller_profiles")
+        .select("user_id,city,area,latitude,longitude,availability_status").eq("is_public",true).eq("availability_status","available");
+      if(providerError)report(providerError,"Request saved, but nearby providers could not be searched.");
+      else{
+        const {data:providerListings,error:listingError}=await client.from("listings")
+          .select("seller_id,category").eq("kind","service").eq("status","published");
+        if(listingError)report(listingError,"Request saved, but service categories could not be matched.");
+        else{
+          const category=listing&&listing.category;
+          const eligibleIds=new Set(providerListings.filter(item=>!category||item.category===category).map(item=>item.seller_id).filter(Boolean));
+          const radians=value=>value*Math.PI/180;
+          const distanceKm=(aLat,aLon,bLat,bLon)=>{
+            const dLat=radians(bLat-aLat),dLon=radians(bLon-aLon);
+            const value=Math.sin(dLat/2)**2+Math.cos(radians(aLat))*Math.cos(radians(bLat))*Math.sin(dLon/2)**2;
+            return 6371*2*Math.atan2(Math.sqrt(value),Math.sqrt(1-value));
+          };
+          const ranked=providers.filter(item=>item.user_id!==user.id&&eligibleIds.has(item.user_id)).map(item=>{
+            let distance=null;
+            if(latitude!==null&&longitude!==null&&item.latitude!==null&&item.longitude!==null)distance=distanceKm(latitude,longitude,item.latitude,item.longitude);
+            const sameArea=area&&[item.area,item.city].some(value=>value&&area.toLowerCase().includes(String(value).toLowerCase()));
+            return {user_id:item.user_id,distance,sameArea};
+          }).filter(item=>item.distance!==null?item.distance<=25:item.sameArea).sort((x,y)=>(x.distance??999)-(y.distance??999)).slice(0,5);
+          if(ranked.length){
+            const {error:matchError}=await client.from("service_request_matches").insert(ranked.map(item=>({request_id:request.id,buyer_id:user.id,provider_id:item.user_id})));
+            if(matchError)report(matchError,"Request saved, but provider invitations could not be sent.");
+            else notify(`Your request was sent to ${ranked.length} nearby provider${ranked.length===1?"":"s"}.`);
+          }else notify("Your request was saved. No available nearby provider matched this area yet.");
+        }
+      }
+    }else notify("Your request was sent to the selected provider.");
     event.currentTarget.reset();
     document.getElementById("service-dialog").close();
-    notify("Service request saved to your account.");
+    await loadBuyerServiceRequests();
   }
 
   async function submitOrderReport(event) {
@@ -677,24 +723,51 @@
   }
 
   async function loadInbox() {
-    if (!user) {
-      showAuth();
-      return;
-    }
-    if (activeAccount !== "seller") return;
-    const { data, error } = await client.from("service_requests")
-      .select("service_title,request_type,area,details,preferred_date,created_at")
-      .eq("provider_id", user.id).order("created_at", { ascending: false });
-    if (error) {
-      report(error, "Seller service requests could not be loaded.");
-      return;
-    }
-    const requests = data.length ? `<div class="service-request-list">${data.map(item =>
-      `<article class="service-request-card"><div><h4>${escapeHtml(item.service_title)} · ${escapeHtml(item.request_type)}</h4><p>${escapeHtml(item.details)}</p><small>${escapeHtml(item.area)}${item.preferred_date ? ` · Preferred date: ${escapeHtml(item.preferred_date)}` : ""} · ${new Date(item.created_at).toLocaleString()}</small></div></article>`
-    ).join("")}</div>` : '<p class="notice">No service requests yet.</p>';
-    document.getElementById("inbox").innerHTML =
-      `<section class="service-request-section"><h3>Service requests</h3>${requests}</section><p class="notice">Messaging is not connected yet.</p>`;
-    document.querySelector("#messages .section-head h2").textContent = "Seller inbox";
+    if(!user){showAuth();return;}
+    if(activeAccount!=="seller")return;
+    const {data,error}=await client.from("service_request_matches")
+      .select("id,status,quoted_amount,currency,response_note,sent_at,service_requests(service_title,request_type,area,details,scheduled_at,service_address,representative_name)")
+      .eq("provider_id",user.id).order("sent_at",{ascending:false});
+    if(error){report(error,"Nearby service requests could not be loaded.");return;}
+    const requests=data.length?`<div class="service-request-list">${data.map(match=>{
+      const item=match.service_requests||{},schedule=item.scheduled_at?new Date(item.scheduled_at).toLocaleString():"As soon as possible";
+      return `<article class="service-request-card"><div><h4>${escapeHtml(item.service_title||"Service request")} · ${escapeHtml(match.status)}</h4><p>${escapeHtml(item.details||"")}</p><small>${escapeHtml(item.area||"")} · ${escapeHtml(schedule)} · ${escapeHtml(item.service_address||"")}${item.representative_name?" · Contact on arrival: "+escapeHtml(item.representative_name):""}</small>
+      ${match.status==="sent"||match.status==="viewed"?`<form class="service-match-response" data-service-match-response="${match.id}"><input name="quotedAmount" type="number" min="0.01" step="0.01" placeholder="Your quotation" required><input name="currency" value="USD" maxlength="3" aria-label="Currency" required><textarea name="responseNote" placeholder="Explain what is included, availability and any conditions" maxlength="2000"></textarea><button class="primary" type="submit">Send private quotation</button></form>`:match.quoted_amount?`<div class="service-quote-card">Your quotation: <strong>${escapeHtml(match.currency)} ${Number(match.quoted_amount).toLocaleString()}</strong><p>${escapeHtml(match.response_note||"")}</p></div>`:""}</div></article>`;
+    }).join("")}</div>`:'<p class="notice">No nearby service requests yet. New requests from buyers in your service area will appear here.</p>';
+    document.getElementById("inbox").innerHTML=`<section class="service-request-section"><h3>Nearby service requests</h3>${requests}</section><p class="notice">Send quotations privately. Buyers compare provider profiles and offers; Bigwizz does not run a public bidding contest.</p>`;
+    document.querySelector("#messages .section-head h2").textContent="Seller inbox";
+  }
+
+  async function respondToServiceMatch(event) {
+    event.preventDefault();event.stopImmediatePropagation();
+    if(!user){showAuth();return;}
+    const form=event.currentTarget,values=new FormData(form),amount=Number(values.get("quotedAmount"));
+    if(!Number.isFinite(amount)||amount<=0){notify("Enter a valid quotation.");return;}
+    const {error}=await client.from("service_request_matches").update({
+      status:"quoted",quoted_amount:Math.round(amount*100)/100,
+      currency:String(values.get("currency")||"USD").toUpperCase(),
+      response_note:String(values.get("responseNote")||"").trim(),responded_at:new Date().toISOString()
+    }).eq("id",form.dataset.serviceMatchResponse).eq("provider_id",user.id);
+    if(error){report(error,"Your quotation could not be sent.");return;}
+    notify("Your private quotation was sent to the buyer.");await loadInbox();
+  }
+
+  async function loadBuyerServiceRequests() {
+    const panel=document.getElementById("buyer-service-request-panel"),list=document.getElementById("buyer-service-request-list");
+    if(!panel||!list||!user){if(panel)panel.hidden=true;return;}
+    const {data,error}=await client.from("service_requests")
+      .select("id,service_title,area,details,scheduled_at,created_at,service_request_matches(id,provider_id,status,quoted_amount,currency,response_note,seller_profiles(shop_name)),service_request_selections(match_id,provider_id)")
+      .eq("buyer_id",user.id).order("created_at",{ascending:false}).limit(10);
+    if(error){report(error,"Your service requests could not be loaded.");return;}
+    panel.hidden=false;
+    list.innerHTML=data.length?data.map(request=>{
+      const selected=(request.service_request_selections||[])[0];
+      const offers=(request.service_request_matches||[]).map(match=>{
+        const shop=Array.isArray(match.seller_profiles)?match.seller_profiles[0]:match.seller_profiles,isSelected=selected&&selected.match_id===match.id;
+        return `<article class="service-quote-card"><strong>${escapeHtml(shop?.shop_name||"Nearby provider")}</strong><p>${match.quoted_amount?`Quotation: ${escapeHtml(match.currency)} ${Number(match.quoted_amount).toLocaleString()}`:"Waiting for provider response"}</p><small>${escapeHtml(match.response_note||match.status)}</small>${isSelected?'<p><strong>Selected provider.</strong> Secure checkout will appear once Bigwizz payment processing is connected.</p>':match.status==="quoted"&&!selected?`<button class="primary" type="button" data-select-service-match="${match.id}" data-request-id="${request.id}" data-provider-id="${match.provider_id}">Choose this provider</button>`:""}</article>`;
+      }).join("");
+      return `<article class="service-request-card"><div><h4>${escapeHtml(request.service_title)}</h4><p>${escapeHtml(request.details)}</p><small>${escapeHtml(request.area)} · ${request.scheduled_at?new Date(request.scheduled_at).toLocaleString():"As soon as possible"}</small>${offers||'<p class="notice">Waiting for provider responses.</p>'}</div></article>`;
+    }).join(""):'<p class="notice">You have not sent a service request yet.</p>';
   }
 
   async function loadNotifications() {
@@ -736,6 +809,7 @@
       await loadAccount();
       showApp();
       await loadCatalog();
+      if (activeAccount !== "seller") await loadBuyerServiceRequests();
       if (activeAccount === "seller" && sessionStorage.getItem("bigwizz-pending-seller-studio")) {
         sellerAuthVerified = true;
         await finalizePendingSellerStudio();
@@ -831,6 +905,7 @@
     if (event.target.id === "seller-setup-form") return saveSellerProfile(event);
     if (event.target.id === "seller-listing-form") return saveSellerListing(event);
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
+    if (event.target.matches("[data-service-match-response]")) return respondToServiceMatch(event);
     if (event.target.id === "issue-form") return submitOrderReport(event);
     if (event.target.id === "search-form") {
       stop(event);
@@ -1000,6 +1075,17 @@
     }
   }, true);
 
+  document.addEventListener("click",async event=>{
+    const choose=event.target.closest("[data-select-service-match]");
+    if(!choose||!user)return;
+    const {error}=await client.from("service_request_selections").insert({
+      request_id:choose.dataset.requestId,match_id:choose.dataset.selectServiceMatch,
+      buyer_id:user.id,provider_id:choose.dataset.providerId
+    });
+    if(error){report(error,"Provider selection could not be saved.");return;}
+    notify("Provider selected. No payment has been taken; secure checkout is not connected yet.");
+    await loadBuyerServiceRequests();
+  });
   const accountMenu = document.getElementById("account-switch-menu");
   accountMenu.insertAdjacentHTML("beforeend",
     '<button type="button" data-supabase-signout><span class="account-option-icon">↪</span><span><b>Sign out</b><small>End this session</small></span></button>');
@@ -1013,4 +1099,7 @@
     if (error) report(error, "Could not check the current sign-in session.");
     else handleSession(data.session && data.session.user);
   });
+  document.querySelectorAll('[data-page="services"]').forEach(button => button.addEventListener("click", () => {
+    window.setTimeout(loadBuyerServiceRequests, 100);
+  }));
 })();
