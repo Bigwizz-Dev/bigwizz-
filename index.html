@@ -412,6 +412,11 @@
           <form id="seller-setup-form">
             <div class="field"><label for="shop-name">Shop or business name</label><input id="shop-name" name="shopName" placeholder="e.g. Northwood Works" required></div>
             <div class="field"><label for="seller-type">Seller type</label><select id="seller-type" name="sellerType" required><option value="Goods and services">Goods and services</option><option value="Quality goods">Quality goods</option><option value="Professional services">Professional services</option><option value="Other (describe below)">Other (describe below)</option></select></div>
+            <div class="field"><label for="seller-city">Your city</label><input id="seller-city" name="city" placeholder="e.g. Warri"></div>
+            <div class="field"><label for="seller-area">Your area or neighbourhood</label><input id="seller-area" name="area" placeholder="e.g. GRA, Effurun"></div>
+            <div class="field"><label for="seller-service-area">Areas you serve</label><input id="seller-service-area" name="serviceArea" placeholder="e.g. Warri, Effurun, Uvwie"></div>
+            <div class="field"><button type="button" class="outline-button" id="seller-use-location">Use GPS for provider location</button><small class="notice" id="seller-location-status">Add your city and service area. GPS helps buyers find you nearby.</small></div>
+            <input type="hidden" id="seller-latitude" name="latitude"><input type="hidden" id="seller-longitude" name="longitude">
             <fieldset class="offering-group">
               <legend>What do you offer?</legend>
               <div class="field"><label for="seller-offering">Describe your goods or services</label><textarea id="seller-offering" name="offeringDescription" maxlength="500" placeholder="Include specific items or services, especially anything not listed above." required></textarea></div>
@@ -456,6 +461,7 @@
               <div class="field" id="seller-product-sizing-field"><label for="seller-listing-size-type">Product sizing</label><select id="seller-listing-size-type" name="sizeType"><option value="other">No apparel size chart</option><option value="clothing">Clothing</option><option value="shoes">Shoes</option><option value="caps">Caps / hats</option></select></div>
               <div class="field"><label for="seller-listing-category">Category</label><select id="seller-listing-category" name="category" required></select></div>
               <div class="field" id="seller-service-pricing-field" hidden><label for="seller-service-pricing-mode">How should buyers see your service price?</label><select id="seller-service-pricing-mode" name="pricingMode"><option value="fixed">Fixed price — this is the full service price</option><option value="starting">Starting price — final price may change</option><option value="quote">Quotation required — agree the price before booking</option></select><small class="notice">Buyers will see the pricing type clearly on your service card.</small></div>
+              <div class="field" id="seller-service-availability-field" hidden><label for="seller-service-availability">Accept nearby service requests?</label><select id="seller-service-availability" name="serviceAvailability"><option value="available">Available — receive nearby requests</option><option value="busy">Busy — pause new requests</option><option value="offline">Offline — do not receive requests</option></select></div>
               <div class="field"><label id="seller-listing-price-label" for="seller-listing-price">Your price (USD)</label><input id="seller-listing-price" name="price" type="number" min="0.01" step="0.01" placeholder="25.00" required></div>
               <div class="field"><label for="seller-listing-image">Upload a listing photo</label><input id="seller-listing-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="seller-listing-image-note"></div>
             </div>
@@ -754,6 +760,7 @@
       document.getElementById("seller-variant-fields").hidden=type!=="goods";
       document.getElementById("seller-product-sizing-field").hidden=type!=="goods";
       document.getElementById("seller-service-pricing-field").hidden=type!=="service";
+      document.getElementById("seller-service-availability-field").hidden=type!=="service";
       document.getElementById("seller-listing-price-label").textContent=type==="service"?"Service price (USD)":"Your price (USD)";
       const pricingMode=document.getElementById("seller-service-pricing-mode").value;
       document.getElementById("seller-listing-price").required=type!=="service"||pricingMode!=="quote";
@@ -994,6 +1001,7 @@
       document.getElementById("seller-listing-type").value=item.type;
       updateSellerListingOptions(item.type,item.category,item.sizeType||"other");
       document.getElementById("seller-service-pricing-mode").value=item.pricingMode||"starting";
+      document.getElementById("seller-service-availability").value=item.serviceAvailability||"available";
       document.getElementById("seller-listing-price").value=item.price===null?"":String(item.price);
       updateSellerListingOptions(item.type,item.category,item.sizeType||"other");
       document.getElementById("seller-listing-description").value=item.description;
@@ -1308,6 +1316,16 @@
     document.getElementById("seller-listing-colors").addEventListener("change",event=>renderSellerColorPhotoFields(parseVariantOptions(event.currentTarget.value),customListings.find(item=>item.id===editingListingId)?.colorImages||{}));
     document.getElementById("seller-listing-price").addEventListener("input",updateSellerListingPricePreview);
     document.getElementById("seller-service-pricing-mode").addEventListener("change",()=>{updateSellerListingOptions(document.getElementById("seller-listing-type").value);updateSellerListingPricePreview()});
+    document.getElementById("seller-use-location").addEventListener("click",()=>{
+      const status=document.getElementById("seller-location-status");
+      if(!navigator.geolocation){status.textContent="GPS is not available in this browser.";return}
+      status.textContent="Getting your location…";
+      navigator.geolocation.getCurrentPosition(position=>{
+        document.getElementById("seller-latitude").value=String(position.coords.latitude);
+        document.getElementById("seller-longitude").value=String(position.coords.longitude);
+        status.textContent="Your provider location has been added.";
+      },()=>{status.textContent="GPS access was unavailable. You can still enter your city and area."},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+    });
     document.getElementById("request-use-location").addEventListener("click",()=>{
       const status=document.getElementById("request-location-status");
       if(!navigator.geolocation){status.textContent="GPS is not available in this browser. Enter your address manually.";return}
