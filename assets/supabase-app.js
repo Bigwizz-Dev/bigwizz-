@@ -334,7 +334,7 @@
     container.innerHTML = data.map(item => `<article class="seller-listing-item">
       <img src="${escapeHtml(item.image_url)}" alt="">
       <div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong>
-        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
+        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
       </div>
       <div class="seller-listing-actions">
         <button type="button" data-seller-listing-action="edit" data-listing-id="${item.id}">Edit</button>
@@ -604,6 +604,7 @@
       }
       remoteEditingId = null;
       resetSellerListingForm();
+      document.getElementById("seller-service-availability").value = sellerAvailabilityStatus;
       await Promise.all([loadMyListings(), loadCatalog()]);
       notify("Listing saved to the shared marketplace.");
     } catch (error) {
