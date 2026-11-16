@@ -141,7 +141,7 @@
     feedback.hidden = true;
     feedback.textContent = "";
     nameField.hidden = mode !== "signup";
-    if (locationFields) locationFields.hidden = mode !== "signup";
+    if (locationFields) { locationFields.hidden = mode !== "signup"; locationFields.querySelectorAll("input").forEach(input => { input.required = mode === "signup"; }); }
     roleField.hidden = mode !== "signup";
     name.required = mode === "signup";
     passwordField.hidden = mode === "reset";
