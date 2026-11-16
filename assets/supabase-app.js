@@ -833,6 +833,7 @@
     if (signOut) {
       stop(event);
       sellerAuthVerified = false;
+      sessionStorage.removeItem("bigwizz-active-account");
       client.auth.signOut().then(({ error }) => {
         if (error) report(error, "Could not sign out.");
         else {
@@ -848,6 +849,7 @@
         stop(event);
         activeAccount = "seller";
         sellerAuthVerified = false;
+        sessionStorage.setItem("bigwizz-active-account", "seller");
         updateAccountState();
         activatePage("seller-studio");
         showAuth("signin", "seller");
@@ -857,6 +859,7 @@
       stop(event);
       sellerAuthVerified = false;
       activeAccount = "buyer";
+      sessionStorage.setItem("bigwizz-active-account", "buyer");
       updateAccountState();
       activatePage(activeAccount === "seller" ? "seller-studio" : "discover");
       return;
