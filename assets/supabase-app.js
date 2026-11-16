@@ -724,7 +724,16 @@
           if (result.error) throw result.error;
           if (result.data.session) {
             document.getElementById("auth-dialog").close();
-            notify("Your Bigwizz account has been created.");
+            if (authAudience === "seller") {
+              sellerAuthVerified = true;
+              activeAccount = "seller";
+              await handleSession(result.data.user);
+              const setupForm = document.getElementById("seller-setup-form");
+              if (setupForm) setupForm.requestSubmit();
+              notify("Seller account created. Finishing your studio setup…");
+            } else {
+              notify("Your Buyer account has been created.");
+            }
           } else {
             showAuthFeedback("Account created. Check your email for a confirmation link, then return here to sign in.");
           }
