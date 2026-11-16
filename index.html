@@ -83,6 +83,8 @@
     .service-detail-main,.service-detail-aside{padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--paper);box-shadow:var(--shadow)}
     .service-detail-image{display:block;width:100%;max-height:340px;aspect-ratio:16/9;object-fit:cover;border-radius:15px;background:#eee7f2}
     .service-detail-meta{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;margin:18px 0 10px;color:var(--muted);font-size:12px}
+    .service-detail-rating{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border:1px solid rgba(230,174,42,.28);border-radius:999px;background:rgba(245,190,55,.11);color:var(--ink);font-size:13px;font-weight:750;letter-spacing:.1px}
+    .service-detail-rating-star{color:#f2b827;font-size:16px;line-height:1;text-shadow:0 1px 1px rgba(130,85,0,.16)}
     .service-detail-main h3{margin:8px 0;font-size:clamp(23px,4vw,30px);letter-spacing:-.6px}
     .service-detail-description{color:var(--muted);font-size:14px;line-height:1.75}
     .service-detail-provider{padding:15px;margin-top:18px;border-radius:13px;background:var(--canvas)}
@@ -1373,7 +1375,7 @@
       container.innerHTML=`<div class="service-detail-layout">
         <article class="service-detail-main">
           <img class="service-detail-image" src="${escapeHtml(service.image||"")}" alt="${escapeHtml(service.title)}">
-          <div class="service-detail-meta"><span>${escapeHtml(service.category||"Service")}</span><span>★ ${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New listing"}</span></div>
+          <div class="service-detail-meta"><span>${escapeHtml(service.category||"Service")}</span><span class="service-detail-rating"><span class="service-detail-rating-star" aria-hidden="true">★</span>${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New listing"}</span></div>
           <h3>${escapeHtml(service.title)}</h3>
           <div class="service-request-compact service-request-inline">
             <span class="service-detail-price">${escapeHtml(service.price||"Request an estimate")}</span>
