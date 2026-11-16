@@ -203,6 +203,7 @@
       image: row.image_url,
       seller: row.seller_name,
       rating: row.rating === null ? "" : Number(row.rating).toFixed(1),
+      ratingCount: Number(row.rating_count || 0),
       detail: row.description
     }));
     services = rows.filter(row => row.kind === "service").map(row => ({
@@ -714,6 +715,29 @@
         submit.textContent = authMode === "signup" ? "Create account" :
           authMode === "reset" ? "Send reset link" : "Sign in";
       }
+      return;
+    }
+    if (event.target.id === "item-review-form") {
+      stop(event);
+      const form = event.target;
+      const values = new FormData(form);
+      const listingId = String(values.get("listingId") || "");
+      const rating = Number(selectedReviewRating || window.BIGWIZZ_PRODUCT_SELECTED_RATING || 0);
+      const body = String(values.get("review") || "").trim();
+      const reviewer = String(values.get("reviewer") || "").trim();
+      if (!rating) { notify("Choose a star rating before posting."); return; }
+      if (!body) { notify("Write a review before posting."); return; }
+      const submit = form.querySelector('[type="submit"]');
+      submit.disabled = true;
+      try {
+        const rows = await submitListingReview({ listingId, rating, text: body, reviewer });
+        document.getElementById("review-dialog").close();
+        form.reset();
+        if (typeof window.BIGWIZZ_PRODUCT_REVIEWS_UPDATED === "function") window.BIGWIZZ_PRODUCT_REVIEWS_UPDATED(rows);
+        notify("Your review is now shared with other customers.");
+      } catch (error) {
+        report(error, error.message || "Your product review could not be saved.");
+      } finally { submit.disabled = false; }
       return;
     }
     if (event.target.id === "service-review-form") {
