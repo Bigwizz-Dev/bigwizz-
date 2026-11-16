@@ -49,6 +49,33 @@
     dialog{width:min(520px,calc(100vw - 28px));max-height:90vh;padding:0;border:1px solid var(--line);border-radius:20px;background:var(--paper);color:var(--ink);box-shadow:0 24px 80px #1b102c55}
     dialog::backdrop{background:#21152fb3;backdrop-filter:blur(3px)}
     .dialog-content{padding:24px}
+    #service-dialog{width:min(560px,calc(100vw - 24px));max-height:min(92vh,860px);overflow:auto;border:0;border-radius:24px;background:var(--paper);box-shadow:0 28px 90px #1b102c66}
+    #service-dialog::backdrop{background:#1b102ccc;backdrop-filter:blur(6px)}
+    #service-dialog .service-request-content{padding:0}
+    #service-dialog .service-request-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding:26px 26px 22px;background:linear-gradient(135deg,#f1e8f5 0%,#f8f3fa 62%,#edf2e9 100%);border-bottom:1px solid var(--line)}
+    #service-dialog .service-request-eyebrow{display:inline-block;margin-bottom:9px;color:#765684;font-size:9px;font-weight:900;letter-spacing:1.7px}
+    #service-dialog .service-request-heading h2{margin:0;color:#30213a;font-size:clamp(22px,5vw,27px);line-height:1.15;letter-spacing:-.8px}
+    #service-dialog .service-request-heading p{margin:9px 0 0;color:#716477;font-size:12px;line-height:1.55}
+    #service-dialog .service-request-close{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border:1px solid #e1d5e7;border-radius:50%;background:#fff;color:#4a3455}
+    #service-dialog .service-request-close svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round}
+    #service-dialog .service-request-form{display:grid;gap:17px;padding:23px 26px 25px}
+    #service-dialog .service-request-field{display:grid;gap:8px;min-width:0}
+    #service-dialog .service-request-field label{color:var(--ink);font-size:12px;font-weight:800}
+    #service-dialog .service-request-field label span{margin-left:5px;color:var(--muted);font-size:10px;font-weight:500}
+    #service-dialog .service-request-field input,#service-dialog .service-request-field select,#service-dialog .service-request-field textarea{width:100%;min-height:49px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px;outline:none;transition:border-color .18s,box-shadow .18s}
+    #service-dialog .service-request-field textarea{min-height:112px;resize:vertical;line-height:1.5}
+    #service-dialog .service-request-field input:focus,#service-dialog .service-request-field select:focus,#service-dialog .service-request-field textarea:focus{border-color:#9475a2;box-shadow:0 0 0 3px #9475a21c}
+    #service-dialog .service-request-submit{display:flex;justify-content:center;align-items:center;gap:10px;min-height:52px;margin-top:2px;border:0;border-radius:13px;background:var(--deep);color:#fff;font-size:14px;font-weight:850}
+    #service-dialog .service-request-submit span{font-size:19px;line-height:1}
+    #service-dialog .service-request-note{margin: -5px 0 0;color:var(--muted);font-size:10px;line-height:1.5;text-align:center}
+    html[data-theme="dark"] #service-dialog .service-request-header{background:linear-gradient(135deg,#382b41,#2a2331)}
+    html[data-theme="dark"] #service-dialog .service-request-heading h2{color:var(--ink)}
+    html[data-theme="dark"] #service-dialog .service-request-heading p{color:var(--muted)}
+    html[data-theme="dark"] #service-dialog .service-request-eyebrow{color:#d4b8e3}
+    html[data-theme="dark"] #service-dialog .service-request-close{border-color:var(--line);background:#44374b;color:var(--ink)}
+    html[data-theme="dark"] #service-dialog .service-request-submit{background:var(--lime);color:#34203f}
+    @media(max-width:520px){#service-dialog{width:calc(100vw - 20px);max-height:92vh;border-radius:20px}#service-dialog .service-request-header{padding:22px 19px 18px}#service-dialog .service-request-form{gap:15px;padding:19px 19px 22px}}
+
     .dialog-head{display:flex;justify-content:space-between;align-items:start;gap:16px}
     .dialog-head h2{margin:0;font-size:21px}
     .dialog-head p{margin:7px 0 0;color:var(--muted);font-size:12px;line-height:1.5}
@@ -439,16 +466,35 @@
     </div>
   </dialog>
   <dialog id="service-dialog" aria-labelledby="service-dialog-title">
-    <div class="dialog-content">
-      <div class="dialog-head"><div><h2 id="service-dialog-title">Request a service</h2><p id="service-dialog-summary"></p></div><button class="dialog-close" type="button" aria-label="Close service request">Ã—</button></div>
-      <form id="service-request-form">
+    <div class="dialog-content service-request-content">
+      <div class="service-request-header">
+        <div class="service-request-heading">
+          <span class="service-request-eyebrow">BIGWIZZ SERVICES</span>
+          <h2 id="service-dialog-title">Request a service</h2>
+          <p id="service-dialog-summary"></p>
+        </div>
+        <button class="service-request-close" type="button" aria-label="Close service request"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      </div>
+      <form id="service-request-form" class="service-request-form">
         <input type="hidden" name="service" id="service-request-name">
-        <div class="field"><label for="request-type">What do you need?</label><select id="request-type" name="requestType" required><option value="Request a quote">Request a quote</option><option value="Ask a question">Ask a question</option><option value="Request a time">Request a time</option></select></div>
-        <div class="field"><label for="request-date">Preferred date (optional)</label><input id="request-date" type="date" name="preferredDate"></div>
-        <div class="field"><label for="request-area">Your area</label><input id="request-area" name="area" placeholder="Neighborhood or city" required></div>
-        <div class="field"><label for="request-details">Details for the provider</label><textarea id="request-details" name="details" placeholder="Describe the job, questions, or timing that would help the provider respond." required></textarea></div>
-        <button class="primary dialog-submit" type="submit">Save request</button>
-        <p class="notice">Your request is saved to your Bigwizz account. This does not contact the provider or book a service.</p>
+        <div class="service-request-field">
+          <label for="request-type">How can the provider help?</label>
+          <select id="request-type" name="requestType" required><option value="Request a quote">Request a quote</option><option value="Ask a question">Ask a question</option><option value="Request a time">Request a time</option></select>
+        </div>
+        <div class="service-request-field">
+          <label for="request-date">Preferred date <span>Optional</span></label>
+          <input id="request-date" type="date" name="preferredDate">
+        </div>
+        <div class="service-request-field">
+          <label for="request-area">Where do you need the service?</label>
+          <input id="request-area" name="area" placeholder="Enter your neighbourhood or city" autocomplete="address-level2" required>
+        </div>
+        <div class="service-request-field">
+          <label for="request-details">Tell the provider a little more</label>
+          <textarea id="request-details" name="details" placeholder="Share what you need, any questions, and useful details about the job." required></textarea>
+        </div>
+        <button class="service-request-submit" type="submit">Send service request <span aria-hidden="true">→</span></button>
+        <p class="service-request-note">Your request is saved in this prototype. The provider is not contacted and no booking is made.</p>
       </form>
     </div>
   </dialog>
@@ -1180,7 +1226,7 @@
       if(currentProductId)renderProductDetails(currentProductId);
       showToast("Review saved in this browser.");
     });
-    document.querySelector(".dialog-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
+    document.querySelector(".service-request-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
     document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");requests.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();document.getElementById("service-dialog").close();showToast("Request saved in this browser. The provider was not contacted.")});
     document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
     document.getElementById("new-post").addEventListener("click",()=>showToast("Community posting is a demo. Sign-in and moderation are needed before launch."));
