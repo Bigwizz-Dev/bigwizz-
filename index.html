@@ -1216,12 +1216,6 @@
           <h3>${escapeHtml(service.title)}</h3>
           <p class="service-detail-description">${escapeHtml(service.description||"Contact the provider to discuss the service and your requirements.")}</p>
           <div class="service-detail-provider"><strong>${escapeHtml(service.provider||"Independent provider")}</strong><span class="service-provider-location">⌖ ${escapeHtml(service.location||"Location not provided by this service provider")}</span></div>
-          <section class="service-reviews-section">
-            <h3>Customer rating & reviews</h3>
-            <div class="service-rating-summary"><strong>${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New"}</strong><span class="service-rating-stars" aria-label="${stars} out of 5 stars">${"★".repeat(stars)}<span>${"★".repeat(5-stars)}</span></span><small>${totalRatingCount} ratings</small></div>
-            <div class="service-review-list">${reviewMarkup}</div>
-            <p class="service-review-disclaimer">Prototype examples are labelled. Submitted customer reviews are shared through Bigwizz.</p>
-          </section>
           <section class="service-write-review">
             <h3>Write a review</h3>
             <p>How was your experience with this service provider?</p>
@@ -1238,6 +1232,13 @@
               <small class="service-review-disclaimer">Sign in to submit. Your review will be saved to Bigwizz and visible to other customers.</small>
             </form>
           </section>
+          <section class="service-reviews-section">
+            <h3>Customer rating & reviews</h3>
+            <div class="service-rating-summary"><strong>${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New"}</strong><span class="service-rating-stars" aria-label="${stars} out of 5 stars">${"★".repeat(stars)}<span>${"★".repeat(5-stars)}</span></span><small>${totalRatingCount} ratings</small></div>
+            <div class="service-review-list">${reviewMarkup}</div>
+            <p class="service-review-disclaimer">Prototype examples are labelled. Submitted customer reviews are shared through Bigwizz.</p>
+          </section>
+
         </article>
         <aside class="service-detail-aside">
           <h3>Request this service</h3>
