@@ -1183,29 +1183,25 @@
     }
     let selectedServiceDetail=null;
     let selectedServiceReviewRating=0;
-    function loadServiceReviews(){
-      try{const saved=JSON.parse(localStorage.getItem("bigwizz-service-reviews")||"{}");return saved&&typeof saved==="object"&&!Array.isArray(saved)?saved:{}}
-      catch(error){console.error("Could not load service reviews.",error);return {}}
-    }
-    let serviceReviewsByTitle=loadServiceReviews();
-    function renderServiceDetails(service){
+    let serviceReviewsByListing={};
+    function renderServiceDetails(service,skipRemoteLoad=false){
       selectedServiceDetail=service;
       const container=document.getElementById("service-detail-content");
       if(!container)return;
       const sampleReviews=sampleServiceReviews[service.title]||[];
-      const customerReviews=Array.isArray(serviceReviewsByTitle[service.title])?serviceReviewsByTitle[service.title]:[];
+      const customerReviews=Array.isArray(serviceReviewsByListing[service.id])?serviceReviewsByListing[service.id]:[];
       const allReviews=[...sampleReviews,...customerReviews];
-      const baseRating=Number.parseFloat(service.rating);
-      const baseCount=sampleReviews.length;
-      const submittedTotal=customerReviews.reduce((sum,review)=>sum+Number(review.rating||0),0);
-      const totalRatingCount=baseCount+customerReviews.length;
-      const accumulatedRating=totalRatingCount?(baseRating*baseCount+submittedTotal)/totalRatingCount:baseRating;
+      const storedCount=Number(service.ratingCount||0);
+      const storedRating=Number.parseFloat(service.rating);
+      const newCount=customerReviews.length;
+      const totalRatingCount=storedCount+newCount;
+      const accumulatedRating=totalRatingCount?((Number.isFinite(storedRating)?storedRating*storedCount:0)+customerReviews.reduce((sum,review)=>sum+Number(review.rating||0),0))/totalRatingCount:NaN;
       const stars=Number.isFinite(accumulatedRating)?Math.round(accumulatedRating):0;
       const reviewMarkup=allReviews.length?allReviews.map(review=>`<article class="service-review-item"><div class="service-review-top"><strong>${escapeHtml(review.reviewer||"Customer")}</strong><span class="service-review-stars" aria-label="${review.rating} out of 5 stars">${"★".repeat(review.rating)}<span>${"★".repeat(5-review.rating)}</span></span></div><p>${escapeHtml(review.text)}</p><small>${review.demo?"Prototype review":"Customer review"}</small></article>`).join(""):'<p class="service-detail-description">No customer reviews yet. Be the first to share your experience.</p>';
       container.innerHTML=`<div class="service-detail-layout">
         <article class="service-detail-main">
           <img class="service-detail-image" src="${escapeHtml(service.image||"")}" alt="${escapeHtml(service.title)}">
-          <div class="service-detail-meta"><span>${escapeHtml(service.category||"Service")}</span><span>★ ${escapeHtml(service.rating||"New listing")}</span></div>
+          <div class="service-detail-meta"><span>${escapeHtml(service.category||"Service")}</span><span>★ ${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New listing"}</span></div>
           <h3>${escapeHtml(service.title)}</h3>
           <p class="service-detail-description">${escapeHtml(service.description||"Contact the provider to discuss the service and your requirements.")}</p>
           <div class="service-detail-provider"><strong>${escapeHtml(service.provider||"Independent provider")}</strong><span class="service-provider-location">⌖ ${escapeHtml(service.location||"Location not provided by this service provider")}</span></div>
@@ -1213,22 +1209,22 @@
             <h3>Customer rating & reviews</h3>
             <div class="service-rating-summary"><strong>${Number.isFinite(accumulatedRating)?accumulatedRating.toFixed(1):"New"}</strong><span class="service-rating-stars" aria-label="${stars} out of 5 stars">${"★".repeat(stars)}<span>${"★".repeat(5-stars)}</span></span><small>${totalRatingCount} ratings</small></div>
             <div class="service-review-list">${reviewMarkup}</div>
-            <p class="service-review-disclaimer">Sample reviews are labelled as prototype content. Customer-submitted reviews are saved in this browser.</p>
+            <p class="service-review-disclaimer">Prototype examples are labelled. Submitted customer reviews are shared through Bigwizz.</p>
           </section>
           <section class="service-write-review">
             <h3>Write a review</h3>
             <p>How was your experience with this service provider?</p>
-            <form id="service-review-form">
+            <form id="service-review-form" data-listing-id="${escapeHtml(service.id||"")}" data-selected-rating="0">
               <label for="service-review-name">Your name</label>
               <input id="service-review-name" name="reviewer" maxlength="50" placeholder="Enter your name" required>
               <span class="service-review-form-label">Your rating</span>
               <div class="service-review-rating-picker" role="group" aria-label="Choose a star rating">
-                ${[1,2,3,4,5].map(rating=>`<button type="button" data-service-review-rating="${rating}" aria-label="Rate ${rating} stars" aria-pressed="${rating<=selectedServiceReviewRating}">★</button>`).join("")}
+                ${[1,2,3,4,5].map(rating=>`<button type="button" data-service-review-rating="${rating}" aria-label="Rate ${rating} stars" aria-pressed="false">★</button>`).join("")}
               </div>
               <label for="service-review-comment">Your review</label>
-              <textarea id="service-review-comment" name="review" maxlength="500" placeholder="Share your experience with this provider..." required></textarea>
+              <textarea id="service-review-comment" name="review" maxlength="1200" placeholder="Share your experience with this provider..." required></textarea>
               <button class="service-review-submit" type="submit">Submit review</button>
-              <small class="service-review-disclaimer">Prototype: your review is saved on this device and is not yet shared with the provider or other customers.</small>
+              <small class="service-review-disclaimer">Sign in to submit. Your review will be saved to Bigwizz and visible to other customers.</small>
             </form>
           </section>
         </article>
@@ -1237,22 +1233,20 @@
           <p class="service-detail-description">Review the details, then tell the provider what you need.</p>
           <span class="service-detail-price">${escapeHtml(service.price||"Request an estimate")}</span>
           <button type="button" class="service-detail-request" data-service-detail-request>Request this service</button>
-          <p class="notice">Sending a request in this prototype saves your details locally. It does not contact the provider or confirm a booking.</p>
+          <p class="notice">Your service request is saved to your Bigwizz account. It does not contact the provider or confirm a booking.</p>
         </aside>
       </div>`;
-      const reviewForm=document.getElementById("service-review-form");
-      reviewForm.addEventListener("submit",event=>{
-        event.preventDefault();
-        const values=new FormData(reviewForm);
-        const reviewer=String(values.get("reviewer")||"").trim();
-        const review=String(values.get("review")||"").trim();
-        if(!selectedServiceReviewRating){showToast("Please select a star rating before submitting.");return}
-        if(!reviewer||!review){showToast("Please enter your name and review.");return}
-        const nextReviews={...serviceReviewsByTitle,[service.title]:[...customerReviews,{reviewer,rating:selectedServiceReviewRating,text:review,createdAt:new Date().toISOString()}]};
-        try{localStorage.setItem("bigwizz-service-reviews",JSON.stringify(nextReviews));serviceReviewsByTitle=nextReviews;selectedServiceReviewRating=0;renderServiceDetails(service);showToast("Your service review has been saved on this device.");}
-        catch(error){console.error("Could not save service review.",error);showToast("Your review could not be saved. Please try again.");}
-      });
       setPage("service-details");
+      window.BIGWIZZ_RENDER_SERVICE_REVIEWS=rows=>{
+        serviceReviewsByListing[service.id]=rows;
+        renderServiceDetails(service,true);
+      };
+      if(!skipRemoteLoad&&service.id&&window.BIGWIZZ_BACKEND){
+        window.BIGWIZZ_BACKEND.loadListingReviews(service.id).then(rows=>{
+          serviceReviewsByListing[service.id]=rows;
+          if(selectedServiceDetail&&selectedServiceDetail.id===service.id)renderServiceDetails(service,true);
+        }).catch(error=>{console.error("Could not load shared service reviews.",error);showToast("Customer reviews could not be loaded right now.");});
+      }
     }
     function renderNotifications(){
       document.getElementById("notification-list").innerHTML=appNotifications.map(item=>`<article class="notification-card"><span class="notification-icon" aria-hidden="true">${item.icon}</span><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.copy)}</p><small>${escapeHtml(item.time)}</small></div></article>`).join("");
@@ -1296,7 +1290,7 @@
       const accountOption=event.target.closest("[data-account-option]");if(accountOption){switchAccount(accountOption.dataset.accountOption);return}
       const openProduct=event.target.closest("[data-open-product]");if(openProduct){renderProductDetails(openProduct.dataset.openProduct);return}
       const productCard=event.target.closest("[data-product-card]");if(productCard&&!event.target.closest("[data-save]")){renderProductDetails(productCard.dataset.productCard);return}
-      const serviceReviewRating=event.target.closest("[data-service-review-rating]");if(serviceReviewRating){selectedServiceReviewRating=Number(serviceReviewRating.dataset.serviceReviewRating);document.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=selectedServiceReviewRating)));return}
+      const serviceReviewRating=event.target.closest("[data-service-review-rating]");if(serviceReviewRating){selectedServiceReviewRating=Number(serviceReviewRating.dataset.serviceReviewRating);const form=document.getElementById("service-review-form");if(form)form.dataset.selectedRating=String(selectedServiceReviewRating);document.querySelectorAll("[data-service-review-rating]").forEach(button=>button.setAttribute("aria-pressed",String(Number(button.dataset.serviceReviewRating)<=selectedServiceReviewRating)));return}
       const reviewRating=event.target.closest("[data-review-rating]");if(reviewRating){selectedReviewRating=Number(reviewRating.dataset.reviewRating);document.querySelectorAll("#product-review-rating [data-review-rating]").forEach(button=>{const selected=Number(button.dataset.reviewRating)<=selectedReviewRating;button.setAttribute("aria-pressed",String(selected));button.classList.remove("rating-pop");if(selected){button.style.setProperty("--star-delay",`${(Number(button.dataset.reviewRating)-1)*55}ms`);void button.offsetWidth;button.classList.add("rating-pop")}});return}
       const writeReview=event.target.closest("[data-write-review]");if(writeReview){document.getElementById("item-review-form").reset();document.getElementById("review-listing-id").value=writeReview.dataset.writeReview;document.getElementById("review-dialog-title").textContent=`Review ${writeReview.dataset.reviewTitle}`;document.getElementById("review-dialog-summary").textContent="How was this item?";document.getElementById("review-dialog").showModal();return}
       const salesRange=event.target.closest("[data-sales-range]");if(salesRange){salesRangeDays=Number(salesRange.dataset.salesRange);document.querySelectorAll("[data-sales-range]").forEach(button=>button.classList.toggle("active",button===salesRange));renderSellerSales();return}
