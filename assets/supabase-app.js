@@ -635,6 +635,7 @@
   async function loadSellerServiceRequests(){
     const target=document.getElementById("seller-service-request-list");if(!target)return;
     if(!user){target.innerHTML='<p class="notice">Sign in with your seller account to view customer requests.</p>';return;}
+    if(!accountRoles.includes("seller")){target.innerHTML='<p class="notice">This workspace is available to approved seller accounts. Switch to your seller account or complete seller setup.</p>';return;}
     target.innerHTML='<p class="notice">Loading customer requests…</p>';
     const {data,error}=await client.from("service_requests").select("id,buyer_id,service_title,request_type,area,details,preferred_date,status,quoted_amount,quote_currency,provider_response,created_at").eq("provider_id",user.id).order("created_at",{ascending:false});
     if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Seller service requests could not be loaded.");return;}
@@ -970,6 +971,8 @@
   client.channel("bigwizz-community-live")
     .on("postgres_changes",{event:"*",schema:"public",table:"community_posts"},async()=>{try{await loadCommunityPosts();renderCommunity();}catch(error){console.error("Community live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"community_comments"},async()=>{try{await loadCommunityPosts();renderCommunity();const postId=document.getElementById("community-comment-post-id")?.value;if(postId&&document.getElementById("community-thread-dialog")?.open)renderCommunityComments(await loadCommunityComments(postId));}catch(error){console.error("Community comment live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"service_requests"},async payload=>{try{if(!user)return;const row=payload.new||payload.old;if(row?.buyer_id===user.id)await loadBuyerServiceRequests();if(row?.provider_id===user.id)await loadSellerServiceRequests();}catch(error){console.error("Service request live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"notifications"},async payload=>{try{if(user&&(payload.new||payload.old)?.user_id===user.id&&document.getElementById("notifications")?.classList.contains("active"))await loadNotifications();}catch(error){console.error("Notification live refresh failed.",error);}})
     .subscribe();
   client.auth.getSession().then(({ data, error }) => {
     if (error) report(error, "Could not check the current sign-in session.");
