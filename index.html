@@ -132,6 +132,9 @@
     .listing-photo{background:#eee7f2}
     .listing:nth-child(3n+2) .listing-photo{background:#f3e8db}
     .listing:nth-child(3n) .listing-photo{background:#e8e4ef}
+    .service-workspace-link{display:flex;align-items:center;justify-content:flex-end;gap:12px;margin:0 0 12px;color:var(--muted);font-size:11px}
+    .service-workspace-link .outline-button{width:auto;padding:9px 12px}
+    @media(max-width:520px){.service-workspace-link{justify-content:space-between;gap:8px}.service-workspace-link .outline-button{font-size:11px}}
     .service-toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:20px 0}
     .service-search{flex:1 1 270px;display:flex;gap:8px;padding:6px;border:1px solid var(--line);border-radius:13px;background:white}
     .service-search input{flex:1;min-width:0;padding:8px 11px;border:0;outline:0;background:transparent;color:var(--ink)}
@@ -533,6 +536,7 @@
       </section>
       <section id="services" class="page">
         <div id="service-buyer-interface">
+        <div class="service-workspace-link"><span>Offering services on Bigwizz?</span><button type="button" class="outline-button" data-service-role="seller">Open seller workspace →</button></div>
         <div class="service-toolbar">
           <form class="service-search" id="service-search-form"><input id="service-search-input" type="search" placeholder="Search a service or provider" aria-label="Search services"><button type="submit">Search</button></form>
           <div class="service-filters" aria-label="Filter services">
