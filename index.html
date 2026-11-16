@@ -416,7 +416,7 @@
               <div class="field"><label for="seller-listing-image">Upload a listing photo</label><input id="seller-listing-image" name="image" type="file" accept="image/jpeg,image/png,image/webp" aria-describedby="seller-listing-image-note"></div>
             </div>
               <div id="seller-variant-fields" class="seller-listing-form-grid">
-                <div class="field"><label for="seller-listing-sizes">Available sizes (optional)</label><input id="seller-listing-sizes" name="sizes" maxlength="200" placeholder="Choose a product sizing type first"><small class="notice" id="seller-size-guidance">Size charts are shown only for clothing, shoes, and caps.</small></div>
+                <div class="field"><label for="seller-listing-sizes">Available sizes (optional)</label><input id="seller-listing-sizes" name="sizes" maxlength="200" placeholder="Choose a product sizing type first"><small class="notice" id="seller-size-guidance">Size charts are shown only for clothing, shoes, and caps.</small><div id="seller-size-guide-preview" class="seller-size-guide-preview" aria-live="polite"></div></div>
                 <div class="field"><label for="seller-listing-colors">Available colors (optional)</label><input id="seller-listing-colors" name="colors" maxlength="200" placeholder="e.g. Natural, Navy, Sage"><small class="notice">Add one clear product photo for every color.</small></div>
               </div>
             <div id="seller-color-photo-fields" class="variant-photo-list" aria-live="polite"></div>
@@ -682,6 +682,11 @@
       document.querySelector('label[for="seller-listing-sizes"]').textContent=activeType==="shoes"?"Available EU shoe sizes (comma-separated)":activeType==="caps"?"Available cap sizes (comma-separated)":activeType==="clothing"?"Available clothing sizes (comma-separated)":"Available sizes (optional)";
       document.getElementById("seller-size-guidance").textContent=activeType==="other"?"No size selector or size chart will be shown for this item.":`Suggested ${activeType} sizes: ${suggestedSizes[activeType]}. Adjust to match the product label.`;
       if(applySuggested&&activeType!=="other")input.value=suggestedSizes[activeType]||"";
+      const guidePreview=document.getElementById("seller-size-guide-preview");
+      if(guidePreview){
+        let listedSizes=[];try{listedSizes=parseVariantOptions(input.value)}catch(error){}
+        guidePreview.innerHTML=type==="goods"&&activeType!=="other"?renderSizeChart(activeType,listedSizes).replace("<details class=\"product-size-chart\">","<details class=\"product-size-chart\" open>"):"";
+      }
     }
     function renderSellerColorPhotoFields(colors,colorImages={}){
       const container=document.getElementById("seller-color-photo-fields");
@@ -1202,6 +1207,7 @@
     });
     document.getElementById("seller-listing-type").addEventListener("change",event=>updateSellerListingOptions(event.currentTarget.value));
     document.getElementById("seller-listing-size-type").addEventListener("change",event=>updateSellerListingOptions("goods",document.getElementById("seller-listing-category").value,event.currentTarget.value,true));
+    document.getElementById("seller-listing-sizes").addEventListener("input",()=>updateSellerListingOptions("goods",document.getElementById("seller-listing-category").value,document.getElementById("seller-listing-size-type").value));
     document.getElementById("seller-listing-colors").addEventListener("change",event=>renderSellerColorPhotoFields(parseVariantOptions(event.currentTarget.value),customListings.find(item=>item.id===editingListingId)?.colorImages||{}));
     document.getElementById("seller-listing-price").addEventListener("input",updateSellerListingPricePreview);
     document.getElementById("seller-listing-cancel").addEventListener("click",resetSellerListingForm);
