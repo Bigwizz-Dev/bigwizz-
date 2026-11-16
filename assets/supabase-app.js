@@ -4,6 +4,14 @@
   if (!config || !config.url || !config.publishableKey || !supabaseApi) return;
 
   const client = supabaseApi.createClient(config.url, config.publishableKey);
+  // The Seller workspace owns its pages and navigation, outside the Buyer shell.
+  const sellerWorkspace = document.getElementById("seller-workspace");
+  const sellerWorkspaceMain = document.getElementById("seller-workspace-main");
+  ["seller-studio", "seller-listings", "seller-progress", "messages"].forEach(id => {
+    const page = document.getElementById(id);
+    if (page && sellerWorkspaceMain) sellerWorkspaceMain.appendChild(page);
+  });
+
   const currency = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" });
   let user = null;
   let profile = null;
@@ -126,13 +134,22 @@
   }
 
   function activatePage(page) {
-    if (page === "seller-listings" && (!user || !sellerProfileReady || activeAccount !== "seller")) {
-      notify("Set up and switch to your Seller account to manage listings.");
+    const sellerPages = ["seller-studio", "seller-listings", "seller-progress", "messages"];
+    const isSellerPage = sellerPages.includes(page);
+    if (isSellerPage && (!user || activeAccount !== "seller" || !sellerAuthVerified)) {
+      notify("Sign in to your Seller account to open the Seller Dashboard.");
       return;
     }
-    if (page === "seller-progress" && (!user || activeAccount !== "seller")) {
-      notify("Sign in and switch to your Seller account to continue.");
-      return;
+    if (page === "seller-listings" && !sellerProfileReady) {
+      page = "seller-studio";
+      notify("Complete your shop profile before managing listings.");
+    }
+    if (sellerWorkspace) {
+      sellerWorkspace.hidden = !isSellerPage;
+      const buyerShell = document.querySelector("#marketplace-app > .shell");
+      if (buyerShell) buyerShell.hidden = isSellerPage;
+      const buyerNav = document.querySelector("#marketplace-app > .mobile-nav");
+      if (buyerNav) buyerNav.hidden = isSellerPage;
     }
     document.querySelectorAll(".page").forEach(section => {
       section.classList.toggle("active", section.id === page);
@@ -702,9 +719,12 @@
     try {
       await loadAccount();
       showApp();
-      if (!document.querySelector(".page.active")) setPage("discover");
       await loadCatalog();
-      if (activeAccount === "seller" && sellerProfileReady) loadMyListings();
+      if (activeAccount === "seller" && sellerAuthVerified) {
+        activatePage("seller-studio");
+      } else if (!document.querySelector(".page.active")) {
+        activatePage("discover");
+      }
       notify("Signed in. Your account data is shared across devices.");
     } catch (error) {
       report(error, "Account details could not be loaded.");
