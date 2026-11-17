@@ -8,6 +8,8 @@
   let user = null;
   let profile = null;
   let sellerAvailabilityStatus = "available";
+  let sellerProfileReady = false;
+  let sellerShopName = "";
   let savedListingIds = new Set();
   let remoteEditingId = null;
 
@@ -178,7 +180,10 @@
       if(pair[0].error)throw new Error(pair[1]+" could not be loaded: "+pair[0].error.message);
     }
     const shop=shopResult.data||{};
-    const displayName=shop.shop_name||profile?.display_name||user.email?.split("@")[0]||"Seller";
+    sellerShopName=shop.shop_name||sellerShopName||profile?.display_name||user.email?.split("@")[0]||"Seller";
+    sellerProfileReady=true;
+    await loadMyListings();
+    const displayName=sellerShopName;
     const nameNode=document.getElementById("seller-welcome-name");
     const avatarNode=document.getElementById("seller-studio-avatar");
     if(nameNode)nameNode.textContent=displayName;
@@ -489,6 +494,24 @@
     if (typeof window.BIGWIZZ_REFRESH_SERVICE_LOCATION === "function") window.BIGWIZZ_REFRESH_SERVICE_LOCATION();
     accountRoles = rolesResult.data.map(item => item.role);
     if (!accountRoles.includes("buyer")) accountRoles.unshift("buyer");
+    sellerProfileReady = false;
+    if (accountRoles.includes("seller")) {
+      const {data:sellerData,error:sellerError}=await client.from("seller_profiles").select("shop_name,seller_type,availability_status").eq("user_id",user.id).maybeSingle();
+      if(sellerError)throw sellerError;
+      let sellerRecord=sellerData;
+      if(!sellerRecord){
+        const fallbackShop=(profile.display_name||user.email?.split("@")[0]||"Seller")+"’s Shop";
+        const created=await client.from("seller_profiles").insert({user_id:user.id,shop_name:fallbackShop,seller_type:"Goods and services",offering_description:"",country:profile.country||"Nigeria",state:profile.state||null,city:profile.city||null,area:profile.area||null}).select("shop_name,seller_type,availability_status").single();
+        if(created.error)throw created.error;
+        sellerRecord=created.data;
+      }
+      sellerShopName=sellerRecord.shop_name||profile.display_name||"Bigwizz Seller";
+      sellerAvailabilityStatus=sellerRecord.availability_status||"available";
+      sellerProfileReady=true;
+    } else {
+      sellerShopName="";
+      sellerAvailabilityStatus="available";
+    }
     activeAccount = accountRoles.includes("seller") ? "seller" : "buyer";
     updateAccountState();
     await loadSavedListings();
@@ -699,66 +722,45 @@
   async function saveSellerListing(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
-    if (!user || !sellerProfileReady) {
-      showAuth();
-      return;
-    }
-    const submit = document.getElementById("seller-listing-submit");
-    submit.disabled = true;
-    try {
-      const values = new FormData(event.currentTarget);
-      const title = String(values.get("title") || "").trim();
-      const description = String(values.get("description") || "").trim();
-      const kind = String(values.get("type") || "");
-      const category = String(values.get("category") || "");
-      const pricingMode = kind === "service" ? String(values.get("pricingMode") || "fixed") : "fixed";
-      const rawPrice = String(values.get("price") || "").trim();
-      const price = kind === "service" && pricingMode === "quote" ? null : Number(rawPrice);
-      if (!title || !description || (price !== null && (!Number.isFinite(price) || price <= 0)) || (price === null && !(kind === "service" && pricingMode === "quote"))) {
-        throw new Error("Enter a valid price or select quotation required.");
+    if(!user){showAuth();return;}
+    if(!accountRoles.includes("seller")||!sellerProfileReady)throw new Error("Complete seller account setup before publishing listings.");
+    const form=event.currentTarget,submit=document.getElementById("seller-listing-submit");
+    submit.disabled=true;
+    try{
+      const values=new FormData(form);
+      const title=String(values.get("title")||"").trim();
+      const description=String(values.get("description")||"").trim();
+      const kind=String(values.get("type")||"");
+      const category=String(values.get("category")||"").trim();
+      const pricingMode=kind==="service"?String(values.get("pricingMode")||"fixed"):"fixed";
+      const rawPrice=String(values.get("price")||"").trim();
+      const price=kind==="service"&&pricingMode==="quote"?null:Number(rawPrice);
+      if(!title||title.length>80||!description||!category||!["goods","service"].includes(kind))throw new Error("Complete the title, category, type and description.");
+      if(price!==null&&(!Number.isFinite(price)||price<=0))throw new Error("Enter a valid listing price.");
+      if(price===null&&!(kind==="service"&&pricingMode==="quote"))throw new Error("Enter a price or choose quotation required.");
+      const existing=remoteEditingId?await client.from("listings").select("id,status,image_url").eq("id",remoteEditingId).eq("seller_id",user.id).single():{data:null,error:null};
+      if(existing.error)throw existing.error;
+      const file=document.getElementById("seller-listing-image").files[0];
+      const imageUrl=await uploadListingImage(file)||(existing.data&&existing.data.image_url);
+      if(!imageUrl)throw new Error("Upload a product or service photo before publishing.");
+      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published"};
+      const result=remoteEditingId?await client.from("listings").update(row).eq("id",remoteEditingId).eq("seller_id",user.id):await client.from("listings").insert(row);
+      if(result.error)throw result.error;
+      if(kind==="service"){
+        const availability=String(values.get("serviceAvailability")||sellerAvailabilityStatus||"available");
+        const profileUpdate=await client.from("seller_profiles").update({is_public:true,availability_status:availability}).eq("user_id",user.id);
+        if(profileUpdate.error)throw profileUpdate.error;
+        sellerAvailabilityStatus=availability;
       }
-      const { data: existing, error: existingError } = remoteEditingId
-        ? await client.from("listings").select("id,status,image_url")
-          .eq("id", remoteEditingId).eq("seller_id", user.id).single()
-        : { data: null, error: null };
-      if (existingError) throw existingError;
-      const file = document.getElementById("seller-listing-image").files[0];
-      const imageUrl = await uploadListingImage(file) || (existing && existing.image_url);
-      if (!imageUrl) throw new Error("Upload a photo before publishing.");
-      const row = {
-        seller_id: user.id,
-        kind,
-        category,
-        title,
-        description,
-        seller_name: sellerShopName,
-        price: price === null ? null : Math.round((price + Number.EPSILON) * 100) / 100,
-        pricing_mode: pricingMode,
-        image_url: imageUrl,
-        status: existing ? existing.status : "published"
-      };
-      const result = remoteEditingId
-        ? await client.from("listings").update(row).eq("id", remoteEditingId).eq("seller_id", user.id)
-        : await client.from("listings").insert(row);
-      if (result.error) throw result.error;
-      if (kind === "service") {
-        const { error: profileError } = await client.from("seller_profiles").update({
-          is_public: true,
-          availability_status: String(values.get("serviceAvailability") || sellerAvailabilityStatus || "available")
-        }).eq("user_id", user.id);
-        sellerAvailabilityStatus = String(values.get("serviceAvailability") || sellerAvailabilityStatus || "available");
-        if (profileError) throw profileError;
-      }
-      remoteEditingId = null;
-      resetSellerListingForm();
-      document.getElementById("seller-service-availability").value = sellerAvailabilityStatus;
-      await Promise.all([loadMyListings(), loadCatalog()]);
-      notify("Listing saved to the shared marketplace.");
-    } catch (error) {
-      report(error, error instanceof Error ? error.message : "Listing could not be saved.");
-    } finally {
-      submit.disabled = false;
-    }
+      remoteEditingId=null;form.reset();
+      document.getElementById("seller-listing-submit").textContent="Publish listing";
+      document.getElementById("seller-listing-cancel").hidden=true;
+      document.getElementById("seller-service-pricing-mode").disabled=false;
+      document.getElementById("seller-listing-price").disabled=false;
+      await Promise.all([loadMyListings(),loadCatalog(),loadSellerStudio()]);
+      notify("Your listing is live in the Bigwizz marketplace.");
+    }catch(error){report(error,error.message||"Listing could not be saved.");}
+    finally{submit.disabled=false;}
   }
 
   async function updateListing(action, listingId) {
@@ -771,21 +773,19 @@
       .eq("id", listingId).eq("seller_id", user.id).single();
     if (row.error) throw row.error;
     if (action === "edit") {
-      const item = row.data;
-      remoteEditingId = item.id;
-      document.getElementById("seller-listing-title").value = item.title;
-      document.getElementById("seller-listing-type").value = item.kind;
-      document.getElementById("seller-listing-type").dispatchEvent(new Event("change", { bubbles: true }));
-      document.getElementById("seller-listing-category").value = item.category;
-      document.getElementById("seller-service-pricing-mode").value = item.price === null ? "quote" : item.pricing_mode || "fixed";
-      document.getElementById("seller-service-availability").value = sellerAvailabilityStatus;
-      document.getElementById("seller-listing-price").value = item.price === null ? "" : String(item.price);
-      document.getElementById("seller-listing-price").disabled = item.kind === "service" && item.pricing_mode === "quote";
-      document.getElementById("seller-listing-description").value = item.description;
-      document.getElementById("seller-listing-submit").textContent = "Save changes";
-      document.getElementById("seller-listing-cancel").hidden = false;
-      updateSellerListingPricePreview();
-      document.getElementById("seller-listing-form").scrollIntoView({ behavior: "smooth", block: "start" });
+      const item=row.data;
+      remoteEditingId=item.id;
+      document.getElementById("seller-listing-title").value=item.title||"";
+      document.getElementById("seller-listing-type").value=item.kind||"goods";
+      document.getElementById("seller-listing-category").value=item.category||"";
+      document.getElementById("seller-service-pricing-mode").value=item.price===null?"quote":item.pricing_mode||"fixed";
+      document.getElementById("seller-service-availability").value=sellerAvailabilityStatus;
+      document.getElementById("seller-listing-price").value=item.price===null?"":String(item.price);
+      document.getElementById("seller-listing-price").disabled=item.kind==="service"&&item.pricing_mode==="quote";
+      document.getElementById("seller-listing-description").value=item.description||"";
+      document.getElementById("seller-listing-submit").textContent="Save changes";
+      document.getElementById("seller-listing-cancel").hidden=false;
+      document.getElementById("seller-listing-form").scrollIntoView({behavior:"smooth",block:"start"});
       document.getElementById("seller-listing-title").focus();
       return;
     }
@@ -1125,6 +1125,7 @@
       return;
     }
     if(event.target.matches("[data-service-response-form]")){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]'),rawAmount=String(values.get("quotedAmount")||"").trim();submit.disabled=true;submit.textContent="Sending…";try{await respondToServiceRequest(String(values.get("requestId")),{status:"responded",quotedAmount:rawAmount===""?null:rawAmount,providerResponse:values.get("providerResponse")});}catch(error){report(error,error.message||"Your response could not be sent.");}finally{submit.disabled=false;submit.textContent="Submit formal quotation";}return;}
+    if (event.target.id === "seller-listing-form") return saveSellerListing(event);
     if (event.target.id === "service-request-form") return submitServiceRequest(event);
     if(event.target.id==="community-post-form"){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]'),file=form.querySelector("[name=media]")?.files?.[0]||null,progress=document.getElementById("community-upload-progress"),preview=document.getElementById("community-media-preview");submit.disabled=true;submit.textContent=file?"Uploading…":"Publishing…";if(progress)progress.hidden=!file;try{await submitCommunityPost({title:values.get("title"),category:values.get("category"),body:values.get("body"),file,productId:values.get("productId")||null});form.reset();if(preview){preview.hidden=true;preview.innerHTML="";}document.getElementById("community-compose-dialog").close();notify("Your post was submitted and is awaiting review.");}catch(error){report(error,error.message||"Your post could not be submitted.");}finally{submit.disabled=false;submit.textContent="Share maker update";if(progress)progress.hidden=true;}return;}
     if(event.target.id==="community-comment-form"){stop(event);const form=event.target,values=new FormData(form),submit=form.querySelector('[type="submit"]'),postId=String(values.get("postId")||"");submit.disabled=true;try{const comments=await submitCommunityComment({postId,body:values.get("body")});form.reset();document.getElementById("community-comment-post-id").value=postId;renderCommunityComments(comments);notify("Your comment was submitted and is awaiting review.");}catch(error){report(error,error.message||"Your comment could not be submitted.");}finally{submit.disabled=false;}return;}
@@ -1173,6 +1174,11 @@
     }
     if (event.target.closest("#seller-listing-cancel")) {
       remoteEditingId = null;
+      const form=document.getElementById("seller-listing-form");
+      if(form)form.reset();
+      const submit=document.getElementById("seller-listing-submit");
+      if(submit)submit.textContent="Publish listing";
+      event.target.closest("#seller-listing-cancel").hidden=true;
       return;
     }
     const signOut = event.target.closest("[data-supabase-signout]");
