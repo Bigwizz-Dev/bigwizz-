@@ -410,7 +410,7 @@
   async function loadCatalog() {
     const { data: rows, error } = await client
       .from("listings")
-      .select("id,seller_id,kind,category,title,description,seller_name,price,currency,image_url,rating,rating_count,size_type,sizes,colors,color_images,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
+      .select("id,seller_id,kind,category,title,description,seller_name,price,currency,image_url,gallery_images,accepts_custom_measurements,rating,rating_count,size_type,sizes,colors,color_images,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (error) {
@@ -452,6 +452,11 @@
       basePrice: row.price,
       currency: row.currency||"NGN",
       image: row.image_url,
+      galleryImages:Array.isArray(row.gallery_images)&&row.gallery_images.length?row.gallery_images:[row.image_url],
+      acceptsCustomMeasurements:!!row.accepts_custom_measurements,
+      sellerLatitude:row.seller_profiles?.latitude??null,
+      sellerLongitude:row.seller_profiles?.longitude??null,
+      sellerLocation:[row.seller_profiles?.area,row.seller_profiles?.city,row.seller_profiles?.state].filter(Boolean).join(", "),
       seller: row.seller_name,
       sizeType:row.size_type||"other",
       sizes:Array.isArray(row.sizes)?row.sizes:[],
@@ -525,12 +530,12 @@
     if (!accountRoles.includes("buyer")) accountRoles.unshift("buyer");
     sellerProfileReady = false;
     if (accountRoles.includes("seller")) {
-      const {data:sellerData,error:sellerError}=await client.from("seller_profiles").select("shop_name,seller_type,availability_status").eq("user_id",user.id).maybeSingle();
+      const {data:sellerData,error:sellerError}=await client.from("seller_profiles").select("shop_name,seller_type,availability_status,latitude,longitude").eq("user_id",user.id).maybeSingle();
       if(sellerError)throw sellerError;
       let sellerRecord=sellerData;
       if(!sellerRecord){
         const fallbackShop=(profile.display_name||user.email?.split("@")[0]||"Seller")+"’s Shop";
-        const created=await client.from("seller_profiles").insert({user_id:user.id,shop_name:fallbackShop,seller_type:"Goods and services",offering_description:"",country:profile.country||"Nigeria",state:profile.state||null,city:profile.city||null,area:profile.area||null}).select("shop_name,seller_type,availability_status").single();
+        const created=await client.from("seller_profiles").insert({user_id:user.id,shop_name:fallbackShop,seller_type:"Goods and services",offering_description:"",country:profile.country||"Nigeria",state:profile.state||null,city:profile.city||null,area:profile.area||null}).select("shop_name,seller_type,availability_status,latitude,longitude").single();
         if(created.error)throw created.error;
         sellerRecord=created.data;
       }
@@ -731,6 +736,23 @@
       notify("Saved to your account.");
     }
     updateSavedButtons();
+  }
+
+  async function saveSellerStoreLocation(button){
+    if(!user||!accountRoles.includes("seller")){showAuth();return;}
+    if(!navigator.geolocation){notify("GPS is not available in this browser.");return;}
+    button.disabled=true;button.textContent="Finding your shop…";
+    try{
+      const position=await new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,timeout:15000,maximumAge:60000}));
+      const latitude=position.coords.latitude,longitude=position.coords.longitude;
+      const {error}=await client.from("seller_profiles").update({latitude,longitude,is_public:true}).eq("user_id",user.id);
+      if(error)throw error;
+      const caption=document.getElementById("seller-gps-caption");
+      if(caption)caption.textContent="Shop GPS saved. Buyers using nearby discovery can now find your published listings.";
+      await loadCatalog();
+      notify("Your shop GPS location is saved.");
+    }catch(error){notify(error.code===1?"Location permission was denied. Allow it in your browser settings.":error.message||"Could not save your shop GPS location.");}
+    finally{button.disabled=false;button.textContent="⌖ Save shop GPS";}
   }
 
   async function uploadListingImages(files) {
@@ -1243,6 +1265,7 @@
   document.getElementById("seller-listing-price")?.addEventListener("input",updateSellerPricePreview);
   updateSellerPricePreview();
 
+  document.getElementById("seller-save-location")?.addEventListener("click",event=>saveSellerStoreLocation(event.currentTarget));
   document.addEventListener("change", event => {
     if(event.target.id==="seller-size-type"||event.target.id==="seller-listing-type"){
       const type=document.getElementById("seller-listing-type")?.value||"goods";
