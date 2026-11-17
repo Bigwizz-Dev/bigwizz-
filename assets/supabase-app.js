@@ -703,7 +703,11 @@
     const variantColor = String(options.color || "").trim();
     const item = listings.find(row => row.id === listingId);
     if (!item || item.basePrice === null || item.basePrice === undefined) { notify("This item cannot be added to the cart."); return; }
-    // The product detail UI enforces required options; blank values represent non-applicable variants.
+    const needsSize=["clothing","shoes","caps"].includes(item.sizeType);
+    if(needsSize&&!variantSize){notify("Choose a size or request custom measurements before adding this item.");return;}
+    if(Array.isArray(item.colors)&&item.colors.length&&!variantColor){notify("Choose a colour before adding this item.");return;}
+    if(variantSize&&needsSize&&!item.sizes.includes(variantSize)&&variantSize!=="Custom measurements"){notify("That size is not available for this listing.");return;}
+    if(variantColor&&Array.isArray(item.colors)&&!item.colors.includes(variantColor)){notify("That colour is not available for this listing.");return;}
     const cartResult = await client.from("carts").upsert({ user_id: user.id }, { onConflict: "user_id" });
     if (cartResult.error) throw cartResult.error;
     const current = await client.from("cart_items").select("quantity")
@@ -1392,7 +1396,10 @@
     const addButton = event.target.closest("[data-add-to-cart]");
     if (addButton) {
       stop(event);
-      addCartItem(addButton.dataset.addToCart).catch(error => report(error, "Could not add that item to your shared cart."));
+      const selectedSize=document.querySelector(".product-size-chip[aria-pressed=true]:not(:disabled)")?.dataset.productSize||"";
+      const customMeasurements=document.getElementById("product-custom-measurements")?.checked===true;
+      const selectedColor=document.getElementById("product-color")?.value||"";
+      addCartItem(addButton.dataset.addToCart,{size:customMeasurements?"Custom measurements":selectedSize,color:selectedColor}).catch(error => report(error, "Could not add that item to your shared cart."));
       return;
     }
     const saveButton = event.target.closest("[data-save]");
@@ -1470,7 +1477,8 @@
     .on("postgres_changes",{event:"*",schema:"public",table:"notifications"},async payload=>{try{if(user&&(payload.new||payload.old)?.user_id===user.id)await loadNotifications();}catch(error){console.error("Notification live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"orders"},async payload=>{try{const row=payload.new||payload.old;if(!user||!row)return;if(row.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();if(row.buyer_id===user.id)await loadBuyerOrders();}catch(error){console.error("Order feed refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"payment_records"},async()=>{try{if(user){if(activeAccount==="seller")await loadSellerStudio();await loadBuyerOrders();}}catch(error){console.error("Payment status refresh failed.",error);}})
-    .on("postgres_changes",{event:"*",schema:"public",table:"listings"},async payload=>{try{if(user&&(payload.new||payload.old)?.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller product refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"listings"},async payload=>{try{await loadCatalog();if(user&&(payload.new||payload.old)?.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Marketplace listing refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"seller_profiles"},async()=>{try{await loadCatalog();}catch(error){console.error("Seller location refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"listing_reviews"},async()=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller review refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"product_reviews"},async()=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller product review refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"order_reports"},async()=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller report refresh failed.",error);}})
