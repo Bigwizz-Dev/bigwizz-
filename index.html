@@ -571,13 +571,40 @@
     .community-thread-media{width:100%;max-height:360px;object-fit:contain;border-radius:13px;background:#17131a;margin-bottom:12px}
     @media(max-width:700px){.maker-feed{margin:0 -2px}.maker-post{border-radius:15px}.maker-post-media{aspect-ratio:1/1}.maker-feed-intro{padding:12px}.maker-post-head,.maker-post-copy{padding-left:13px;padding-right:13px}}
 
-    .account-entry[hidden]{display:none}
-    .account-entry{min-height:100svh;display:grid;place-items:center;padding:28px 18px;background:radial-gradient(circle at 15% 10%,#f0e8f5 0,transparent 38%),var(--canvas);color:var(--ink)}
-    .account-entry-card{width:min(100%,560px);padding:clamp(24px,5vw,42px);border:1px solid var(--line);border-radius:24px;background:var(--paper);box-shadow:0 22px 70px #25162a14}
-    .account-entry-brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-size:21px;font-weight:900;letter-spacing:-.7px}.account-entry-brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--deep);color:#fff;font-size:25px}
-    .account-entry-eyebrow{margin:0 0 8px;color:var(--deep);font-size:10px;font-weight:850;letter-spacing:1.5px;text-transform:uppercase}.account-entry-card h1{margin:0 0 9px;font-size:clamp(25px,5vw,34px);letter-spacing:-1px}.account-entry-copy{margin:0 0 25px;color:var(--muted);font-size:14px;line-height:1.65}
-    .account-choice-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}.account-choice{display:flex;flex-direction:column;align-items:flex-start;gap:9px;min-height:145px;padding:18px;border:1.5px solid var(--line);border-radius:16px;background:var(--paper);color:var(--ink);text-align:left;cursor:pointer}.account-choice[aria-pressed=true]{border-color:var(--deep);background:#f5eff8;box-shadow:inset 0 0 0 1px var(--deep)}.account-choice-icon{font-size:25px}.account-choice strong{font-size:15px}.account-choice small{color:var(--muted);font-size:11px;line-height:1.5}.account-entry-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}.account-entry-actions button{min-height:48px;border:1px solid var(--deep);border-radius:12px;font-weight:800;cursor:pointer}.account-entry-signin{background:var(--deep);color:white}.account-entry-signup{background:transparent;color:var(--deep)}.account-entry-footnote{margin:18px 0 0;color:var(--muted);font-size:11px;line-height:1.55;text-align:center}
-    @media(max-width:430px){.account-choice-list{grid-template-columns:1fr}.account-choice{min-height:unset}.account-entry-card{border-radius:18px}}
+    .account-entry[hidden]{display:none!important}
+    .account-entry{position:fixed;inset:0;z-index:25;display:block;overflow-y:auto;min-height:100svh;padding:clamp(24px,5vh,54px) 20px 34px;background:radial-gradient(ellipse at 12% 24%,#3a174d88 0,transparent 34%),radial-gradient(ellipse at 90% 62%,#4b123c66 0,transparent 38%),#17131d;color:#fff}
+    .account-entry-card{width:min(100%,570px);min-height:calc(100svh - 58px);margin:0 auto;padding:clamp(4px,1.5vh,16px) 0 12px;border:0;border-radius:0;background:transparent;box-shadow:none}
+    .account-entry-top{display:flex;align-items:center;justify-content:space-between;margin:0 0 clamp(44px,7vh,78px)}
+    .account-entry-brand{display:flex;align-items:center;gap:12px;margin:0;color:#fff;font-size:clamp(23px,5vw,29px);font-weight:900;letter-spacing:-1px}
+    .account-entry-brand-mark{display:grid;place-items:center;width:57px;height:57px;border-radius:17px 17px 17px 6px;background:linear-gradient(145deg,#a329ed,#d20caa);color:#fff;font-size:39px;line-height:1;box-shadow:0 0 30px #c11de766}
+    .account-entry-avatar{position:relative;display:grid;place-items:center;width:48px;height:48px;border:1px solid #ffffff24;border-radius:50%;background:linear-gradient(145deg,#4b3c57,#28212f);color:#eadcf2}
+    .account-entry-avatar:after{content:"";position:absolute;right:0;top:1px;width:11px;height:11px;border:2px solid #17131d;border-radius:50%;background:#c22bd2}
+    .account-entry-avatar svg{width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+    .account-entry-eyebrow{display:none}
+    .account-entry-card h1{max-width:550px;margin:0 0 18px;color:#fff;font-size:clamp(34px,7vw,52px);font-weight:850;line-height:1.12;letter-spacing:-1.9px}
+    .account-entry-card h1 span{color:#c52bd0}
+    .account-entry-copy{max-width:550px;margin:0 0 36px;color:#d2cbd7;font-size:clamp(15px,3.7vw,19px);line-height:1.55}
+    .account-choice-list{display:grid;grid-template-columns:1fr;gap:17px}
+    .account-choice{position:relative;display:grid;grid-template-columns:1fr;grid-template-rows:155px auto;gap:0;min-height:320px;padding:0 25px 23px;overflow:hidden;border:1.5px solid #514653;border-radius:25px;background:linear-gradient(145deg,#29232f,#211c27);color:#fff;text-align:left;transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}
+    .account-choice[aria-pressed=true]{border-color:#a22bd0;background:linear-gradient(112deg,#32104b 0%,#4a103f 100%);box-shadow:0 0 0 1px #a22bd066,0 15px 42px #a51c9b22}
+    .account-choice:hover{transform:translateY(-2px)}
+    .account-choice-art{position:relative;display:flex;align-items:center;justify-content:flex-end;min-height:0}
+    .account-choice-art svg{display:block;width:min(72%,280px);height:150px;overflow:visible}
+    .account-choice-art .art-spark{position:absolute;color:#f4bd57;font-size:24px;text-shadow:0 0 14px #eaa8ff88}
+    .account-choice-art .spark-one{left:8px;top:26px}.account-choice-art .spark-two{right:6px;top:28px;color:#e8a9eb}
+    .account-choice-copy{align-self:end}
+    .account-choice strong{display:block;margin:0 0 8px;color:#fff;font-size:clamp(21px,4.8vw,26px);font-weight:850;letter-spacing:-.5px}
+    .account-choice small{display:block;max-width:440px;color:#d8cfdf;font-size:15px;line-height:1.55}
+    .account-choice-icon{display:none}
+    .account-entry-actions{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:31px}
+    .account-entry-actions button{min-height:61px;border:1px solid #776a7c;border-radius:999px;color:#fff;font-size:17px;font-weight:850;cursor:pointer;transition:filter .18s ease,transform .18s ease}
+    .account-entry-actions button:active{transform:scale(.985)}
+    .account-entry-signin{border:0!important;background:linear-gradient(105deg,#6728e8,#d10ba5);box-shadow:0 8px 28px #a21acb44}
+    .account-entry-signup{background:transparent}
+    .account-entry-footnote{max-width:470px;margin:27px auto 0;color:#bcb2c2;font-size:13px;line-height:1.65;text-align:center}
+    @media(min-width:700px){.account-entry{padding-top:38px}.account-entry-card{min-height:unset}.account-entry-top{margin-bottom:48px}.account-choice{grid-template-rows:165px auto;min-height:330px}}
+    @media(max-width:430px){.account-entry{padding:24px 18px 30px}.account-entry-card{min-height:calc(100svh - 54px)}.account-entry-top{margin-bottom:46px}.account-entry-brand-mark{width:52px;height:52px}.account-entry-card h1{font-size:clamp(34px,9vw,42px)}.account-entry-copy{margin-bottom:30px}.account-choice{grid-template-rows:145px auto;min-height:300px;padding:0 19px 21px;border-radius:22px}.account-choice-art svg{height:140px}.account-entry-actions{gap:10px;margin-top:26px}.account-entry-actions button{min-height:57px;font-size:15px}.account-entry-footnote{margin-top:22px}}
+    @media(prefers-reduced-motion:reduce){.account-choice,.account-entry-actions button{transition:none}}
 </style>
 </head>
 <body>
@@ -586,15 +613,43 @@
   </section>
   <section id="account-entry" class="account-entry" aria-labelledby="account-entry-title" hidden>
     <div class="account-entry-card">
-      <div class="account-entry-brand"><span class="account-entry-brand-mark" aria-hidden="true">b</span> bigwizz</div>
-      <p class="account-entry-eyebrow">Welcome to Bigwizz</p>
-      <h1 id="account-entry-title">How would you like to use Bigwizz?</h1>
+      <div class="account-entry-top">
+        <div class="account-entry-brand"><span class="account-entry-brand-mark" aria-hidden="true">b</span> bigwizz</div>
+        <div class="account-entry-avatar" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.4 3.1-5.2 7-5.2s6.2 1.8 7 5.2"/></svg></div>
+      </div>
+      <h1 id="account-entry-title">How would you like<br>to use <span>Bigwizz?</span></h1>
       <p class="account-entry-copy">Choose your account type to continue. You can sign in to an existing account or create a new one.</p>
       <div class="account-choice-list" role="group" aria-label="Choose account type">
-        <button class="account-choice" type="button" data-entry-audience="buyer" aria-pressed="true"><span class="account-choice-icon" aria-hidden="true">🛍️</span><strong>I'm a Buyer</strong><small>Discover products and services, and shop on Bigwizz.</small></button>
-        <button class="account-choice" type="button" data-entry-audience="seller" aria-pressed="false"><span class="account-choice-icon" aria-hidden="true">✦</span><strong>I'm a Seller</strong><small>Choose a seller account to offer products and services.</small></button>
+        <button class="account-choice" type="button" data-entry-audience="buyer" aria-pressed="true">
+          <span class="account-choice-art" aria-hidden="true">
+            <span class="art-spark spark-one">✦</span><span class="art-spark spark-two">✦</span>
+            <svg viewBox="0 0 280 155" role="img" aria-label="">
+              <defs><linearGradient id="bagPink" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffb5d5"/><stop offset="1" stop-color="#d94c9a"/></linearGradient><linearGradient id="bagPurple" x1="0" x2="1"><stop stop-color="#c8a2ff"/><stop offset="1" stop-color="#7541cb"/></linearGradient></defs>
+              <path d="M91 54h49l-5 71H96z" fill="#f4d9a6"/><path d="M101 54c0-25 29-25 29 0" fill="none" stroke="#d6b67b" stroke-width="5"/>
+              <path d="M143 43h57l-5 85h-47z" fill="url(#bagPink)"/><path d="M155 44c0-34 34-34 34 0" fill="none" stroke="#efb8d0" stroke-width="5"/>
+              <path d="M176 71h48l-4 61h-42z" fill="url(#bagPurple)"/><path d="M187 72c0-27 27-27 27 0" fill="none" stroke="#c5a8f0" stroke-width="5"/>
+              <path d="M106 77h20v17h-20z" fill="#fff0d0" opacity=".65"/><path d="M158 62h25v18h-25z" fill="#fff" opacity=".22"/>
+              <path d="M42 42l4 10 10 4-10 4-4 10-4-10-10-4 10-4zM237 28l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#f4bd57"/>
+            </svg>
+          </span>
+          <span class="account-choice-copy"><strong>I'm a Buyer</strong><small>Discover products and services, and shop on Bigwizz.</small></span>
+        </button>
+        <button class="account-choice" type="button" data-entry-audience="seller" aria-pressed="false">
+          <span class="account-choice-art" aria-hidden="true">
+            <span class="art-spark spark-one">✦</span><span class="art-spark spark-two">✦</span>
+            <svg viewBox="0 0 280 155" role="img" aria-label="">
+              <defs><linearGradient id="storeFront" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#a987f0"/><stop offset="1" stop-color="#52339c"/></linearGradient></defs>
+              <rect x="68" y="56" width="145" height="80" rx="8" fill="url(#storeFront)"/><rect x="85" y="91" width="46" height="45" rx="3" fill="#c8b6f3"/><rect x="145" y="87" width="48" height="49" rx="3" fill="#382b69"/><rect x="88" y="34" width="105" height="26" rx="5" fill="#7453b9"/><text x="140" y="52" fill="#fff" font-size="14" font-weight="800" text-anchor="middle">STORE</text>
+              <path d="M61 59h160l-10 26H71z" fill="#f7e5ef"/><path d="M61 59h27l-6 26H71zM114 59h27v26h-27zM167 59h27l6 26h-27z" fill="#ed679e"/>
+              <path d="M83 136h120" stroke="#d6c6f4" stroke-width="5"/><rect x="35" y="108" width="44" height="31" rx="4" fill="#e5d6f5"/><path d="M43 117h26M43 125h17" stroke="#906bc5" stroke-width="3"/>
+              <circle cx="244" cy="60" r="11" fill="#d9a58d"/><path d="M234 57q10-18 21 0" fill="#493044"/><path d="M234 74l-5 43 28 0-8-43z" fill="#bd78d8"/><path d="M235 83l-19 18M251 84l15 15" stroke="#d9a58d" stroke-width="6" stroke-linecap="round"/><path d="M237 116l-6 28M252 116l7 28" stroke="#5b4c9a" stroke-width="7" stroke-linecap="round"/>
+              <path d="M24 35l3 8 8 3-8 3-3 8-3-8-8-3 8-3zM252 23l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#f4bd57"/>
+            </svg>
+          </span>
+          <span class="account-choice-copy"><strong>I'm a Seller</strong><small>Choose a seller account to offer products and services.</small></span>
+        </button>
       </div>
-      <div class="account-entry-actions"><button class="account-entry-signin" type="button" data-entry-auth="signin">Sign in</button><button class="account-entry-signup" type="button" data-entry-auth="signup">Create account</button></div>
+      <div class="account-entry-actions"><button class="account-entry-signin" type="button" data-entry-auth="signin">Sign in</button><button class="account-entry-signup" type="button" data-entry-auth="signup">Create an Account</button></div>
       <p class="account-entry-footnote">Your choice will be used for this sign-in or registration. Seller dashboard setup will be added separately.</p>
     </div>
   </section>
