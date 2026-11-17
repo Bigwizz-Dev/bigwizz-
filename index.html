@@ -198,6 +198,9 @@
     #service-dialog .request-media-item span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
     #service-dialog .request-media-item small{color:var(--muted);white-space:nowrap}
     #service-dialog .request-media-remove{width:27px;height:27px;border:0;border-radius:8px;background:var(--canvas);color:var(--ink);font-size:17px}
+    #service-dialog .request-media-status{display:block;color:var(--muted);font-size:10px;margin-top:2px}
+    #service-dialog .request-media-progress{display:block;height:4px;overflow:hidden;border-radius:99px;background:var(--line);margin-top:5px}
+    #service-dialog .request-media-progress i{display:block;height:100%;background:#765684;transition:width .15s ease}
     html[data-theme="dark"] #service-dialog .request-media-dropzone:hover,html[data-theme="dark"] #service-dialog .request-media-dropzone.is-dragover{background:#3b3043}
     html[data-theme="dark"] #service-dialog .request-media-icon{background:#4a3b51;color:#e4c9f0}
 
@@ -1648,8 +1651,29 @@
     const requestMediaZone=document.getElementById("request-media-dropzone");
     const requestMediaList=document.getElementById("request-media-list");
     let requestMediaFiles=[];
+    let requestMediaId=crypto.randomUUID();
+    let requestMediaUploading=false;
+    const requestSubmitButton=document.querySelector("#service-request-form [type=submit]");
+    function updateRequestSubmitState(){
+      const pending=requestMediaFiles.some(item=>item.status!=="uploaded");
+      requestSubmitButton.disabled=requestMediaUploading||pending;
+      requestSubmitButton.title=requestMediaUploading?"Wait for attachments to finish uploading":pending?"Remove failed uploads or wait for upload completion":"";
+    }
     function renderRequestMedia(){
-      requestMediaList.innerHTML=requestMediaFiles.map((file,index)=>'<div class="request-media-item"><span>'+escapeHtml(file.name)+'</span><small>'+((file.size/1024/1024).toFixed(1))+' MB</small><button class="request-media-remove" type="button" data-remove-request-media="'+index+'" aria-label="Remove '+escapeHtml(file.name)+'">×</button></div>').join("");
+      requestMediaList.innerHTML=requestMediaFiles.map((item,index)=>{
+        const file=item.file,progress=Math.round(item.progress||0);
+        const status=item.status==="uploaded"?"Uploaded":item.status==="uploading"?"Uploading…":item.status==="error"?"Upload failed":"Preparing…";
+        return '<div class="request-media-item"><span>'+escapeHtml(file.name)+'<small class="request-media-status">'+status+'</small><span class="request-media-progress" role="progressbar" aria-label="Upload progress for '+escapeHtml(file.name)+'" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+progress+'"><i style="width:'+progress+'%"></i></span></span><small>'+((file.size/1024/1024).toFixed(1))+' MB · '+progress+'%</small><button class="request-media-remove" type="button" data-remove-request-media="'+index+'" aria-label="Remove '+escapeHtml(file.name)+'" '+(item.status==="uploading"?'disabled':'')+'>×</button></div>';
+      }).join("");
+      updateRequestSubmitState();
+    }
+    async function uploadRequestMediaItem(item){
+      item.status="uploading";item.progress=0;renderRequestMedia();
+      try{
+        const result=await window.BIGWIZZ_BACKEND.uploadServiceRequestMedia({requestId:requestMediaId,file:item.file,onProgress:value=>{item.progress=value;renderRequestMedia()}});
+        item.path=result.path;item.status="uploaded";item.progress=100;item.metadata=result.metadata;
+      }catch(error){item.status="error";item.error=error;showToast("Could not upload "+item.file.name+". Remove it and try again.");}
+      renderRequestMedia();
     }
     function getRequestVideoDuration(file){
       return new Promise((resolve,reject)=>{
@@ -1668,7 +1692,7 @@
         if(!file.type.startsWith("image/")&&!file.type.startsWith("video/")){showToast("Please choose an image or video file.");continue}
         if(file.size>50*1024*1024){showToast(file.name+" is larger than the 50 MB limit.");continue}
         if(requestMediaFiles.length>=5){showToast("You can attach up to 5 files.");break}
-        if(requestMediaFiles.some(existing=>existing.name===file.name&&existing.size===file.size&&existing.lastModified===file.lastModified))continue;
+        if(requestMediaFiles.some(existing=>existing.file.name===file.name&&existing.file.size===file.size&&existing.file.lastModified===file.lastModified))continue;
         if(file.type.startsWith("video/")){
           try{
             const duration=await getRequestVideoDuration(file);
@@ -1676,9 +1700,11 @@
             if(duration>60){showToast(file.name+" is longer than the 60-second video limit.");continue}
           }catch(error){showToast(file.name+": "+error.message);continue}
         }
-        requestMediaFiles.push(file);
+        requestMediaFiles.push({file,status:"queued",progress:0});
       }
       renderRequestMedia();
+      const queued=requestMediaFiles.filter(item=>item.status==="queued");
+      for(const item of queued)await uploadRequestMediaItem(item);
     }
     document.getElementById("request-media-browse").addEventListener("click",()=>requestMediaInput.click());
     requestMediaZone.addEventListener("click",event=>{if(event.target.closest("button"))return;requestMediaInput.click()});
@@ -1687,8 +1713,8 @@
     ["dragenter","dragover"].forEach(type=>requestMediaZone.addEventListener(type,event=>{event.preventDefault();requestMediaZone.classList.add("is-dragover")}));
     ["dragleave","drop"].forEach(type=>requestMediaZone.addEventListener(type,event=>{event.preventDefault();requestMediaZone.classList.remove("is-dragover")}));
     requestMediaZone.addEventListener("drop",event=>addRequestMedia(event.dataTransfer.files));
-    requestMediaList.addEventListener("click",event=>{const button=event.target.closest("[data-remove-request-media]");if(!button)return;requestMediaFiles.splice(Number(button.dataset.removeRequestMedia),1);renderRequestMedia()});
-    document.getElementById("service-request-form").addEventListener("submit",async event=>{event.preventDefault();event.stopImmediatePropagation();const form=event.currentTarget,submit=form.querySelector("[type=submit]");if(!window.BIGWIZZ_BACKEND?.createServiceRequestWithMedia){showToast("Service requests are temporarily unavailable. Please sign in and try again.");return}const values=Object.fromEntries(new FormData(form).entries());submit.disabled=true;submit.textContent="Sending request…";try{await window.BIGWIZZ_BACKEND.createServiceRequestWithMedia({listingId:values.listingId,providerId:values.providerId,serviceTitle:values.service,bookingTiming:values.bookingTiming,preferredDate:values.preferredDate,preferredTime:values.preferredTime,city:values.city,area:values.area,details:values.details,files:requestMediaFiles});form.reset();requestMediaFiles=[];renderRequestMedia();document.getElementById("service-dialog").close();showToast("Your service request and attachments have been sent to the provider.");}catch(error){showToast(error?.message||"Your service request could not be sent. Please try again.");}finally{submit.disabled=false;submit.innerHTML='Send service request <span aria-hidden="true">→</span>';}});
+    requestMediaList.addEventListener("click",event=>{const button=event.target.closest("[data-remove-request-media]");if(!button)return;const removed=requestMediaFiles.splice(Number(button.dataset.removeRequestMedia),1)[0];if(removed?.path)window.BIGWIZZ_BACKEND?.removeServiceRequestMedia?.([removed.path]);renderRequestMedia()});
+    document.getElementById("service-request-form").addEventListener("submit",async event=>{event.preventDefault();event.stopImmediatePropagation();const form=event.currentTarget,submit=form.querySelector("[type=submit]");if(requestMediaUploading||requestMediaFiles.some(item=>item.status!=="uploaded")){showToast("Please wait until all photos and videos finish uploading.");return}if(!window.BIGWIZZ_BACKEND?.createServiceRequestWithMedia){showToast("Service requests are temporarily unavailable. Please sign in and try again.");return}const values=Object.fromEntries(new FormData(form).entries());submit.disabled=true;submit.textContent="Sending request…";try{await window.BIGWIZZ_BACKEND.createServiceRequestWithMedia({listingId:values.listingId,providerId:values.providerId,serviceTitle:values.service,bookingTiming:values.bookingTiming,preferredDate:values.preferredDate,preferredTime:values.preferredTime,city:values.city,area:values.area,details:values.details,requestId:requestMediaId,attachments:requestMediaFiles.map(item=>item.metadata)});form.reset();requestMediaFiles=[];requestMediaId=crypto.randomUUID();renderRequestMedia();document.getElementById("service-dialog").close();showToast("Your service request and attachments have been sent to the provider.");}catch(error){showToast(error?.message||"Your service request could not be sent. Please try again.");}finally{submit.disabled=false;submit.innerHTML='Send service request <span aria-hidden="true">→</span>';}});
     document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
     document.getElementById("new-post").addEventListener("click",()=>showToast("Community posting is a demo. Sign-in and moderation are needed before launch."));
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});
