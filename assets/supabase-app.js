@@ -197,7 +197,7 @@
     const paidStatuses=["paid","processing","shipped","completed","delivered"];
     const todaysOrders=orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===today&&paidStatuses.includes(String(order.status||"").toLowerCase()));
     const todayValue=todaysOrders.reduce((sum,order)=>sum+Number(order.seller_subtotal||order.total||0),0);
-    const dailyTotals=Array.from({length:7},(_,index)=>{const date=new Date();date.setDate(date.getDate()-(6-index));const key=date.toLocaleDateString("en-CA");return orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===key).reduce((sum,order)=>sum+Number(order.total||0),0);});
+    const dailyTotals=Array.from({length:7},(_,index)=>{const date=new Date();date.setDate(date.getDate()-(6-index));const key=date.toLocaleDateString("en-CA");return orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===key&&paidStatuses.includes(String(order.status||"").toLowerCase())).reduce((sum,order)=>sum+Number(order.seller_subtotal||order.total||0),0);});
     const maxDaily=Math.max(1,...dailyTotals);
     const points=dailyTotals.map((amount,index)=>({x:index*560/6,y:102-(amount/maxDaily)*82}));
     const linePath=points.map((point,index)=>(index?"L":"M")+point.x.toFixed(1)+" "+point.y.toFixed(1)).join(" ");
@@ -1142,6 +1142,22 @@
   }, true);
 
   document.addEventListener("change", event => {
+    if(event.target.id==="seller-listing-type"){
+      const service=event.target.value==="service";
+      const pricing=document.getElementById("seller-service-pricing-field");
+      const availability=document.getElementById("seller-service-availability-field");
+      const mode=document.getElementById("seller-service-pricing-mode");
+      const price=document.getElementById("seller-listing-price");
+      if(pricing)pricing.hidden=!service;
+      if(availability)availability.hidden=!service;
+      if(mode)mode.disabled=!service;
+      if(price)price.required=!(service&&mode?.value==="quote");
+    }
+    if(event.target.id==="seller-service-pricing-mode"){
+      const price=document.getElementById("seller-listing-price");
+      if(price)price.required=event.target.value!=="quote";
+      if(price)price.disabled=event.target.value==="quote";
+    }
     if(event.target.name==="bookingTiming"){
       const later=event.target.value==="later";
       const schedule=document.getElementById("service-schedule-fields");
@@ -1307,6 +1323,8 @@
     .on("postgres_changes",{event:"*",schema:"public",table:"orders"},async payload=>{try{const row=payload.new||payload.old;if(!user||!row)return;if(row.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();if(row.buyer_id===user.id)await loadBuyerOrders();}catch(error){console.error("Order feed refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"payment_records"},async()=>{try{if(user){if(activeAccount==="seller")await loadSellerStudio();await loadBuyerOrders();}}catch(error){console.error("Payment status refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"listings"},async payload=>{try{if(user&&(payload.new||payload.old)?.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller product refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"listing_reviews"},async payload=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller review refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"order_reports"},async payload=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller report refresh failed.",error);}})
     .subscribe();
   client.auth.getSession().then(({ data, error }) => {
     if (error) report(error, "Could not check the current sign-in session.");
