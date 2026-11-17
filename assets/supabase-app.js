@@ -640,8 +640,8 @@
       <div class="cart-total-row"><span>Seller prices</span><strong>${currency.format(subtotal)}</strong></div>
       <div class="cart-total-row"><span>Bigwizz fee · 2%</span><strong>${currency.format(fee)}</strong></div>
       <div class="cart-total-row total"><span>Buyer total</span><strong>${currency.format(subtotal + fee)}</strong></div>
-      <button class="primary" type="button" data-checkout-demo>Continue to checkout</button>
-      <p class="notice">Checkout and payments aren't connected yet.</p>`;
+      <button class="primary" type="button" data-checkout-demo>Place order</button>
+      <p class="notice">Your order will be sent to the seller. Online payment is not enabled yet.</p>`;
   }
 
   async function changeCart(listingId, action, options = {}) {
