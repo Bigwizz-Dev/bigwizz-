@@ -1621,7 +1621,8 @@
       const colors=Array.isArray(item.colors)?item.colors:[];
       const selectedSize=document.querySelector(".product-size-chip[aria-pressed=true]:not(:disabled)")?.dataset.productSize||"";
       const selectedColor=document.getElementById("product-color")?.value||"";
-      button.disabled=!( (!clothing||(sizes.length>0&&!!selectedSize)) && (colors.length===0||!!selectedColor) );
+      const customMeasurements=document.getElementById("product-custom-measurements")?.checked===true;
+      button.disabled=!( (!clothing||(!!selectedSize||customMeasurements)) && (colors.length===0||!!selectedColor) );
       button.title=button.disabled?"Choose all required options before adding this item to your cart.":"";
     }
     function renderSizeChart(type,listedSizes=[],item={}){
@@ -1658,7 +1659,7 @@
       const sellerPrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
       const displayedPrice=sellerPrice?currencyFormatter.format(buyerPrice(sellerPrice)):item.price;
       const variantFields=[
-        sizeEnabled?(sizes.length?`<div class="field"><div class="product-size-heading"><span class="field-label">Size</span>${renderSizeChart(item.sizeType,sizes,item)}</div><div class="product-size-options" role="group" aria-label="Choose a size">${sizes.map(size=>{const available=isProductSizeAvailable(item,size);return `<button class="product-size-chip" type="button" data-product-size="${escapeHtml(size)}" aria-pressed="false" ${available?"":"disabled aria-label=\""+escapeHtml(size)+" — out of stock\""}>${escapeHtml(size)}</button>`}).join("")}</div><small class="product-size-help">Choose one size. Unavailable sizes are crossed out.</small></div>`:`<p class="notice">The seller has not added size choices for this clothing item yet, so it cannot be added to the cart.</p>`):"",
+        sizeEnabled?(sizes.length?`<div class="field"><div class="product-size-heading"><span class="field-label">Size</span>${renderSizeChart(item.sizeType,sizes,item)}</div><div class="product-size-options" role="group" aria-label="Choose a size">${sizes.map(size=>{const available=isProductSizeAvailable(item,size);return `<button class="product-size-chip" type="button" data-product-size="${escapeHtml(size)}" aria-pressed="false" ${available?"":"disabled aria-label=\""+escapeHtml(size)+" — out of stock\""}>${escapeHtml(size)}</button>`}).join("")}</div><small class="product-size-help">Choose one size. Unavailable sizes are crossed out.</small>${item.acceptsCustomMeasurements?'<label class="listing-custom-size-toggle"><input id="product-custom-measurements" type="checkbox"><span><strong>Request bespoke measurements</strong><small>The seller will confirm your measurements for a custom fit.</small></span></label>':''}</div>`:(item.acceptsCustomMeasurements?`<div class="field"><label class="listing-custom-size-toggle"><input id="product-custom-measurements" type="checkbox"><span><strong>Request bespoke measurements</strong><small>This seller makes items to your measurements.</small></span></label></div>`:`<p class="notice">The seller has not added size choices for this clothing item yet, so it cannot be added to the cart.</p>`)):"",
         colors.length?`<div class="field"><label for="product-color">Colour</label><select id="product-color" required><option value="">Choose a colour</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select><small id="product-color-preview-label" class="notice">Choose a colour to view its product photo.</small></div>`:""
       ].filter(Boolean).join("");
       document.getElementById("product-detail-content").innerHTML=`
@@ -1968,7 +1969,7 @@
     });
     document.addEventListener("change",async event=>{
       if(event.target.id==="community-post-media"){const input=event.target,file=input.files&&input.files[0],preview=document.getElementById("community-media-preview");if(!preview)return;if(!file){preview.hidden=true;preview.innerHTML="";return;}if(file.size>50*1024*1024){input.value="";preview.hidden=true;showToast("Media must be 50 MB or smaller.");return;}const allowed=["image/jpeg","image/png","image/webp","image/avif","video/mp4","video/webm"];if(!allowed.includes(file.type)){input.value="";preview.hidden=true;showToast("Choose a JPG, PNG, WebP, AVIF, MP4 or WebM file.");return;}if(file.type.startsWith("video/")){try{const duration=await getRequestVideoDuration(file);if(!Number.isFinite(duration)||duration<=0||duration>60){input.value="";preview.hidden=true;showToast("Maker videos must be 60 seconds or shorter.");return;}}catch(error){input.value="";preview.hidden=true;showToast("Video duration could not be checked.");return;}}const url=URL.createObjectURL(file);preview.hidden=false;preview.innerHTML=file.type.startsWith("video/")?`<video controls playsinline src="${url}" class="maker-preview-media"></video>`:`<img src="${url}" alt="Selected maker media preview" class="maker-preview-media">`;}
-      if(event.target.id==="product-color"){updateProductColorImage(event.target.value);updateProductVariantState();}
+      if(event.target.id==="product-color"||event.target.id==="product-custom-measurements"){if(event.target.id==="product-color")updateProductColorImage(event.target.value);updateProductVariantState();}
       if(event.target.matches("[data-color-image]")&&event.target.files&&event.target.files[0]){
         const photo=event.target.closest(".variant-photo-field").querySelector("img");
         if(photo.dataset.previewUrl)URL.revokeObjectURL(photo.dataset.previewUrl);
