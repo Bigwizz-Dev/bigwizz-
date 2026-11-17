@@ -728,6 +728,18 @@
     html[data-theme="dark"] .listing-ai-button{color:var(--lime)}
     @media(max-width:560px){.listing-media-section{padding:13px}.listing-section-heading{align-items:flex-start}.listing-media-count{padding-top:5px}.seller-listing-form-grid{grid-template-columns:1fr}.listing-description-heading{align-items:flex-start;flex-wrap:wrap}.listing-ai-button{margin-left:auto}.seller-listing-form-actions{position:sticky;bottom:calc(68px + env(safe-area-inset-bottom));z-index:5;padding:10px 0;background:var(--paper)}}
 
+  
+    .goods-location-bar,.seller-gps-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 16px;margin:18px 0 4px;border:1px solid var(--line);border-radius:15px;background:var(--paper)}
+    .goods-location-bar strong,.seller-gps-card strong{display:block;font-size:12px}
+    .goods-location-bar small,.seller-gps-card small{display:block;margin-top:4px;color:var(--muted);font-size:10px;line-height:1.5}
+    .goods-location-bar .outline-button,.seller-gps-card .outline-button{flex:0 0 auto;width:auto}
+    .product-gallery-thumbs{display:flex;gap:8px;overflow-x:auto;padding:9px 1px}
+    .product-gallery-thumb{width:62px;height:62px;flex:0 0 62px;padding:2px;border:1px solid var(--line);border-radius:9px;background:var(--paper)}
+    .product-gallery-thumb[aria-pressed=true]{border:2px solid var(--green)}
+    .product-gallery-thumb img{width:100%;height:100%;object-fit:cover;border-radius:6px}
+    .bespoke-size-note{padding:11px 13px;border:1px solid var(--line);border-radius:11px;background:var(--canvas);font-size:11px;line-height:1.5}
+    @media(max-width:560px){.goods-location-bar,.seller-gps-card{align-items:flex-start;flex-direction:column}.goods-location-bar .outline-button,.seller-gps-card .outline-button{width:100%}}
+
   </style>
 </head>
 <body>
@@ -813,6 +825,7 @@
       </section>
       <section id="seller-products" class="page seller-data-page"><div class="section-head"><div><h2>My Products</h2><p>Publish and manage the goods and services buyers can discover.</p></div><button class="outline-button" style="width:auto" type="button" data-page="seller-studio">Back to Studio</button></div>
         <section class="seller-panel seller-product-panel" style="margin-bottom:18px"><h2 id="seller-listing-form-heading">Create a listing</h2><form id="seller-listing-form" class="seller-listing-form" enctype="multipart/form-data">
+          <section class="seller-gps-card"><div><strong>Store location</strong><small id="seller-gps-caption">Share your shop location so nearby buyers can discover your goods and services.</small></div><button type="button" class="outline-button" id="seller-save-location">⌖ Save shop GPS</button></section>
           <section class="listing-media-section" aria-labelledby="listing-media-title">
             <div class="listing-section-heading"><div><span class="listing-step">01 · PRODUCT MEDIA</span><h3 id="listing-media-title">Showcase your work</h3><p>Add up to 8 clear photos. The first photo will be your cover image.</p></div><span class="listing-media-count" id="seller-image-count">0 / 8 photos</span></div>
             <label class="listing-dropzone" for="seller-listing-image"><span class="listing-upload-icon">＋</span><strong>Choose product photos</strong><span>Tap to browse or drag images here · JPG, PNG or WebP · 5 MB each</span><input id="seller-listing-image" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
@@ -840,6 +853,7 @@
         <div class="hero"><div class="hero-copy"><div class="eyebrow">Good finds. Better connections.</div><h1>Find what suits<br>your style.</h1><p>Discover quality goods from thoughtful sellers, with clear details, real reviews, and support if something isn't right.</p><form class="searchbar" id="search-form"><input id="search-input" type="search" aria-label="Search quality goods"><button type="submit" aria-label="Search goods"><svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button></form></div>
           <div class="hero-art" aria-hidden="true"><div class="art-main"><img class="product-hero-image" src="assets/product-tote.jpg" alt=""><strong>Made with intention</strong><span>Small makers, thoughtful goods</span></div><div class="art-note"><b>Trusted, not guessed</b><span>Verified shops & reviews</span></div><div class="art-badge">A better kind of marketplace <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.6 7.4L21 12l-7.4 1.6L12 21l-1.6-7.4L3 12l7.4-2.6z"/></svg></div></div>
         </div>
+        <div class="goods-location-bar" id="goods-location-bar"><div><strong id="goods-location-title">Discover goods from sellers near you</strong><small id="goods-location-caption">Use GPS to prioritise nearby sellers who have shared their shop location.</small></div><button type="button" class="outline-button" id="goods-use-gps">⌖ Use my location</button></div>
         <section class="section"><div class="section-head"><div><h2>Explore by category</h2><p>Thoughtful finds from trusted independent sellers.</p></div></div>
           <div class="category-row" id="categories">
             <button class="category selected" data-category="All"><img class="category-image" src="assets/ceramic-set.jpg" alt=""><strong>All goods</strong><small>Quality finds</small></button><button class="category" data-category="Home"><img class="category-image" src="assets/oak-table.jpg" alt=""><strong>Home & living</strong><small>Made for your space</small></button><button class="category" data-category="Style"><img class="category-image" src="assets/cotton-scarf.jpg" alt=""><strong>Style & craft</strong><small>Wear it your way</small></button>
@@ -1651,6 +1665,7 @@
         <article class="product-detail">
           <div class="product-media-column">
             <div class="product-image-frame"><img class="product-detail-image" src="${escapeHtml(item.image)}" alt="${escapeHtml(item.title)}"></div>
+            ${(item.galleryImages&&item.galleryImages.length>1)?'<div class="product-gallery-thumbs" aria-label="More product photos">'+item.galleryImages.map((url,index)=>'<button type="button" class="product-gallery-thumb" data-product-image="'+escapeHtml(url)+'" aria-label="View product photo '+(index+1)+'" aria-pressed="'+String(index===0)+'"><img src="'+escapeHtml(url)+'" alt=""></button>').join("")+'</div>':''}
             <div class="product-meta-rating-row">
               <div class="product-meta-copy">
                 <div class="seller-line"><span>${escapeHtml(item.seller)}</span></div>
@@ -1667,6 +1682,7 @@
           </div>
           <div class="product-detail-info">
             <p class="product-detail-description">${escapeHtml(item.detail||"")}</p>
+            ${item.acceptsCustomMeasurements?'<p class="bespoke-size-note"><strong>Bespoke sizing available.</strong> This seller accepts custom measurements. Choose this option when ordering and confirm your measurements with the maker through the order details.</p>':''}
             <section class="product-options-panel" aria-labelledby="product-options-title">
               <h4 id="product-options-title">Choose your options</h4>
               <p>Select the available options before adding this item to your cart.</p>
@@ -1708,6 +1724,13 @@
       const container=document.getElementById("listing-grid"),normalized=query.trim().toLowerCase();
       const allListings=getGoodsListings();
       const results=allListings.filter(item=>(activeCategory==="All"||item.category===activeCategory)&&(!normalized||[item.title,item.category,item.seller,item.detail].join(" ").toLowerCase().includes(normalized)));
+      const locationContext=window.BIGWIZZ_LOCATION_CONTEXT||{};
+      if(locationContext.source==="gps"&&Number.isFinite(Number(locationContext.latitude))&&Number.isFinite(Number(locationContext.longitude))){
+        results.sort((a,b)=>{
+          const distance=item=>item.sellerLatitude!==null&&item.sellerLatitude!==undefined&&item.sellerLongitude!==null&&item.sellerLongitude!==undefined?serviceDistanceKm(Number(locationContext.latitude),Number(locationContext.longitude),Number(item.sellerLatitude),Number(item.sellerLongitude)):Number.POSITIVE_INFINITY;
+          return distance(a)-distance(b);
+        });
+      }
       document.getElementById("result-caption").textContent=normalized?`${results.length} result${results.length===1?"":"s"} for â€œ${query.trim()}â€.`:activeCategory==="All"?"Quality goods from independent sellers.":`Showing ${activeCategory.toLowerCase()} goods.`;
       if(!results.length){container.innerHTML='<div class="empty">No matches yet. Try another search or choose a different category.</div>';return}
       container.innerHTML=results.map(item=>{
@@ -1725,10 +1748,11 @@
     }
     function serviceDistanceKm(a,b,c,d){const r=v=>v*Math.PI/180,x=r(c-a),y=r(d-b),h=Math.sin(x/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(y/2)**2;return 6371*2*Math.atan2(Math.sqrt(h),Math.sqrt(1-h));}
     function serviceLocationScore(item,ctx){const norm=v=>String(v||"").trim().toLowerCase(),same=(a,b)=>norm(a)!==""&&norm(a)===norm(b),mentions=(text,value)=>norm(value)!==""&&norm(text).includes(norm(value));if(ctx.latitude!==null&&ctx.latitude!==undefined&&ctx.longitude!==null&&ctx.longitude!==undefined&&item.providerLatitude!==null&&item.providerLatitude!==undefined&&item.providerLongitude!==null&&item.providerLongitude!==undefined&&Number.isFinite(Number(ctx.latitude))&&Number.isFinite(Number(ctx.longitude))&&Number.isFinite(Number(item.providerLatitude))&&Number.isFinite(Number(item.providerLongitude))){const km=serviceDistanceKm(Number(ctx.latitude),Number(ctx.longitude),Number(item.providerLatitude),Number(item.providerLongitude));return {score:100000-km,distance:km};}if(same(ctx.area,item.providerArea))return {score:4000,distance:null};if(same(ctx.city,item.providerCity))return {score:3000,distance:null};if(same(ctx.state,item.providerState))return {score:2000,distance:null};if(same(ctx.country,item.providerCountry))return {score:1000,distance:null};if(mentions(item.location,ctx.area))return {score:3900,distance:null};if(mentions(item.location,ctx.city))return {score:2900,distance:null};if(mentions(item.location,ctx.state))return {score:1900,distance:null};return {score:0,distance:null};}
-    function refreshServiceLocationUI(){const c=window.BIGWIZZ_LOCATION_CONTEXT||{},t=document.getElementById("service-location-title"),d=document.getElementById("service-location-caption");if(!t||!d)return;const place=[c.area,c.city,c.state,c.country].filter(Boolean).join(", ");t.textContent=c.source==="gps"?"Using your current GPS location":place||"Set your location to find nearby services";d.textContent=c.source==="gps"?"Providers with GPS coordinates are sorted by distance. Your saved address has not changed.":place?"Matching providers in your saved area, city and state first.":"Add your location during registration or use GPS to find nearby services.";if(typeof renderServices==="function")renderServices(document.getElementById("service-search-input")?.value||"");}
+    function refreshServiceLocationUI(){const c=window.BIGWIZZ_LOCATION_CONTEXT||{},t=document.getElementById("service-location-title"),d=document.getElementById("service-location-caption"),goodsTitle=document.getElementById("goods-location-title"),goodsCaption=document.getElementById("goods-location-caption");const place=[c.area,c.city,c.state,c.country].filter(Boolean).join(", ");if(t&&d){t.textContent=c.source==="gps"?"Using your current GPS location":place||"Set your location to find nearby services";d.textContent=c.source==="gps"?"Providers with GPS coordinates are sorted by distance. Your saved address has not changed.":place?"Matching providers in your saved area, city and state first.":"Add your location during registration or use GPS to find nearby services.";if(typeof renderServices==="function")renderServices(document.getElementById("service-search-input")?.value||"");}if(goodsTitle&&goodsCaption){goodsTitle.textContent=c.source==="gps"?"Prioritising sellers near your current location":place?"Goods from sellers near "+place:"Discover goods from sellers near you";goodsCaption.textContent=c.source==="gps"?"Sellers with saved shop GPS coordinates appear first. Your saved address has not changed.":"Use GPS to prioritise nearby sellers who have shared their shop location.";}if(typeof renderListings==="function")renderListings(document.getElementById("search-input")?.value||"");}
     window.BIGWIZZ_REFRESH_SERVICE_LOCATION=refreshServiceLocationUI;
     function requestCurrentLocation(event){if(!navigator.geolocation){showToast("Location services are not available in this browser.");return;}const b=event&&event.currentTarget?event.currentTarget:null;if(b){b.disabled=true;b.textContent="Finding your location…";}navigator.geolocation.getCurrentPosition(p=>{const old=window.BIGWIZZ_LOCATION_CONTEXT||{};window.BIGWIZZ_LOCATION_CONTEXT={...old,source:"gps",latitude:p.coords.latitude,longitude:p.coords.longitude};if(b&&b.id==="request-use-gps"){document.getElementById("request-city").value="GPS location";document.getElementById("request-area").value="Exact GPS pin attached";}refreshServiceLocationUI();showToast("GPS selected for this search/request. Your saved address has not changed.");if(b){b.disabled=false;b.textContent=b.id==="request-use-gps"?"Use current GPS location for this request":"⌖ Use my current location";}},e=>{showToast(e.code===1?"Location permission denied. Allow it in browser settings.":"Could not determine your location. Please try again.");if(b){b.disabled=false;b.textContent=b.id==="request-use-gps"?"Use current GPS location for this request":"⌖ Use my current location";}},{enableHighAccuracy:true,timeout:12000,maximumAge:60000});}
-    document.getElementById("service-use-gps")?.addEventListener("click",requestCurrentLocation);document.getElementById("request-use-gps")?.addEventListener("click",requestCurrentLocation);
+    document.addEventListener("click",event=>{const thumb=event.target.closest("[data-product-image]");if(!thumb)return;const image=document.querySelector(".product-detail-image");if(image){image.src=thumb.dataset.productImage;document.querySelectorAll(".product-gallery-thumb").forEach(button=>button.setAttribute("aria-pressed",String(button===thumb)));}});
+    document.getElementById("service-use-gps")?.addEventListener("click",requestCurrentLocation);document.getElementById("request-use-gps")?.addEventListener("click",requestCurrentLocation);document.getElementById("goods-use-gps")?.addEventListener("click",requestCurrentLocation);
     function renderServices(query=""){
       const normalized=query.trim().toLowerCase();
       const sellerServices=customListings.filter(item=>item.type==="service"&&item.status==="published").map(item=>({...item,provider:item.seller,sellerPrice:item.price,pricingMode:item.pricingMode||"starting",price:item.pricingMode==="quote"?"Request a quote":item.pricingMode==="starting"?`From ${currencyFormatter.format(item.price)} / service`:currencyFormatter.format(item.price),rating:"New listing",requestId:`custom-${item.id}`}));
