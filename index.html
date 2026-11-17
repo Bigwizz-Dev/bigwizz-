@@ -1665,7 +1665,7 @@
         if(!service)return;
         renderServiceDetails({...service,category:custom?custom.category:original.category,image:custom?custom.image:original.image,description:custom?custom.description:original.description});return
       }
-      if(event.target.closest("[data-reply], [data-reply-to]"))showToast("Replying is a demo; connect an inbox to send real messages.");
+      if(event.target.closest("[data-reply], [data-reply-to]")){event.preventDefault();showToast("Private buyer–seller messaging is disabled on Bigwizz.");}
     });
     document.addEventListener("change",event=>{
       if(event.target.id==="community-post-media"){const file=event.target.files&&event.target.files[0],preview=document.getElementById("community-media-preview");if(!preview)return;if(!file){preview.hidden=true;preview.innerHTML="";return;}if(file.size>50*1024*1024){event.target.value="";preview.hidden=true;showToast("Media must be 50 MB or smaller.");return;}const url=URL.createObjectURL(file);preview.hidden=false;preview.innerHTML=file.type.startsWith("video/")?`<video controls playsinline src="${url}" class="maker-preview-media"></video>`:`<img src="${url}" alt="Selected maker media preview" class="maker-preview-media">`;}
