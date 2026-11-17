@@ -542,7 +542,22 @@
     }
     html[data-theme="dark"] .seller-nav-link.active,html[data-theme="dark"] .seller-nav-link:hover{background:#46364e;color:#f5eef7}
     html[data-theme="dark"] .seller-workspace-tag{background:#46364e;color:#f5eef7}
-  </style>
+  
+    /* Maker & Process Feed */
+    .maker-feed-intro{display:flex;gap:13px;align-items:center;margin:0 0 18px;padding:15px 17px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(110deg,#f1eaf5,#fff)}
+    .maker-feed-intro>span{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border-radius:12px;background:#fff;color:#79588c;font-size:20px}
+    .maker-feed-intro strong{font-size:13px}.maker-feed-intro p{margin:4px 0 0;color:var(--muted);font-size:11px;line-height:1.5}
+    .maker-feed{max-width:760px;margin:0 auto}.maker-post{display:block;overflow:hidden;border:1px solid var(--line);border-radius:19px;background:var(--paper);box-shadow:0 8px 24px #251a2d08}
+    .maker-post-head{display:flex;align-items:center;gap:11px;padding:15px 17px}.maker-post-avatar{width:40px;height:40px;flex:0 0 40px;border-radius:50%;object-fit:cover;background:var(--canvas)}
+    .maker-post-name{font-size:13px;font-weight:850}.maker-post-date{display:block;margin-top:3px;color:var(--muted);font-size:10px}
+    .maker-post-media{display:block;width:100%;max-height:560px;aspect-ratio:4/3;object-fit:cover;background:#eee9f0}.maker-post-video{object-fit:contain;background:#17131a}
+    .maker-post-copy{padding:15px 17px 12px}.maker-post-copy p{margin:0;color:var(--ink);font-size:13px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere}
+    .maker-post-tags{margin-top:9px;color:#79588c;font-size:12px}.maker-post-product{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:8px 12px;border-radius:999px;background:#f0e9f4;color:#57396a;font-size:11px;font-weight:850;text-decoration:none}
+    .maker-post-actions{display:flex;align-items:center;gap:19px;padding:12px 17px;border-top:1px solid var(--line)}.maker-post-actions button{border:0;background:transparent;color:var(--ink);font-size:12px;font-weight:750;padding:3px 0}.maker-post-actions button[aria-pressed=true]{color:#d94d65}
+    .maker-post-empty{padding:36px 20px;border:1px dashed var(--line);border-radius:17px;text-align:center;background:var(--paper)}.maker-post-empty strong{display:block;margin-bottom:6px}.maker-post-empty p{margin:0;color:var(--muted);font-size:12px}
+    .community-thread-media{width:100%;max-height:360px;object-fit:contain;border-radius:13px;background:#17131a;margin-bottom:12px}
+    @media(max-width:700px){.maker-feed{margin:0 -2px}.maker-post{border-radius:15px}.maker-post-media{aspect-ratio:1/1}.maker-feed-intro{padding:12px}.maker-post-head,.maker-post-copy{padding-left:13px;padding-right:13px}}
+</style>
 </head>
 <body>
   <section id="launch-screen" class="launch-screen" aria-label="Bigwizz app launch">
@@ -619,13 +634,13 @@
         <div class="section-head service-detail-nav"><div><span class="service-detail-kicker">BIGWIZZ SERVICES</span><h2>Service details</h2><p>Explore the provider and decide what you need before sending a request.</p></div><button class="outline-button" type="button" style="width:auto" data-page="services">← Back to services</button></div>
         <div id="service-detail-content"></div>
       </section>
-      <section id="community" class="page"><div class="section-head"><div><h2>Community conversations</h2><p>Ask for recommendations, share ideas, and learn from your local community.</p></div><button class="primary" id="new-post">＋ Start a conversation</button></div><div class="community-list" id="community-list"></div></section>
+      <section id="community" class="page"><div class="section-head"><div><span class="eyebrow" style="color:var(--green)">MADE ON BIGWIZZ</span><h2>Maker & Process Feed</h2><p>Discover the people, craft and stories behind the products you love.</p></div><button class="primary" id="new-post">＋ Share your process</button></div><div class="maker-feed-intro"><span>✦</span><div><strong>Made by real people. Shared as it happens.</strong><p>Explore works in progress, new collections and behind-the-scenes moments from Bigwizz makers.</p></div></div><div class="community-list maker-feed" id="community-list"></div></section>
   <dialog class="community-dialog" id="community-compose-dialog"><div class="dialog-content">
-    <div class="dialog-head"><div><h2>Start a conversation</h2><p>Share a question, recommendation or idea with the Bigwizz community.</p></div><button type="button" class="dialog-close" data-close-community-dialog aria-label="Close">×</button></div>
-    <form id="community-post-form"><div class="field"><label for="community-post-title">Title</label><input id="community-post-title" name="title" maxlength="160" placeholder="What would you like to talk about?" required></div>
-      <div class="field"><label for="community-post-category">Category</label><select id="community-post-category" name="category"><option value="General">General</option><option value="Recommendations">Recommendations</option><option value="Services">Services</option><option value="Shopping">Shopping</option><option value="Ideas">Ideas</option></select></div>
-      <div class="field"><label for="community-post-body">Write something</label><textarea id="community-post-body" name="body" maxlength="5000" rows="5" placeholder="Share the details with the community..." required></textarea></div>
-      <button class="primary dialog-submit" type="submit">Submit post</button><p class="notice">New posts are sent for review before appearing publicly.</p>
+    <div class="dialog-head"><div><h2>Share your process</h2><p>Show customers what you are making, creating or working on.</p></div><button type="button" class="dialog-close" data-close-community-dialog aria-label="Close">×</button></div>
+    <form id="community-post-form"><div class="field"><label for="community-post-media">Photo or short video</label><input id="community-post-media" name="media" type="file" accept="image/jpeg,image/png,image/webp,image/avif,video/mp4,video/webm"><small class="notice">Images and videos up to 50 MB.</small></div>
+      <div class="field"><label for="community-post-body">Tell the story</label><textarea id="community-post-body" name="body" maxlength="5000" rows="4" placeholder="What are you making? Share the process, materials or inspiration…" required></textarea></div>
+      <div class="field"><label for="community-post-category">Maker category</label><select id="community-post-category" name="category"><option value="Craftsmanship">Craftsmanship</option><option value="Fashion & tailoring">Fashion & tailoring</option><option value="Behind the scenes">Behind the scenes</option><option value="New collection">New collection</option><option value="Work in progress">Work in progress</option><option value="Product showcase">Product showcase</option></select></div>
+      <button class="primary dialog-submit" type="submit">Share maker update</button><p class="notice">Your update is reviewed before it appears in the public feed.</p>
     </form></div></dialog>
   <dialog class="community-dialog" id="community-thread-dialog"><div class="dialog-content">
     <div class="dialog-head"><div><h2 id="community-thread-title">Community discussion</h2><p id="community-thread-meta"></p></div><button type="button" class="dialog-close" data-close-community-dialog aria-label="Close">×</button></div>
@@ -1538,7 +1553,7 @@
       const post=conversations.find(item=>String(item.id)===String(postId));if(!post)return;
       document.getElementById("community-thread-title").textContent=post.title;
       document.getElementById("community-thread-meta").textContent=`${post.meta} · By ${post.author||"Community member"}`;
-      document.getElementById("community-thread-body").textContent=post.copy;
+      document.getElementById("community-thread-body").innerHTML=(post.mediaUrl?(post.mediaType==="video"?'<video class="community-thread-media" src="'+escapeHtml(post.mediaUrl)+'" controls playsinline></video>':'<img class="community-thread-media" src="'+escapeHtml(post.mediaUrl)+'" alt="Maker work">'):"")+'<p>'+escapeHtml(post.copy||"")+'</p>';
       document.getElementById("community-comment-post-id").value=post.id;
       document.getElementById("community-comments").innerHTML='<p class="notice">Loading comments…</p>';
       document.getElementById("community-thread-dialog").showModal();
@@ -1546,7 +1561,18 @@
       catch(error){document.getElementById("community-comments").innerHTML='<p class="notice">Comments could not be loaded. Please try again.</p>';console.error(error);}
     }
     function renderCommunityComments(comments){const target=document.getElementById("community-comments");target.innerHTML=comments.length?comments.map(item=>`<article class="community-comment"><b>${escapeHtml(item.author||"Community member")}</b><p>${escapeHtml(item.body)}</p>${item.status==="pending"?'<small class="community-post-status">Awaiting moderation</small>':""}</article>`).join(""):'<p class="notice">No comments yet. Start the conversation.</p>';}
-    function renderCommunity(){document.getElementById("community-list").innerHTML=conversations.length?conversations.map(item=>`<article class="community-card"><img class="community-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" decoding="async"><div style="flex:1;min-width:0"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.meta)} · ${escapeHtml(item.copy)}</p><small class="community-post-author">By ${escapeHtml(item.author||"Community member")}</small>${item.status==="pending"?'<span class="community-post-status">Awaiting moderation</span>':""}</div><button class="text-button" data-open-community-post="${escapeHtml(item.id)}">Comments · ${Number(item.commentCount||0)} →</button></article>`).join(""):'<p class="notice">No community conversations yet. Start the first one.</p>'}
+    function renderCommunity(){
+      const target=document.getElementById("community-list");if(!target)return;
+      target.innerHTML=conversations.length?conversations.map(item=>{
+        const media=item.mediaUrl?(item.mediaType==="video"
+          ?'<video class="maker-post-media maker-post-video" src="'+escapeHtml(item.mediaUrl)+'" controls playsinline preload="metadata"></video>'
+          :'<img class="maker-post-media" src="'+escapeHtml(item.mediaUrl)+'" alt="Maker work" loading="lazy" decoding="async">'):"";
+        const tags=(item.copy||"").match(/#[\w]+/g)||[];
+        const tagHtml=tags.length?'<div class="maker-post-tags">'+tags.map(escapeHtml).join(" ")+'</div>':"";
+        const shop=item.productId?'<a class="maker-post-product" href="#" data-community-product="'+escapeHtml(item.productId)+'">↗ Shop this product</a>':"";
+        return '<article class="maker-post"><header class="maker-post-head"><img class="maker-post-avatar" src="'+escapeHtml(item.avatar||"assets/avatar-placeholder.png")+'" alt="" loading="lazy"><div><div class="maker-post-name">'+escapeHtml(item.author||"Bigwizz maker")+'</div><time class="maker-post-date">'+escapeHtml(item.createdAt||"")+'</time></div>'+(item.status==="pending"?'<span class="community-post-status" style="margin-left:auto">Awaiting review</span>':"")+'</header>'+media+'<div class="maker-post-copy"><p>'+escapeHtml(item.copy||"")+'</p>'+tagHtml+shop+'</div><div class="maker-post-actions"><button type="button" data-community-like="'+escapeHtml(item.id)+'" aria-pressed="'+(item.liked?"true":"false")+'">'+(item.liked?"♥":"♡")+' Like · '+Number(item.likeCount||0)+'</button><button type="button" data-open-community-post="'+escapeHtml(item.id)+'">♡ Comment · '+Number(item.commentCount||0)+'</button></div></article>';
+      }).join(""):'<div class="maker-post-empty"><strong>No maker updates yet</strong><p>Be the first to share a product, work in progress or behind-the-scenes moment.</p></div>';
+    }
     function loadServiceRequests(){
       try{
         const saved=localStorage.getItem("bigwizz-service-requests");
@@ -1580,7 +1606,7 @@
     document.addEventListener("click",event=>{
       if(event.target.closest("#new-post")){if(!window.BIGWIZZ_BACKEND?.getCurrentUser()){window.BIGWIZZ_BACKEND?.requireSignIn();return}document.getElementById("community-post-form").reset();document.getElementById("community-compose-dialog").showModal();return}
       const closeCommunity=event.target.closest("[data-close-community-dialog]");if(closeCommunity){closeCommunity.closest("dialog")?.close();return}
-      const openCommunityPost=event.target.closest("[data-open-community-post]");if(openCommunityPost){openCommunityThread(openCommunityPost.dataset.openCommunityPost);return}
+      const likeCommunityPost=event.target.closest("[data-community-like]");if(likeCommunityPost){window.BIGWIZZ_BACKEND?.toggleCommunityLike(likeCommunityPost.dataset.communityLike).then(()=>window.BIGWIZZ_BACKEND.loadCommunityPosts()).then(()=>renderCommunity()).catch(error=>showToast(error.message||"Could not update like."));return}const openCommunityPost=event.target.closest("[data-open-community-post]");if(openCommunityPost){openCommunityThread(openCommunityPost.dataset.openCommunityPost);return}
       if(!event.target.closest(".account-switch-wrap"))closeAccountMenu();
       const accountMenuToggle=event.target.closest("[data-account-menu-toggle]");if(accountMenuToggle){const menu=document.getElementById("account-switch-menu");const wrap=document.querySelector(".account-switch-wrap");const isOpen=!menu.hidden;menu.hidden=isOpen;accountMenuToggle.setAttribute("aria-expanded",String(!isOpen));if(wrap){wrap.classList.toggle("is-open",!isOpen)};return}
       const serviceRole=event.target.closest("[data-service-role]");if(serviceRole){const role=serviceRole.dataset.serviceRole;document.getElementById("service-buyer-interface").hidden=role!=="buyer";document.getElementById("service-provider-placeholder").hidden=role!=="seller";document.querySelectorAll(".service-role-button").forEach(button=>{const selected=button.dataset.serviceRole===role;button.classList.toggle("active",selected);button.setAttribute("aria-pressed",String(selected))});if(role==="seller")window.BIGWIZZ_BACKEND?.loadSellerServiceRequests?.();return}
@@ -1740,7 +1766,7 @@
     requestMediaList.addEventListener("click",event=>{const button=event.target.closest("[data-remove-request-media]");if(!button)return;const removed=requestMediaFiles.splice(Number(button.dataset.removeRequestMedia),1)[0];if(removed?.path)window.BIGWIZZ_BACKEND?.removeServiceRequestMedia?.([removed.path]);renderRequestMedia()});
     document.getElementById("service-request-form").addEventListener("submit",async event=>{event.preventDefault();event.stopImmediatePropagation();const form=event.currentTarget,submit=form.querySelector("[type=submit]");if(requestMediaUploading||requestMediaFiles.some(item=>item.status!=="uploaded")){showToast("Please wait until all photos and videos finish uploading.");return}if(!window.BIGWIZZ_BACKEND?.createServiceRequestWithMedia){showToast("Service requests are temporarily unavailable. Please sign in and try again.");return}const values=Object.fromEntries(new FormData(form).entries());submit.disabled=true;submit.textContent="Sending request…";try{await window.BIGWIZZ_BACKEND.createServiceRequestWithMedia({listingId:values.listingId,providerId:values.providerId,serviceTitle:values.service,bookingTiming:values.bookingTiming,preferredDate:values.preferredDate,preferredTime:values.preferredTime,city:values.city,area:values.area,details:values.details,requestId:requestMediaId,attachments:requestMediaFiles.map(item=>item.metadata)});form.reset();requestMediaFiles=[];requestMediaId=crypto.randomUUID();renderRequestMedia();document.getElementById("service-dialog").close();showToast("Your service request and attachments have been sent to the provider.");}catch(error){showToast(error?.message||"Your service request could not be sent. Please try again.");}finally{submit.disabled=false;submit.innerHTML='Send service request <span aria-hidden="true">→</span>';}});
     document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
-    document.getElementById("new-post").addEventListener("click",()=>showToast("Community posting is a demo. Sign-in and moderation are needed before launch."));
+    document.getElementById("new-post").addEventListener("click",()=>{if(!window.BIGWIZZ_BACKEND?.getCurrentUser()){window.BIGWIZZ_BACKEND?.requireSignIn();return}document.getElementById("community-post-form").reset();document.getElementById("community-compose-dialog").showModal()});
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});
     setTimeout(()=>{
       const launch=document.getElementById("launch-screen");
