@@ -1191,7 +1191,7 @@
       if(pricing)pricing.hidden=!service;
       if(availability)availability.hidden=!service;
       if(mode)mode.disabled=!service;
-      if(price)price.required=!(service&&mode?.value==="quote");
+      if(price){price.disabled=service&&mode?.value==="quote";price.required=!(service&&mode?.value==="quote");}
     }
     if(event.target.id==="seller-service-pricing-mode"){
       const price=document.getElementById("seller-listing-price");
