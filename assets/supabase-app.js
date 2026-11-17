@@ -134,7 +134,58 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),requireSignIn:()=>showAuth()});
+
+  async function loadSellerStudio(){
+    if(!user||!accountRoles.includes("seller"))return;
+    const ids=["seller-dashboard-products","seller-products-list","seller-orders-list","seller-action-items"];
+    ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<p class="notice">Loading store data…</p>';});
+    const results=await Promise.all([
+      client.from("seller_profiles").select("shop_name,seller_type").eq("user_id",user.id).maybeSingle(),
+      client.from("listings").select("id,title,kind,price,currency,image_url,status,created_at").eq("seller_id",user.id).order("created_at",{ascending:false}),
+      client.from("orders").select("id,order_number,status,total,currency,created_at").eq("seller_id",user.id).order("created_at",{ascending:false}).limit(100),
+      client.from("service_requests").select("id,service_title,status,created_at").eq("provider_id",user.id).order("created_at",{ascending:false}).limit(100)
+    ]);
+    const [shopResult,productsResult,ordersResult,requestsResult]=results;
+    for(const pair of [[shopResult,"Seller profile"],[productsResult,"Seller products"],[ordersResult,"Seller orders"],[requestsResult,"Customer requests"]]){
+      if(pair[0].error)throw new Error(pair[1]+" could not be loaded: "+pair[0].error.message);
+    }
+    const shop=shopResult.data||{};
+    const displayName=shop.shop_name||profile?.display_name||user.email?.split("@")[0]||"Seller";
+    const nameNode=document.getElementById("seller-welcome-name");
+    const avatarNode=document.getElementById("seller-studio-avatar");
+    if(nameNode)nameNode.textContent=displayName;
+    if(avatarNode)avatarNode.textContent=initials(displayName);
+    const products=productsResult.data||[],orders=ordersResult.data||[],requests=requestsResult.data||[];
+    const today=new Date().toLocaleDateString("en-CA");
+    const todaysOrders=orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===today);
+    const todayValue=todaysOrders.reduce((sum,order)=>sum+Number(order.total||0),0);
+    const money=(amount,currencyCode="NGN")=>new Intl.NumberFormat("en-NG",{style:"currency",currency:currencyCode||"NGN",maximumFractionDigits:2}).format(Number(amount||0));
+    const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=String(value);};
+    setText("seller-today-sales",money(todayValue));
+    setText("seller-sales-trend",todaysOrders.length?String(todaysOrders.length)+" today":"—");
+    setText("seller-order-count",orders.length);
+    setText("seller-product-count",products.filter(item=>item.status==="published").length);
+    setText("seller-request-count",requests.filter(item=>["new","responded"].includes(item.status)).length);
+    const productCard=item=>'<article class="seller-product-card"><img src="'+escapeHtml(item.image_url||"assets/ceramic-set.jpg")+'" alt=""><div class="seller-product-copy"><strong>'+escapeHtml(item.title)+'</strong><small>'+(item.status==="published"?"Published":"Paused")+' · '+(item.price===null?"Quote":money(item.price,item.currency))+'</small></div><button type="button" data-page="seller-products">Manage</button></article>';
+    const productMarkup=products.length?products.map(productCard).join(""):'<p class="notice">No products yet. Your first listing will appear here once published.</p>';
+    const dashboardProducts=document.getElementById("seller-dashboard-products");
+    const allProducts=document.getElementById("seller-products-list");
+    if(dashboardProducts)dashboardProducts.innerHTML=products.length?products.slice(0,4).map(productCard).join(""):productMarkup;
+    if(allProducts)allProducts.innerHTML=productMarkup;
+    const orderMarkup=orders.length?orders.slice(0,30).map(order=>'<article class="seller-order-card"><div><strong>'+escapeHtml(order.order_number||("Order "+String(order.id).slice(0,8)))+'</strong><small>'+new Date(order.created_at).toLocaleString()+' · '+money(order.total,order.currency)+'</small></div><span class="seller-order-status">'+escapeHtml(order.status||"received")+'</span></article>').join(""):'<p class="notice">No customer orders have been recorded yet.</p>';
+    const orderTarget=document.getElementById("seller-orders-list");if(orderTarget)orderTarget.innerHTML=orderMarkup;
+    const openRequests=requests.filter(item=>["new","responded"].includes(item.status));
+    const pendingOrders=orders.filter(order=>["pending","processing","paid","confirmed","ready_to_ship"].includes(String(order.status||"").toLowerCase()));
+    const actions=[];
+    if(pendingOrders.length)actions.push('<div class="seller-action-item"><span class="seller-action-icon">⚠️</span><div class="seller-action-copy"><strong>'+pendingOrders.length+' Order(s) Pending Fulfilment</strong><small>Review order status and prepare dispatch</small></div><button type="button" data-page="seller-orders">View</button></div>');
+    if(openRequests.length)actions.push('<div class="seller-action-item"><span class="seller-action-icon">✉️</span><div class="seller-action-copy"><strong>'+openRequests.length+' New Customer Request(s)</strong><small>Review formal service requests</small></div><button type="button" data-page="seller-orders">View</button></div>');
+    if(products.some(item=>item.status==="paused"))actions.push('<div class="seller-action-item"><span class="seller-action-icon">▣</span><div class="seller-action-copy"><strong>Paused listings need attention</strong><small>'+products.filter(item=>item.status==="paused").length+' listing(s) are not visible to buyers</small></div><button type="button" data-page="seller-products">Review</button></div>');
+    if(!actions.length)actions.push('<div class="seller-action-item"><span class="seller-action-icon">✓</span><div class="seller-action-copy"><strong>You are all caught up</strong><small>New orders and service requests will appear here.</small></div></div>');
+    const actionTarget=document.getElementById("seller-action-items");if(actionTarget)actionTarget.innerHTML=actions.join("");
+    return {shop,products,orders,requests,todayValue};
+  }
+
+  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),getActiveAccount:()=>activeAccount,setActiveAccount:(account)=>{if(account==="seller"&&(!user||!accountRoles.includes("seller")))return false;activeAccount=account==="seller"?"seller":"buyer";updateAccountState();activatePage(activeAccount==="seller"?"seller-studio":"discover");if(activeAccount==="seller")Promise.all([loadSellerStudio(),loadSellerServiceRequests()]).catch(error=>report(error,"Seller Studio could not be be loaded."));return true;},loadSellerStudio,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -251,7 +302,8 @@
   }
 
   function activatePage(page) {
-    if (["seller-studio", "seller-listings", "seller-progress", "messages", "inbox", "chat", "conversation"].includes(page)) page = "discover";
+    if (["messages", "inbox", "chat", "conversation"].includes(page)) page = "discover";
+    if (["seller-studio", "seller-products", "seller-orders"].includes(page) && (!user || !accountRoles.includes("seller"))) page = "discover";
     document.querySelectorAll(".page").forEach(section => {
       section.classList.toggle("active", section.id === page);
     });
@@ -386,7 +438,7 @@
     if (typeof window.BIGWIZZ_REFRESH_SERVICE_LOCATION === "function") window.BIGWIZZ_REFRESH_SERVICE_LOCATION();
     accountRoles = rolesResult.data.map(item => item.role);
     if (!accountRoles.includes("buyer")) accountRoles.unshift("buyer");
-    activeAccount = "buyer";
+    activeAccount = accountRoles.includes("seller") ? "seller" : "buyer";
     updateAccountState();
     await loadSavedListings();
   }
@@ -899,8 +951,10 @@
       showApp();
       await loadCatalog();
       await Promise.all([loadCart(), loadNotifications()]);
-      activeAccount = "buyer";
-      if (!document.querySelector(".page.active")) activatePage("discover");
+      activeAccount = accountRoles.includes("seller") ? "seller" : "buyer";
+      updateAccountState();
+      activatePage(activeAccount === "seller" ? "seller-studio" : "discover");
+      if (activeAccount === "seller") await Promise.all([loadSellerStudio(), loadSellerServiceRequests()]);
       notify("Signed in. Your account data is shared across devices.");
     } catch (error) {
       report(error, "Account details could not be loaded.");
@@ -1181,6 +1235,8 @@
     .on("postgres_changes",{event:"*",schema:"public",table:"community_comments"},async()=>{try{await loadCommunityPosts();renderCommunity();const postId=document.getElementById("community-comment-post-id")?.value;if(postId&&document.getElementById("community-thread-dialog")?.open)renderCommunityComments(await loadCommunityComments(postId));}catch(error){console.error("Community comment live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"service_requests"},async payload=>{try{if(!user)return;const row=payload.new||payload.old;if(row?.buyer_id===user.id)await loadBuyerServiceRequests();if(row?.provider_id===user.id)await loadSellerServiceRequests();}catch(error){console.error("Service request live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"notifications"},async payload=>{try{if(user&&(payload.new||payload.old)?.user_id===user.id)await loadNotifications();}catch(error){console.error("Notification live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"orders"},async payload=>{try{if(user&&(payload.new||payload.old)?.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller order refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"listings"},async payload=>{try{if(user&&(payload.new||payload.old)?.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller product refresh failed.",error);}})
     .subscribe();
   client.auth.getSession().then(({ data, error }) => {
     if (error) report(error, "Could not check the current sign-in session.");
