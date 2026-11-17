@@ -664,7 +664,7 @@
     <footer class="footer">Bigwizz is a marketplace prototype. Verify the provider, scope, price, and local requirements before booking.</footer>
   </div>
   <nav class="mobile-nav" aria-label="Main navigation">
-    <button class="active" data-audience="buyer" data-page="discover"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg></span>Discover</button><button data-audience="buyer" data-page="services"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2zM19 16v5m-2.5-2.5h5"/></svg></span>Services</button><button data-audience="buyer" data-page="community"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.3-3.7A7 7 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7zM8 12h.01M12 12h.01M16 12h.01"/></svg></span>Makers</button><button data-audience="buyer" data-page="notifications"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg></span>Notifications</button><button data-audience="buyer" data-page="cart"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 8H6M10 21h.01M18 21h.01"/></svg></span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
+    <button class="active" data-audience="buyer" data-page="discover"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-6v-7h-4v7H4a1 1 0 0 1-1-1z"/></svg></span>Discover</button><button data-audience="buyer" data-page="services"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2zM19 16v5m-2.5-2.5h5"/></svg></span>Services</button><button data-audience="buyer" data-page="community"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.3-3.7A7 7 0 0 1 4 12c0-4.1 3.6-7.5 8-7.5s8 3.1 8 7zM8 12h.01M12 12h.01M16 12h.01"/><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Social</button><button data-audience="buyer" data-page="notifications"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9m-8 12h4"/></svg></span>Notifications</button><button data-audience="buyer" data-page="cart"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 4h2l2.2 11.2a2 2 0 0 0 2 1.6h8.9a2 2 0 0 0 2-1.6L22 8H6M10 21h.01M18 21h.01"/></svg></span>Cart <span class="nav-badge" id="cart-count" hidden>0</span></button>
 
   </nav>
   <dialog id="auth-dialog" aria-labelledby="auth-title">
@@ -1174,8 +1174,8 @@
         const isMobileButton=Boolean(button.closest(".mobile-nav"));
         button.classList.toggle("active",isMobileButton&&mobileNavButton?button===mobileNavButton:button.dataset.page===page);
       });
-      if(page==="notifications")renderNotifications();
-      if(page==="cart")renderCart();
+      if(page==="notifications"){if(window.BIGWIZZ_BACKEND?.loadNotifications)window.BIGWIZZ_BACKEND.loadNotifications();else renderNotifications();}
+      if(page==="cart"){if(window.BIGWIZZ_BACKEND?.loadCart)window.BIGWIZZ_BACKEND.loadCart();else renderCart();}
       if(page==="orders")window.BIGWIZZ_BACKEND?.loadBuyerServiceRequests?.();
       if(focusTarget){document.getElementById(focusTarget).scrollIntoView({behavior:"smooth",block:"start"})}
       else window.scrollTo({top:0,behavior:"smooth"});
@@ -1646,8 +1646,8 @@
       const sizeChip=event.target.closest("[data-product-size]");if(sizeChip&&!sizeChip.disabled){document.querySelectorAll(".product-size-chip").forEach(button=>button.setAttribute("aria-pressed",String(button===sizeChip)));updateProductVariantState();return}
       if(event.target.closest("[data-open-size-guide]")){document.getElementById("product-size-guide-dialog")?.showModal();return}
       if(event.target.closest("[data-close-size-guide]")){document.getElementById("product-size-guide-dialog")?.close();return}
-      const addCartButton=event.target.closest("[data-add-to-cart]");if(addCartButton&&!addCartButton.disabled){addToCart(addCartButton.dataset.addToCart,{size:document.querySelector(".product-size-chip[aria-pressed=true]")?.dataset.productSize||"",color:document.getElementById("product-color")?.value||""});return}
-      const cartAction=event.target.closest("[data-cart-action]");if(cartAction){updateCartItem(cartAction.dataset.cartId,cartAction.dataset.cartAction);return}
+      const addCartButton=event.target.closest("[data-add-to-cart]");if(addCartButton&&!addCartButton.disabled){if(window.BIGWIZZ_BACKEND?.addCartItem){event.stopImmediatePropagation();window.BIGWIZZ_BACKEND.addCartItem(addCartButton.dataset.addToCart).catch(error=>showToast(error?.message||"Could not add this item to your cart."));}else{addToCart(addCartButton.dataset.addToCart,{size:document.querySelector(".product-size-chip[aria-pressed=true]")?.dataset.productSize||"",color:document.getElementById("product-color")?.value||""});}return}
+      const cartAction=event.target.closest("[data-cart-action]");if(cartAction){if(window.BIGWIZZ_BACKEND?.changeCart){event.stopImmediatePropagation();window.BIGWIZZ_BACKEND.changeCart(cartAction.dataset.cartId,cartAction.dataset.cartAction).catch(error=>showToast(error?.message||"Could not update your cart."));}else{updateCartItem(cartAction.dataset.cartId,cartAction.dataset.cartAction);}return}
       if(event.target.closest("[data-checkout-demo]")){showToast("Checkout and payments aren't connected in this prototype.");return}
       const serviceDetailRequest=event.target.closest("[data-service-detail-request]");if(serviceDetailRequest&&selectedServiceDetail){
         const service=selectedServiceDetail;
@@ -1786,10 +1786,8 @@
     },matchMedia("(prefers-reduced-motion: reduce)").matches?250:1250);
     document.getElementById("clear-filter").addEventListener("click",()=>{activeCategory="All";document.getElementById("search-input").value="";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderListings()});
     document.getElementById("issue-form").addEventListener("submit",event=>{event.preventDefault();const reports=JSON.parse(localStorage.getItem("bigwizz-order-reports")||"[]");reports.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-order-reports",JSON.stringify(reports));event.currentTarget.reset();showToast("Report saved in this browser. No real support case was created.")});
-    loadCart();
     loadReviews();
     seedSampleReviews();
-    updateCartCount();
     updateMobileNavigation();
     const heroGoodsSlides=[{image:"assets/product-tote.jpg",bg:"#e8eee7",orbit:"#397656",card:"#f4dfbe"},{image:"assets/ceramic-set.jpg",bg:"#f2e7df",orbit:"#ad7058",card:"#f1d6bd"},{image:"assets/cotton-scarf.jpg",bg:"#e7eaf2",orbit:"#66779c",card:"#e2d8ee"},{image:"assets/oak-table.jpg",bg:"#eee9dc",orbit:"#8b7751",card:"#e5d7b9"},{image:"assets/linen-cushion.jpg",bg:"#e9e5ee",orbit:"#79588c",card:"#e9dff0"}];
     const heroGoodsImage=document.querySelector(".product-hero-image");
