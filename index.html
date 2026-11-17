@@ -715,7 +715,7 @@
             <span class="request-media-icon" aria-hidden="true">＋</span>
             <strong>Drag and drop photos or videos here</strong>
             <small>or <button class="request-media-browse" type="button" id="request-media-browse">Browse files</button></small>
-            <small>Up to 5 files · 50 MB each</small>
+            <small>Up to 5 files · 50 MB each · videos up to 60 seconds</small>
           </div>
           <div class="request-media-list" id="request-media-list" aria-live="polite"></div>
         </div>
@@ -1647,13 +1647,32 @@
     function renderRequestMedia(){
       requestMediaList.innerHTML=requestMediaFiles.map((file,index)=>'<div class="request-media-item"><span>'+escapeHtml(file.name)+'</span><small>'+((file.size/1024/1024).toFixed(1))+' MB</small><button class="request-media-remove" type="button" data-remove-request-media="'+index+'" aria-label="Remove '+escapeHtml(file.name)+'">×</button></div>').join("");
     }
-    function addRequestMedia(files){
+    function getRequestVideoDuration(file){
+      return new Promise((resolve,reject)=>{
+        const video=document.createElement("video");
+        const objectUrl=URL.createObjectURL(file);
+        const cleanup=()=>{URL.revokeObjectURL(objectUrl);video.removeAttribute("src");video.load()};
+        video.preload="metadata";
+        video.onloadedmetadata=()=>{const duration=video.duration;cleanup();resolve(duration)};
+        video.onerror=()=>{cleanup();reject(new Error("Video duration could not be checked."))};
+        video.src=objectUrl;
+      });
+    }
+    async function addRequestMedia(files){
       const incoming=Array.from(files||[]);
       for(const file of incoming){
         if(!file.type.startsWith("image/")&&!file.type.startsWith("video/")){showToast("Please choose an image or video file.");continue}
-        if(file.size>50*1024*1024){showToast(file.name+" is larger than 50 MB.");continue}
+        if(file.size>50*1024*1024){showToast(file.name+" is larger than the 50 MB limit.");continue}
         if(requestMediaFiles.length>=5){showToast("You can attach up to 5 files.");break}
-        if(!requestMediaFiles.some(existing=>existing.name===file.name&&existing.size===file.size&&existing.lastModified===file.lastModified))requestMediaFiles.push(file);
+        if(requestMediaFiles.some(existing=>existing.name===file.name&&existing.size===file.size&&existing.lastModified===file.lastModified))continue;
+        if(file.type.startsWith("video/")){
+          try{
+            const duration=await getRequestVideoDuration(file);
+            if(!Number.isFinite(duration)||duration<=0){showToast(file.name+" has an unreadable video duration.");continue}
+            if(duration>60){showToast(file.name+" is longer than the 60-second video limit.");continue}
+          }catch(error){showToast(file.name+": "+error.message);continue}
+        }
+        requestMediaFiles.push(file);
       }
       renderRequestMedia();
     }
