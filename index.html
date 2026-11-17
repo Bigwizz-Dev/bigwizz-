@@ -690,7 +690,45 @@
     .buyer-order-total{display:block;margin-top:7px}
     .buyer-order-card{align-items:flex-start}
     .buyer-order-card>div{min-width:0;flex:1}
-</style>
+
+    /* Creator-first listing editor */
+    .seller-product-panel{overflow:visible}
+    .seller-listing-form{padding-bottom:calc(86px + env(safe-area-inset-bottom))}
+    .listing-media-section{margin:4px 0 24px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--canvas)}
+    .listing-section-heading,.listing-description-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .listing-step{color:var(--muted);font-size:9px;font-weight:900;letter-spacing:1.4px}
+    .listing-section-heading h3{margin:5px 0;font-size:17px}
+    .listing-section-heading p{margin:0;color:var(--muted);font-size:11px;line-height:1.5}
+    .listing-media-count{flex:0 0 auto;color:var(--muted);font-size:10px;font-weight:800}
+    .listing-dropzone{display:flex;min-height:130px;margin-top:15px;padding:18px;flex-direction:column;align-items:center;justify-content:center;gap:7px;border:1.5px dashed var(--muted);border-radius:13px;background:var(--paper);text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+    .listing-dropzone:hover,.listing-dropzone:focus-within{border-color:var(--deep);background:var(--canvas)}
+    .listing-dropzone input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+    .listing-upload-icon{display:grid;width:34px;height:34px;place-items:center;border-radius:11px;background:var(--deep);color:white;font-size:22px}
+    .listing-dropzone strong{font-size:12px}.listing-dropzone>span:last-of-type{color:var(--muted);font-size:10px}
+    .listing-image-previews{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:9px;margin-top:12px}
+    .listing-empty-preview{grid-column:1/-1;margin:0;color:var(--muted);font-size:10px;text-align:center}
+    .listing-image-preview{position:relative;overflow:hidden;aspect-ratio:1;border:1px solid var(--line);border-radius:11px;background:var(--paper)}
+    .listing-image-preview img{width:100%;height:100%;object-fit:cover}
+    .listing-cover-badge{position:absolute;left:5px;top:5px;padding:4px 6px;border-radius:6px;background:var(--lime);color:#253324;font-size:8px;font-weight:900}
+    .listing-remove-image{position:absolute;right:5px;top:5px;width:23px;height:23px;border:0;border-radius:50%;background:#171020cc;color:white;font-size:15px;line-height:1}
+    .listing-size-chips{display:flex;flex-wrap:wrap;gap:7px;margin:8px 0 12px}
+    .listing-size-chips label{cursor:pointer}.listing-size-chips input{position:absolute;opacity:0;pointer-events:none}
+    .listing-size-chips span{display:grid;min-width:39px;height:37px;place-items:center;padding:0 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);font-size:11px;font-weight:800}
+    .listing-size-chips input:checked+span{border-color:var(--deep);background:var(--deep);color:#fff}
+    .listing-custom-size-toggle{display:flex;align-items:flex-start;gap:9px;padding:11px;border:1px solid var(--line);border-radius:10px;background:var(--paper);cursor:pointer}
+    .listing-custom-size-toggle>input{width:16px;height:16px;margin:2px 0 0;accent-color:var(--deep)}
+    .listing-custom-size-toggle strong,.listing-custom-size-toggle small{display:block}
+    .listing-custom-size-toggle strong{font-size:11px}.listing-custom-size-toggle small{margin-top:3px;color:var(--muted);font-size:10px;line-height:1.4}
+    .listing-price-preview{display:block;margin-top:7px;color:var(--deep);font-size:11px;font-weight:800}
+    .listing-description-field{grid-column:1/-1}
+    .listing-description-heading{margin-bottom:7px}.listing-description-heading label{margin:0}
+    .listing-ai-button{padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--deep);font-size:10px;font-weight:850}
+    .listing-ai-note{display:block;margin-top:6px;color:var(--muted);font-size:10px}
+    html[data-theme="dark"] .listing-price-preview{color:var(--lime)}
+    html[data-theme="dark"] .listing-ai-button{color:var(--lime)}
+    @media(max-width:560px){.listing-media-section{padding:13px}.listing-section-heading{align-items:flex-start}.listing-media-count{padding-top:5px}.seller-listing-form-grid{grid-template-columns:1fr}.listing-description-heading{align-items:flex-start;flex-wrap:wrap}.listing-ai-button{margin-left:auto}.seller-listing-form-actions{position:sticky;bottom:calc(68px + env(safe-area-inset-bottom));z-index:5;padding:10px 0;background:var(--paper)}}
+
+  </style>
 </head>
 <body>
   <section id="launch-screen" class="launch-screen" aria-label="Bigwizz app launch">
@@ -775,18 +813,22 @@
       </section>
       <section id="seller-products" class="page seller-data-page"><div class="section-head"><div><h2>My Products</h2><p>Publish and manage the goods and services buyers can discover.</p></div><button class="outline-button" style="width:auto" type="button" data-page="seller-studio">Back to Studio</button></div>
         <section class="seller-panel seller-product-panel" style="margin-bottom:18px"><h2 id="seller-listing-form-heading">Create a listing</h2><form id="seller-listing-form" class="seller-listing-form" enctype="multipart/form-data">
+          <section class="listing-media-section" aria-labelledby="listing-media-title">
+            <div class="listing-section-heading"><div><span class="listing-step">01 · PRODUCT MEDIA</span><h3 id="listing-media-title">Showcase your work</h3><p>Add up to 8 clear photos. The first photo will be your cover image.</p></div><span class="listing-media-count" id="seller-image-count">0 / 8 photos</span></div>
+            <label class="listing-dropzone" for="seller-listing-image"><span class="listing-upload-icon">＋</span><strong>Choose product photos</strong><span>Tap to browse or drag images here · JPG, PNG or WebP · 5 MB each</span><input id="seller-listing-image" name="images" type="file" accept="image/jpeg,image/png,image/webp" multiple></label>
+            <div class="listing-image-previews" id="seller-listing-image-previews" aria-live="polite"><p class="listing-empty-preview">Your photo previews will appear here.</p></div>
+          </section>
           <div class="seller-listing-form-grid">
             <div class="field"><label for="seller-listing-title">Listing title</label><input id="seller-listing-title" name="title" maxlength="80" required placeholder="What are you selling?"></div>
             <div class="field"><label for="seller-listing-type">Listing type</label><select id="seller-listing-type" name="type" required><option value="goods">Product / Goods</option><option value="service">Service</option></select></div>
             <div class="field"><label for="seller-listing-category">Category</label><input id="seller-listing-category" name="category" required maxlength="60" placeholder="e.g. Home decor"></div>
-            <div class="field"><label for="seller-size-type">Product size type</label><select id="seller-size-type" name="sizeType"><option value="other">Non-clothing product</option><option value="clothing">Clothing</option><option value="shoes">Shoes</option><option value="caps">Caps</option></select></div>
-            <div class="field" id="seller-size-options-field" hidden><label for="seller-listing-sizes">Available sizes</label><input id="seller-listing-sizes" name="sizes" placeholder="e.g. S, M, L, XL"></div>
+            <div class="field"><label for="seller-size-type">Product size type</label><select id="seller-size-type" name="sizeType"><option value="other">Non-clothing product</option><option value="clothing">Clothing / Apparel</option><option value="shoes">Shoes</option><option value="caps">Caps</option></select></div>
+            <div class="field listing-apparel-field" id="seller-size-options-field" hidden><label>Available standard sizes</label><div class="listing-size-chips" id="seller-size-chips"><label><input type="checkbox" value="S"><span>S</span></label><label><input type="checkbox" value="M"><span>M</span></label><label><input type="checkbox" value="L"><span>L</span></label><label><input type="checkbox" value="XL"><span>XL</span></label><label><input type="checkbox" value="XXL"><span>XXL</span></label></div><input id="seller-listing-sizes" name="sizes" type="hidden"><label class="listing-custom-size-toggle"><input id="seller-custom-measurements" name="customMeasurements" type="checkbox" value="true"><span><strong>Accepts Custom Measurements</strong><small>Customers can request a bespoke fit made to their measurements.</small></span></label></div>
             <div class="field" id="seller-colour-options-field"><label for="seller-listing-colors">Available colours</label><input id="seller-listing-colors" name="colors" placeholder="e.g. Black, Cream, Blue"></div>
             <div class="field" id="seller-service-pricing-field" hidden><label for="seller-service-pricing-mode">Service pricing</label><select id="seller-service-pricing-mode" name="pricingMode"><option value="fixed">Fixed price</option><option value="starting">Starting price</option><option value="quote">Request a quote</option></select></div>
             <div class="field" id="seller-service-availability-field" hidden><label for="seller-service-availability">Service availability</label><select id="seller-service-availability" name="serviceAvailability"><option value="available">Available</option><option value="busy">Busy</option><option value="offline">Offline</option></select></div>
-            <div class="field"><label for="seller-listing-price">Price (NGN)</label><input id="seller-listing-price" name="price" type="number" min="1" step="0.01" required placeholder="Enter price"></div>
-            <div class="field" style="grid-column:1/-1"><label for="seller-listing-image">Listing photo</label><input id="seller-listing-image" name="image" type="file" accept="image/jpeg,image/png,image/webp"></div>
-            <div class="field" style="grid-column:1/-1"><label for="seller-listing-description">Description</label><textarea id="seller-listing-description" name="description" maxlength="5000" required placeholder="Describe the product or service"></textarea></div>
+            <div class="field"><label for="seller-listing-price">Price (NGN)</label><input id="seller-listing-price" name="price" type="number" min="1" step="0.01" required placeholder="Enter price"><small class="listing-price-preview" id="seller-price-preview" aria-live="polite">₦0.00</small></div>
+            <div class="field listing-description-field"><div class="listing-description-heading"><label for="seller-listing-description">Product description</label><button class="listing-ai-button" type="button" id="seller-magic-description">✦ Magic AI Description</button></div><textarea id="seller-listing-description" name="description" maxlength="5000" required placeholder="Tell buyers what makes this product special…"></textarea><small class="listing-ai-note">Need inspiration? Create a starter description from your listing details, then make it your own.</small></div>
           </div>
           <div class="seller-listing-form-actions"><button class="primary" id="seller-listing-submit" type="submit">Publish listing</button><button class="outline-button" id="seller-listing-cancel" type="button" hidden>Cancel edit</button></div>
         </form></section>
