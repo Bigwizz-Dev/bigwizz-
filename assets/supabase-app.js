@@ -1349,8 +1349,9 @@
     .on("postgres_changes",{event:"*",schema:"public",table:"orders"},async payload=>{try{const row=payload.new||payload.old;if(!user||!row)return;if(row.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();if(row.buyer_id===user.id)await loadBuyerOrders();}catch(error){console.error("Order feed refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"payment_records"},async()=>{try{if(user){if(activeAccount==="seller")await loadSellerStudio();await loadBuyerOrders();}}catch(error){console.error("Payment status refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"listings"},async payload=>{try{if(user&&(payload.new||payload.old)?.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller product refresh failed.",error);}})
-    .on("postgres_changes",{event:"*",schema:"public",table:"listing_reviews"},async payload=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller review refresh failed.",error);}})
-    .on("postgres_changes",{event:"*",schema:"public",table:"order_reports"},async payload=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller report refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"listing_reviews"},async()=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller review refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"product_reviews"},async()=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller product review refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"order_reports"},async()=>{try{if(user&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller report refresh failed.",error);}})
     .subscribe();
   client.auth.getSession().then(({ data, error }) => {
     if (error) report(error, "Could not check the current sign-in session.");
