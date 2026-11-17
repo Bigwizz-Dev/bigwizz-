@@ -189,9 +189,16 @@
     if(nameNode)nameNode.textContent=displayName;
     if(avatarNode)avatarNode.textContent=initials(displayName);
     const products=productsResult.data||[],orders=ordersResult.data||[],requests=requestsResult.data||[],reports=reportsResult.data||[];
-    const reviewResult=products.length?await client.from("listing_reviews").select("listing_id,rating,body,reviewer_name,created_at").in("listing_id",products.map(item=>item.id)).order("created_at",{ascending:false}):{data:[],error:null};
-    if(reviewResult.error)throw new Error("Customer reviews could not be loaded: "+reviewResult.error.message);
-    const reviews=reviewResult.data||[];
+    const reviewResults=products.length?await Promise.all([
+      client.from("listing_reviews").select("listing_id,rating,body,reviewer_name,created_at").in("listing_id",products.map(item=>item.id)).order("created_at",{ascending:false}),
+      client.from("product_reviews").select("product_key,rating,body,reviewer_name,created_at").in("product_key",products.map(item=>String(item.id))).order("created_at",{ascending:false})
+    ]):[{data:[],error:null},{data:[],error:null}];
+    const reviewError=reviewResults.find(result=>result.error)?.error;
+    if(reviewError)throw new Error("Customer reviews could not be loaded: "+reviewError.message);
+    const reviews=[
+      ...(reviewResults[0].data||[]),
+      ...(reviewResults[1].data||[]).map(item=>({...item,listing_id:item.product_key}))
+    ].sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
     const averageRating=reviews.length?reviews.reduce((sum,item)=>sum+Number(item.rating),0)/reviews.length:0;
     const today=new Date().toLocaleDateString("en-CA");
     const paidStatuses=["paid","processing","shipped","completed","delivered"];
