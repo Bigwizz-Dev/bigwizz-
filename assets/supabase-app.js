@@ -95,6 +95,11 @@
     if(error)throw error;
     return (data||[]).map(row=>({id:row.id,body:row.body,status:row.status,author:row.author_name||"Community member",createdAt:row.created_at}));
   }
+  async function getMakerVideoDuration(file){
+    const video=document.createElement("video"),objectUrl=URL.createObjectURL(file);
+    try{return await new Promise((resolve,reject)=>{video.preload="metadata";video.onloadedmetadata=()=>resolve(video.duration);video.onerror=()=>reject(new Error("Video duration could not be checked."));video.src=objectUrl;});}
+    finally{URL.revokeObjectURL(objectUrl);video.removeAttribute("src");video.load();}
+  }
   async function submitCommunityPost({title,category,body,file,productId}){
     if(!user){showAuth();throw new Error("Please sign in with your seller account to share a maker update.");}
     if(!accountRoles.includes("seller")) throw new Error("Only approved seller accounts can publish Community progress updates.");
@@ -105,6 +110,7 @@
       const allowed=["image/jpeg","image/png","image/webp","image/avif","video/mp4","video/webm"];
       if(!allowed.includes(file.type))throw new Error("Choose a JPG, PNG, WebP, AVIF, MP4 or WebM file.");
       if(file.size>50*1024*1024)throw new Error("Media must be 50 MB or smaller.");
+      if(file.type.startsWith("video/")){const duration=await getMakerVideoDuration(file);if(!Number.isFinite(duration)||duration<=0||duration>60)throw new Error("Maker videos must be 60 seconds or shorter.");}
       const extension=(file.name.split(".").pop()||"bin").toLowerCase();
       storagePath=user.id+"/"+crypto.randomUUID()+"."+extension;
       const uploaded=await client.storage.from("community-media").upload(storagePath,file,{upsert:false});
