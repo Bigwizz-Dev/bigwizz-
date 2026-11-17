@@ -386,7 +386,7 @@
   async function loadCatalog() {
     const { data: rows, error } = await client
       .from("listings")
-      .select("id,seller_id,kind,category,title,description,seller_name,price,image_url,rating,rating_count,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
+      .select("id,seller_id,kind,category,title,description,seller_name,price,currency,image_url,rating,rating_count,size_type,sizes,colors,color_images,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (error) {
@@ -426,8 +426,13 @@
       kind: "Goods",
       price: row.price === null ? "Request an estimate" : currency.format(row.price),
       basePrice: row.price,
+      currency: row.currency||"NGN",
       image: row.image_url,
       seller: row.seller_name,
+      sizeType:row.size_type||"other",
+      sizes:Array.isArray(row.sizes)?row.sizes:[],
+      colors:Array.isArray(row.colors)?row.colors:[],
+      colorImages:row.color_images&&typeof row.color_images==="object"?row.color_images:{},
       rating: row.rating === null ? "" : Number(row.rating).toFixed(1),
       ratingCount: Number(row.rating_count || 0),
       detail: row.description
@@ -738,12 +743,15 @@
       if(!title||title.length>80||!description||!category||!["goods","service"].includes(kind))throw new Error("Complete the title, category, type and description.");
       if(price!==null&&(!Number.isFinite(price)||price<=0))throw new Error("Enter a valid listing price.");
       if(price===null&&!(kind==="service"&&pricingMode==="quote"))throw new Error("Enter a price or choose quotation required.");
-      const existing=remoteEditingId?await client.from("listings").select("id,status,image_url").eq("id",remoteEditingId).eq("seller_id",user.id).single():{data:null,error:null};
+      const existing=remoteEditingId?await client.from("listings").select("id,status,image_url,color_images").eq("id",remoteEditingId).eq("seller_id",user.id).single():{data:null,error:null};
       if(existing.error)throw existing.error;
       const file=document.getElementById("seller-listing-image").files[0];
       const imageUrl=await uploadListingImage(file)||(existing.data&&existing.data.image_url);
       if(!imageUrl)throw new Error("Upload a product or service photo before publishing.");
-      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published"};
+      const sizeType=kind==="goods"?String(values.get("sizeType")||"other"):"other";
+      const sizes=["clothing","shoes","caps"].includes(sizeType)?String(values.get("sizes")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
+      const colors=kind==="goods"?String(values.get("colors")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
+      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:existing.data?.color_images||{}};
       const result=remoteEditingId?await client.from("listings").update(row).eq("id",remoteEditingId).eq("seller_id",user.id):await client.from("listings").insert(row);
       if(result.error)throw result.error;
       if(kind==="service"){
@@ -769,7 +777,7 @@
       return;
     }
     const row = await client.from("listings")
-      .select("id,title,kind,category,description,price,pricing_mode,image_url,status")
+      .select("id,title,kind,category,description,price,pricing_mode,image_url,status,size_type,sizes,colors")
       .eq("id", listingId).eq("seller_id", user.id).single();
     if (row.error) throw row.error;
     if (action === "edit") {
@@ -778,6 +786,11 @@
       document.getElementById("seller-listing-title").value=item.title||"";
       document.getElementById("seller-listing-type").value=item.kind||"goods";
       document.getElementById("seller-listing-category").value=item.category||"";
+      document.getElementById("seller-size-type").value=item.size_type||"other";
+      document.getElementById("seller-listing-sizes").value=(item.sizes||[]).join(", ");
+      document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
+      document.getElementById("seller-listing-type").dispatchEvent(new Event("change",{bubbles:true}));
+      document.getElementById("seller-size-type").dispatchEvent(new Event("change",{bubbles:true}));
       document.getElementById("seller-service-pricing-mode").value=item.price===null?"quote":item.pricing_mode||"fixed";
       document.getElementById("seller-service-availability").value=sellerAvailabilityStatus;
       document.getElementById("seller-listing-price").value=item.price===null?"":String(item.price);
@@ -1142,8 +1155,14 @@
   }, true);
 
   document.addEventListener("change", event => {
-    if(event.target.id==="seller-listing-type"){
-      const service=event.target.value==="service";
+    if(event.target.id==="seller-size-type"||event.target.id==="seller-listing-type"){
+      const type=document.getElementById("seller-listing-type")?.value||"goods";
+      const sizeType=document.getElementById("seller-size-type")?.value||"other";
+      const service=type==="service";
+      const sizeField=document.getElementById("seller-size-options-field");
+      const colourField=document.getElementById("seller-colour-options-field");
+      if(sizeField)sizeField.hidden=service||!["clothing","shoes","caps"].includes(sizeType);
+      if(colourField)colourField.hidden=service;
       const pricing=document.getElementById("seller-service-pricing-field");
       const availability=document.getElementById("seller-service-availability-field");
       const mode=document.getElementById("seller-service-pricing-mode");
