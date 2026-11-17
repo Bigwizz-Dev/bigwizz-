@@ -733,19 +733,19 @@
     updateSavedButtons();
   }
 
-  async function uploadListingImage(file) {
-    if (!file) return null;
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size > 5 * 1024 * 1024) {
-      throw new Error("Use a JPG, PNG, or WebP image up to 5 MB.");
+  async function uploadListingImages(files) {
+    const selected=Array.from(files||[]);
+    if(selected.length>8)throw new Error("Choose up to 8 listing photos.");
+    const urls=[];
+    for(const file of selected){
+      if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024)throw new Error("Each photo must be JPG, PNG or WebP and no larger than 5 MB.");
+      const extension=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+      const path=`${user.id}/${crypto.randomUUID()}.${extension}`;
+      const {error}=await client.storage.from("listing-images").upload(path,file,{contentType:file.type,upsert:false});
+      if(error)throw error;
+      urls.push(client.storage.from("listing-images").getPublicUrl(path).data.publicUrl);
     }
-    const extension = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-    const path = `${user.id}/${crypto.randomUUID()}.${extension}`;
-    const { error } = await client.storage.from("listing-images").upload(path, file, {
-      contentType: file.type,
-      upsert: false
-    });
-    if (error) throw error;
-    return client.storage.from("listing-images").getPublicUrl(path).data.publicUrl;
+    return urls;
   }
 
   async function saveSellerListing(event) {
@@ -767,15 +767,19 @@
       if(!title||title.length>80||!description||!category||!["goods","service"].includes(kind))throw new Error("Complete the title, category, type and description.");
       if(price!==null&&(!Number.isFinite(price)||price<=0))throw new Error("Enter a valid listing price.");
       if(price===null&&!(kind==="service"&&pricingMode==="quote"))throw new Error("Enter a price or choose quotation required.");
-      const existing=remoteEditingId?await client.from("listings").select("id,status,image_url,color_images").eq("id",remoteEditingId).eq("seller_id",user.id).single():{data:null,error:null};
+      const existing=remoteEditingId?await client.from("listings").select("id,status,image_url,gallery_images,color_images,accepts_custom_measurements").eq("id",remoteEditingId).eq("seller_id",user.id).single():{data:null,error:null};
       if(existing.error)throw existing.error;
-      const file=document.getElementById("seller-listing-image").files[0];
-      const imageUrl=await uploadListingImage(file)||(existing.data&&existing.data.image_url);
-      if(!imageUrl)throw new Error("Upload a product or service photo before publishing.");
+      const files=document.getElementById("seller-listing-image").files;
+      const uploadedUrls=await uploadListingImages(files);
+      const previousGallery=Array.isArray(existing.data?.gallery_images)?existing.data.gallery_images:[];
+      const galleryImages=uploadedUrls.length?uploadedUrls:(previousGallery.length?previousGallery:[existing.data?.image_url].filter(Boolean));
+      const imageUrl=uploadedUrls[0]||(existing.data&&existing.data.image_url);
+      if(!imageUrl)throw new Error("Upload at least one product or service photo before publishing.");
       const sizeType=kind==="goods"?String(values.get("sizeType")||"other"):"other";
       const sizes=["clothing","shoes","caps"].includes(sizeType)?String(values.get("sizes")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
+      const acceptsCustomMeasurements=kind==="goods"&&["clothing","shoes"].includes(sizeType)&&values.get("customMeasurements")==="true";
       const colors=kind==="goods"?String(values.get("colors")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
-      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:existing.data?.color_images||{}};
+      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:existing.data?.color_images||{},gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements};
       const result=remoteEditingId?await client.from("listings").update(row).eq("id",remoteEditingId).eq("seller_id",user.id):await client.from("listings").insert(row);
       if(result.error)throw result.error;
       if(kind==="service"){
@@ -784,7 +788,7 @@
         if(profileUpdate.error)throw profileUpdate.error;
         sellerAvailabilityStatus=availability;
       }
-      remoteEditingId=null;form.reset();
+      remoteEditingId=null;form.reset();renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
       document.getElementById("seller-listing-submit").textContent="Publish listing";
       document.getElementById("seller-listing-cancel").hidden=true;
       document.getElementById("seller-service-pricing-mode").disabled=false;
@@ -801,7 +805,7 @@
       return;
     }
     const row = await client.from("listings")
-      .select("id,title,kind,category,description,price,pricing_mode,image_url,status,size_type,sizes,colors")
+      .select("id,title,kind,category,description,price,pricing_mode,image_url,gallery_images,accepts_custom_measurements,status,size_type,sizes,colors")
       .eq("id", listingId).eq("seller_id", user.id).single();
     if (row.error) throw row.error;
     if (action === "edit") {
@@ -811,7 +815,10 @@
       document.getElementById("seller-listing-type").value=item.kind||"goods";
       document.getElementById("seller-listing-category").value=item.category||"";
       document.getElementById("seller-size-type").value=item.size_type||"other";
-      document.getElementById("seller-listing-sizes").value=(item.sizes||[]).join(", ");
+      document.getElementById("seller-listing-sizes").value=(item.sizes||[]).join(",");
+      document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=(item.sizes||[]).includes(input.value));
+      document.getElementById("seller-custom-measurements").checked=!!item.accepts_custom_measurements;
+      renderSellerListingImagePreviews(item.gallery_images?.length?item.gallery_images:[item.image_url].filter(Boolean));
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change",{bubbles:true}));
       document.getElementById("seller-size-type").dispatchEvent(new Event("change",{bubbles:true}));
@@ -1178,6 +1185,64 @@
     }
   }, true);
 
+  let sellerListingPreviewUrls=[];
+  function renderSellerListingImagePreviews(items){
+    const wrap=document.getElementById("seller-listing-image-previews"),count=document.getElementById("seller-image-count");
+    if(!wrap)return;
+    sellerListingPreviewUrls.forEach(url=>{if(url.startsWith("blob:"))URL.revokeObjectURL(url);});
+    sellerListingPreviewUrls=[];
+    const list=Array.from(items||[]).slice(0,8);
+    if(count)count.textContent=list.length+" / 8 photos";
+    if(!list.length){wrap.innerHTML='<p class="listing-empty-preview">Your photo previews will appear here.</p>';return;}
+    wrap.innerHTML="";
+    list.forEach((item,index)=>{
+      const url=typeof item==="string"?item:URL.createObjectURL(item);
+      if(typeof item!=="string")sellerListingPreviewUrls.push(url);
+      const card=document.createElement("div");card.className="listing-image-preview";
+      const img=document.createElement("img");img.src=url;img.alt="Listing photo "+(index+1);card.appendChild(img);
+      if(index===0){const badge=document.createElement("span");badge.className="listing-cover-badge";badge.textContent="COVER PHOTO";card.appendChild(badge);}
+      wrap.appendChild(card);
+    });
+  }
+  function updateSellerPricePreview(){
+    const input=document.getElementById("seller-listing-price"),preview=document.getElementById("seller-price-preview");
+    if(!input||!preview)return;
+    const amount=Number(input.value);
+    preview.textContent=input.value&&Number.isFinite(amount)&&amount>0?new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",minimumFractionDigits:2}).format(amount):"₦0.00";
+  }
+  function createSellerDescriptionDraft(){
+    const title=document.getElementById("seller-listing-title")?.value.trim()||"this piece";
+    const category=document.getElementById("seller-listing-category")?.value.trim()||"";
+    const colours=document.getElementById("seller-listing-colors")?.value.trim()||"";
+    const sizes=document.getElementById("seller-listing-sizes")?.value.trim()||"";
+    const custom=document.getElementById("seller-custom-measurements")?.checked;
+    const existing=document.getElementById("seller-listing-description")?.value.trim()||"";
+    const details=[category?" in "+category:"",colours?" available in "+colours:"",sizes?" in sizes "+sizes:"",custom?" with custom measurements available":""].join("");
+    const draft=`Meet ${title}${details}. Thoughtfully selected and ready to become part of your everyday style. Add this piece to your collection and enjoy a product made with care. Please review the photos and listing options before ordering.`;
+    const field=document.getElementById("seller-listing-description");
+    if(field){field.value=existing?existing+"\\n\\n"+draft:draft;field.focus();}
+    notify("A starter description is ready. Personalise it with your product's real features and materials.");
+  }
+  document.addEventListener("click",event=>{
+    if(event.target.closest("#seller-magic-description")){event.preventDefault();createSellerDescriptionDraft();}
+    const dropzone=event.target.closest(".listing-dropzone");
+    if(dropzone&&event.target!==document.getElementById("seller-listing-image"))return;
+  });
+  const listingDropzone=document.querySelector(".listing-dropzone");
+  if(listingDropzone){
+    ["dragenter","dragover"].forEach(name=>listingDropzone.addEventListener(name,event=>{event.preventDefault();listingDropzone.classList.add("is-dragging");}));
+    ["dragleave","drop"].forEach(name=>listingDropzone.addEventListener(name,event=>{event.preventDefault();listingDropzone.classList.remove("is-dragging");}));
+    listingDropzone.addEventListener("drop",event=>{
+      const files=Array.from(event.dataTransfer?.files||[]).filter(file=>file.type.startsWith("image/")).slice(0,8);
+      if(!files.length)return;
+      const input=document.getElementById("seller-listing-image");
+      const transfer=new DataTransfer();files.forEach(file=>transfer.items.add(file));input.files=transfer.files;
+      renderSellerListingImagePreviews(files);
+    });
+  }
+  document.getElementById("seller-listing-price")?.addEventListener("input",updateSellerPricePreview);
+  updateSellerPricePreview();
+
   document.addEventListener("change", event => {
     if(event.target.id==="seller-size-type"||event.target.id==="seller-listing-type"){
       const type=document.getElementById("seller-listing-type")?.value||"goods";
@@ -1187,6 +1252,11 @@
       const colourField=document.getElementById("seller-colour-options-field");
       if(sizeField)sizeField.hidden=service||!["clothing","shoes","caps"].includes(sizeType);
       if(colourField)colourField.hidden=service;
+      if(service||!["clothing","shoes","caps"].includes(sizeType)){
+        document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);
+        const sizes=document.getElementById("seller-listing-sizes");if(sizes)sizes.value="";
+        const custom=document.getElementById("seller-custom-measurements");if(custom)custom.checked=false;
+      }
       const pricing=document.getElementById("seller-service-pricing-field");
       const availability=document.getElementById("seller-service-availability-field");
       const mode=document.getElementById("seller-service-pricing-mode");
@@ -1196,6 +1266,12 @@
       if(mode)mode.disabled=!service;
       if(price){price.disabled=service&&mode?.value==="quote";price.required=!(service&&mode?.value==="quote");}
     }
+    if(event.target.matches("#seller-size-chips input")){
+      const selected=Array.from(document.querySelectorAll("#seller-size-chips input:checked")).map(input=>input.value);
+      const sizes=document.getElementById("seller-listing-sizes");if(sizes)sizes.value=selected.join(", ");
+    }
+    if(event.target.id==="seller-listing-image")renderSellerListingImagePreviews(Array.from(event.target.files||[]));
+    if(event.target.id==="seller-listing-price")updateSellerPricePreview();
     if(event.target.id==="seller-service-pricing-mode"){
       const price=document.getElementById("seller-listing-price");
       if(price)price.required=event.target.value!=="quote";
@@ -1235,6 +1311,9 @@
       remoteEditingId = null;
       const form=document.getElementById("seller-listing-form");
       if(form)form.reset();
+      renderSellerListingImagePreviews([]);
+      document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);
+      updateSellerPricePreview();
       const submit=document.getElementById("seller-listing-submit");
       if(submit)submit.textContent="Publish listing";
       event.target.closest("#seller-listing-cancel").hidden=true;
