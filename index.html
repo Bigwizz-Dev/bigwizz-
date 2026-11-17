@@ -571,6 +571,7 @@
     .community-thread-media{width:100%;max-height:360px;object-fit:contain;border-radius:13px;background:#17131a;margin-bottom:12px}
     @media(max-width:700px){.maker-feed{margin:0 -2px}.maker-post{border-radius:15px}.maker-post-media{aspect-ratio:1/1}.maker-feed-intro{padding:12px}.maker-post-head,.maker-post-copy{padding-left:13px;padding-right:13px}}
 
+    .account-entry[hidden]{display:none}
     .account-entry{min-height:100svh;display:grid;place-items:center;padding:28px 18px;background:radial-gradient(circle at 15% 10%,#f0e8f5 0,transparent 38%),var(--canvas);color:var(--ink)}
     .account-entry-card{width:min(100%,560px);padding:clamp(24px,5vw,42px);border:1px solid var(--line);border-radius:24px;background:var(--paper);box-shadow:0 22px 70px #25162a14}
     .account-entry-brand{display:flex;align-items:center;gap:10px;margin-bottom:28px;font-size:21px;font-weight:900;letter-spacing:-.7px}.account-entry-brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--deep);color:#fff;font-size:25px}
@@ -1818,7 +1819,9 @@
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});
     setTimeout(()=>{
       const launch=document.getElementById("launch-screen");
-      document.getElementById("account-entry").hidden=false;
+      const hasSession=!!window.BIGWIZZ_BACKEND?.getCurrentUser?.();
+      if(hasSession){document.getElementById("marketplace-app").hidden=false;setPage("discover");}
+      else document.getElementById("account-entry").hidden=false;
       launch.classList.add("leaving");
       setTimeout(()=>{launch.hidden=true},500);
     },matchMedia("(prefers-reduced-motion: reduce)").matches?250:1250);
