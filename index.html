@@ -674,6 +674,17 @@
     @media(max-width:390px){.seller-product-grid{grid-template-columns:1fr}.seller-kpi{padding-inline:8px}}
     .mobile-nav [hidden]{display:none!important}
 
+    body.seller-mode{background:#17131d;color:#f8f4fb}
+    body.seller-mode .shell{color:#f8f4fb}
+    body.seller-mode .topbar{color:#fff}
+    body.seller-mode .brand{color:#fff}
+    body.seller-mode .icon-button{border-color:#514457;background:#28212e;color:#f5edf8}
+    body.seller-mode .mobile-nav{border:1px solid #514457;border-radius:22px 22px 0 0;background:#211b29f5;box-shadow:0 -8px 28px #09050d55}
+    body.seller-mode .mobile-nav button{color:#c9bdcf}
+    body.seller-mode .mobile-nav button.active{color:#f3d6ff}
+    body.seller-mode .mobile-nav button.active .nav-icon{color:#f4d6a3}
+    body.seller-mode .seller-data-page .section-head h2{color:#fff}
+    body.seller-mode .seller-data-page .section-head p{color:#c5b9ca}
 </style>
 </head>
 <body>
@@ -745,7 +756,7 @@
         <div class="seller-welcome"><div><h1>Seller Studio</h1><p>Welcome Back, <strong id="seller-welcome-name">Seller</strong>!</p></div><div class="seller-avatar" id="seller-studio-avatar" aria-hidden="true">S</div></div>
         <section class="seller-panel seller-performance">
           <h2>Real-Time Performance</h2>
-          <div class="seller-performance-top"><div><small>Today's Sales</small><strong class="seller-sales-amount" id="seller-today-sales">₦0.00</strong></div><strong class="seller-sales-change" id="seller-sales-trend">—</strong></div>
+          <div class="seller-performance-top"><div><small>Today's Order Value</small><strong class="seller-sales-amount" id="seller-today-sales">₦0.00</strong></div><strong class="seller-sales-change" id="seller-sales-trend">—</strong></div>
           <svg class="seller-chart-line" viewBox="0 0 560 112" preserveAspectRatio="none" aria-label="Sales trend chart"><defs><linearGradient id="sellerLineGlow" x1="0" x2="1"><stop stop-color="#8de7ee"/><stop offset="1" stop-color="#d45acb"/></linearGradient></defs><path d="M0 90 C35 88 42 54 80 66 S125 80 155 46 S205 70 238 35 S280 55 315 27 S360 49 394 19 S445 54 470 29 S520 50 560 12" fill="none" stroke="url(#sellerLineGlow)" stroke-width="3" stroke-linecap="round"/><path d="M0 90 C35 88 42 54 80 66 S125 80 155 46 S205 70 238 35 S280 55 315 27 S360 49 394 19 S445 54 470 29 S520 50 560 12 V112 H0Z" fill="#a34cb8" opacity=".08"/></svg>
           <div class="seller-kpis"><div class="seller-kpi"><span>Orders</span><strong id="seller-order-count">0</strong></div><div class="seller-kpi"><span>Active Products</span><strong id="seller-product-count">0</strong></div><div class="seller-kpi"><span>Open Requests</span><strong id="seller-request-count">0</strong></div></div>
         </section>
@@ -1351,6 +1362,7 @@
       if(["seller-studio","seller-products","seller-orders"].includes(page)&&!window.BIGWIZZ_BACKEND?.isSeller?.()){showToast("Sign in with an approved seller account to access Seller Studio.");return;}
       if(!document.getElementById(page))return;
       document.querySelectorAll(".page").forEach(section=>section.classList.toggle("active",section.id===page));
+      document.body.classList.toggle("seller-mode",["seller-studio","seller-products","seller-orders"].includes(page));
       if(!mobileNavButton)mobileNavButton=Array.from(document.querySelectorAll(".mobile-nav [data-page]")).find(button=>!button.hidden&&button.dataset.page===page)||null;
       document.querySelectorAll("[data-page]").forEach(button=>{
         const isMobileButton=Boolean(button.closest(".mobile-nav"));
@@ -1360,7 +1372,6 @@
       if(page==="cart"){if(window.BIGWIZZ_BACKEND?.loadCart)window.BIGWIZZ_BACKEND.loadCart();else renderCart();}
       if(page==="orders")window.BIGWIZZ_BACKEND?.loadBuyerServiceRequests?.();
       if(page==="seller-studio"||page==="seller-products"||page==="seller-orders"){window.BIGWIZZ_BACKEND?.loadSellerStudio?.().catch(error=>showToast(error.message||"Seller data could not be loaded."));if(page==="seller-orders")window.BIGWIZZ_BACKEND?.loadSellerServiceRequests?.();}
-      if(page==="seller-products")window.BIGWIZZ_BACKEND?.loadSellerStudio?.().catch(error=>showToast(error.message||"Products could not be loaded."));
       if(focusTarget){document.getElementById(focusTarget).scrollIntoView({behavior:"smooth",block:"start"})}
       else {
         /* Reset the document scroll when switching tabs; a retained scroll offset
