@@ -1353,6 +1353,7 @@
       if(!skipRemoteLoad&&window.BIGWIZZ_BACKEND){
         window.BIGWIZZ_BACKEND.loadProductReviews(item.id).then(rows=>{
           reviewsByListing[item.id]=[...(sampleReviewsByListing[item.id]||[]).map(review=>({...review,demo:true})),...rows];
+          renderListings(document.getElementById("search-input").value);
           if(currentProductId===item.id)renderProductDetails(item.id,true);
         }).catch(error=>console.error("Could not load shared product reviews.",error));
       }
@@ -1584,18 +1585,27 @@
     });
     document.getElementById("service-search-form").addEventListener("submit",event=>{event.preventDefault();activeServiceCategory="All";document.querySelectorAll("[data-service-category]").forEach(button=>button.classList.toggle("active",button.dataset.serviceCategory==="All"));renderServices(document.getElementById("service-search-input").value)});
     document.getElementById("review-dialog-close").addEventListener("click",()=>document.getElementById("review-dialog").close());
-    document.getElementById("item-review-form").addEventListener("submit",event=>{
+    document.getElementById("item-review-form").addEventListener("submit",async event=>{
       event.preventDefault();
-      const form=event.currentTarget,values=new FormData(form),listingId=document.getElementById("review-listing-id").value,text=String(values.get("review")||"").trim(),reviewer=String(values.get("reviewer")||"").trim();
+      const form=event.currentTarget,submit=form.querySelector('[type="submit"]'),values=new FormData(form),listingId=document.getElementById("review-listing-id").value,text=String(values.get("review")||"").trim(),reviewer=String(values.get("reviewer")||"").trim();
       if(!selectedReviewRating){showToast("Choose a rating under Rating on the product page before posting your review.");return}
       if(!text){showToast("Write a few words about the item before posting.");return}
-      if(!saveListingReview(listingId,{reviewer,rating:selectedReviewRating,text,createdAt:new Date().toISOString()}))return;
-      form.reset();
-      document.getElementById("review-dialog").close();
-      selectedReviewRating=0;
-      renderListings(document.getElementById("search-input").value);
-      if(currentProductId)renderProductDetails(currentProductId);
-      showToast("Review saved in this browser.");
+      if(!window.BIGWIZZ_BACKEND){showToast("Reviews are temporarily unavailable. Please try again shortly.");return}
+      submit.disabled=true;submit.textContent="Posting…";
+      try{
+        const rows=await window.BIGWIZZ_BACKEND.submitProductReview({productKey:listingId,rating:selectedReviewRating,text,reviewer});
+        reviewsByListing[listingId]=[...(sampleReviewsByListing[listingId]||[]).map(review=>({...review,demo:true})),...rows];
+        form.reset();
+        document.getElementById("review-dialog").close();
+        selectedReviewRating=0;
+        renderListings(document.getElementById("search-input").value);
+        if(currentProductId)renderProductDetails(currentProductId,true);
+        showToast("Your review has been published.");
+      }catch(error){
+        showToast(error&&error.message?error.message:"Your review could not be submitted. Please try again.");
+      }finally{
+        submit.disabled=false;submit.textContent="Post review";
+      }
     });
     document.querySelector(".service-request-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
     document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");requests.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();document.getElementById("service-dialog").close();showToast("Demo request saved locally. Sign in to send a real request through Bigwizz.")});
