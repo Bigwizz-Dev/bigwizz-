@@ -307,6 +307,7 @@
     document.querySelectorAll(".page").forEach(section => {
       section.classList.toggle("active", section.id === page);
     });
+    document.body.classList.toggle("seller-mode", ["seller-studio", "seller-products", "seller-orders"].includes(page));
     document.querySelectorAll("[data-page]").forEach(button => {
       button.classList.toggle("active", button.dataset.page === page);
     });
@@ -1233,7 +1234,7 @@
   client.channel("bigwizz-community-live")
     .on("postgres_changes",{event:"*",schema:"public",table:"community_posts"},async()=>{try{await loadCommunityPosts();renderCommunity();}catch(error){console.error("Community live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"community_comments"},async()=>{try{await loadCommunityPosts();renderCommunity();const postId=document.getElementById("community-comment-post-id")?.value;if(postId&&document.getElementById("community-thread-dialog")?.open)renderCommunityComments(await loadCommunityComments(postId));}catch(error){console.error("Community comment live refresh failed.",error);}})
-    .on("postgres_changes",{event:"*",schema:"public",table:"service_requests"},async payload=>{try{if(!user)return;const row=payload.new||payload.old;if(row?.buyer_id===user.id)await loadBuyerServiceRequests();if(row?.provider_id===user.id)await loadSellerServiceRequests();}catch(error){console.error("Service request live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"service_requests"},async payload=>{try{if(!user)return;const row=payload.new||payload.old;if(row?.buyer_id===user.id)await loadBuyerServiceRequests();if(row?.provider_id===user.id){await loadSellerServiceRequests();if(activeAccount==="seller")await loadSellerStudio();}}catch(error){console.error("Service request live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"notifications"},async payload=>{try{if(user&&(payload.new||payload.old)?.user_id===user.id)await loadNotifications();}catch(error){console.error("Notification live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"orders"},async payload=>{try{if(user&&(payload.new||payload.old)?.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller order refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"listings"},async payload=>{try{if(user&&(payload.new||payload.old)?.seller_id===user.id&&activeAccount==="seller")await loadSellerStudio();}catch(error){console.error("Seller product refresh failed.",error);}})
