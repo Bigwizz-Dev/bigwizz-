@@ -76,6 +76,11 @@
     conversations=rows.map(row=>({id:row.id,title:row.title,meta:row.category||"Maker update",copy:row.caption||row.body||"",author:row.author_name||"Bigwizz maker",avatar:row.author_avatar_url||"",createdAt:new Date(row.created_at).toLocaleDateString(),status:row.status,commentCount:counts.get(row.id)||0,likeCount:likes.get(row.id)||0,liked:liked.has(row.id),mediaUrl:row.media_url||row.image_url||"",mediaType:row.media_type||(row.image_url?"image":null),productId:row.product_id}));
     return conversations;
   }
+  async function loadCommunityProducts(){
+    const {data,error}=await client.from("listings").select("id,title").eq("kind","goods").eq("status","published").order("created_at",{ascending:false}).limit(100);
+    if(error)throw error;
+    return data||[];
+  }
   async function toggleCommunityLike(postId){
     if(!user){showAuth();throw new Error("Please sign in to like maker updates.");}
     const {data,error}=await client.from("community_post_likes").select("id").eq("post_id",postId).eq("user_id",user.id).maybeSingle();
@@ -109,7 +114,7 @@
     const {error}=await client.from("community_posts").insert({
       author_id:user.id,author_name:(profile&&profile.display_name)||"Bigwizz maker",
       title:cleanBody.slice(0,160)||"Maker update",category:String(category||"Craftsmanship").slice(0,60),
-      body:cleanBody,caption:cleanBody,media_url:mediaUrl,media_type:mediaType,
+      body:cleanBody,caption:cleanBody,media_url:mediaUrl,media_type:mediaType,product_id:productId||null,
       image_url:mediaType==="image"?mediaUrl:null,status:"pending"
     });
     if(error){if(storagePath)await client.storage.from("community-media").remove([storagePath]);throw error;}
@@ -121,7 +126,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadSellerServiceRequests,loadBuyerServiceRequests,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
