@@ -128,7 +128,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -446,16 +446,22 @@
       report(error, "Your shared cart could not be loaded.");
       return;
     }
-    const items = data.filter(row => row.listings && row.listings.kind === "goods");
+    const items = (data || []).filter(row => row.listings && row.listings.kind === "goods");
     cartItems = items.map(row => ({
       listingId: row.listing_id,
       title: row.listings.title,
       seller: row.listings.seller_name,
       image: row.listings.image_url,
       sellerPrice: Number(row.listings.price),
-      quantity: row.quantity
+      quantity: Number(row.quantity)
     }));
-    updateCartCount();
+    const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+    const cartBadge = document.getElementById("cart-count");
+    if (cartBadge) {
+      cartBadge.hidden = cartCount === 0;
+      cartBadge.textContent = cartCount > 99 ? "99+" : String(cartCount);
+      cartBadge.setAttribute("aria-label", `${cartCount} item${cartCount === 1 ? "" : "s"} in cart`);
+    }
     const container = document.getElementById("cart-items");
     const summary = document.getElementById("cart-summary");
     if (!items.length) {
@@ -504,7 +510,8 @@
         .eq("user_id", user.id).eq("listing_id", listingId);
       if (result.error) throw result.error;
     } else {
-      const quantity = action === "increase" ? (data ? data.quantity + 1 : 1) : data.quantity - 1;
+      if (!data && action === "decrease") throw new Error("This cart item is no longer available.");
+      const quantity = action === "increase" ? Math.min(99, (data ? Number(data.quantity) : 0) + 1) : Number(data.quantity) - 1;
       const result = await client.from("cart_items")
         .upsert({ user_id: user.id, listing_id: listingId, quantity }, { onConflict: "user_id,listing_id" });
       if (result.error) throw result.error;
@@ -530,7 +537,7 @@
     const result = await client.from("cart_items").upsert({
       user_id: user.id,
       listing_id: listingId,
-      quantity: Math.min(99, (current.data ? current.data.quantity : 0) + 1)
+      quantity: Math.min(99, (current.data ? Number(current.data.quantity) : 0) + 1)
     }, { onConflict: "user_id,listing_id" });
     if (result.error) throw result.error;
     await loadCart();
@@ -816,19 +823,41 @@
   async function loadInbox(){return loadSellerServiceRequests();}
 
   async function loadNotifications() {
+    const list = document.getElementById("notification-list");
+    const badge = document.getElementById("notification-count");
     if (!user) {
+      if (badge) { badge.hidden = true; badge.textContent = "0"; }
+      if (list) list.innerHTML = '<div class="empty">Sign in to view your notifications.</div>';
       showAuth();
       return;
     }
-    const { data, error } = await client.from("notifications").select("title,body,kind,created_at")
+    if (list) list.innerHTML = '<p class="notice">Loading notifications…</p>';
+    const { data, error } = await client.from("notifications")
+      .select("id,title,body,kind,created_at,read_at")
       .eq("user_id", user.id).order("created_at", { ascending: false });
     if (error) {
+      if (list) list.innerHTML = '<div class="empty">Notifications could not be loaded. Please try again.</div>';
       report(error, "Notifications could not be loaded.");
       return;
     }
-    document.getElementById("notification-list").innerHTML = data.length
-      ? data.map(item => `<article class="notification-card"><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.body)}</p><small>${new Date(item.created_at).toLocaleString()}</small></div></article>`).join("")
+    const rows = data || [];
+    const unreadCount = rows.filter(item => !item.read_at).length;
+    if (badge) {
+      badge.hidden = unreadCount === 0;
+      badge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+      badge.setAttribute("aria-label", `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`);
+    }
+    if (list) list.innerHTML = rows.length
+      ? rows.map(item => `<article class="notification-card${item.read_at ? "" : " is-unread"}"><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.body)}</p><small>${escapeHtml(item.kind || "Update")} · ${new Date(item.created_at).toLocaleString()}</small>${item.read_at ? "" : `<button type="button" class="notification-read" data-notification-read="${escapeHtml(item.id)}">Mark as read</button>`}</div></article>`).join("")
       : '<div class="empty">No notifications yet.</div>';
+  }
+
+  async function markNotificationRead(notificationId) {
+    if (!user || !notificationId) return;
+    const { error } = await client.from("notifications").update({ read_at: new Date().toISOString() })
+      .eq("id", notificationId).eq("user_id", user.id).is("read_at", null);
+    if (error) throw error;
+    await loadNotifications();
   }
 
   async function handleSession(nextUser) {
@@ -1100,21 +1129,12 @@
         });
       return;
     }
-    const pageButton = event.target.closest("[data-page]");
-    if (pageButton && ["cart", "notifications"].includes(pageButton.dataset.page)) {
-      if (!user) {
-        stop(event);
-        showAuth();
-        return;
-      }
-      window.setTimeout(() => {
-        if (pageButton.dataset.page === "cart") loadCart();
-        if (pageButton.dataset.page === "notifications") loadNotifications();
-      }, 0);
-    }
+
   }, true);
 
   document.addEventListener("click",async event=>{
+    const readNotification=event.target.closest("[data-notification-read]");
+    if(readNotification){stop(event);try{await markNotificationRead(readNotification.dataset.notificationRead);}catch(error){report(error,"Could not update this notification.");}return;}
     const choose=event.target.closest("[data-select-service-match]");
     if(!choose||!user)return;
     const {error}=await client.from("service_request_selections").insert({
