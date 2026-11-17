@@ -301,7 +301,7 @@
     .product-detail-info h2{margin:8px 0;font-size:28px;letter-spacing:-.7px}
     .product-detail-price{margin:12px 0;color:var(--deep);font-size:22px;font-weight:850}
     .product-detail-description{color:var(--muted);font-size:13px;line-height:1.6}
-    .product-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+    .product-option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.product-size-options{display:flex;flex-wrap:wrap;gap:8px;margin-top:9px}.product-size-chip{min-width:44px;min-height:42px;padding:8px 13px;border:1px solid var(--line);border-radius:11px;background:var(--paper);color:var(--ink);font-size:12px;font-weight:800}.product-size-chip[aria-pressed="true"]{border-color:var(--deep);background:#eaf1e8;color:var(--deep);box-shadow:inset 0 0 0 1px var(--deep)}.product-size-chip:disabled{cursor:not-allowed;opacity:.42;text-decoration:line-through;background:var(--canvas)}.product-size-heading{display:flex;align-items:center;justify-content:space-between;gap:8px}.product-size-guide-link{padding:4px 0;border:0;background:transparent;color:var(--green);font-size:11px;font-weight:800;text-decoration:underline}.product-size-help{display:block;margin-top:8px;color:var(--muted);font-size:11px}.product-size-dialog{width:min(620px,calc(100% - 28px));max-width:620px;max-height:86vh;padding:0;border:1px solid var(--line);border-radius:18px;background:var(--paper);color:var(--ink);box-shadow:0 24px 80px #17102055}.product-size-dialog::backdrop{background:#17102099}.product-size-dialog-content{padding:20px;overflow:auto;max-height:86vh}.product-size-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:15px}.product-size-dialog-head h3{margin:0 0 5px;font-size:19px}.product-size-dialog-head p{margin:0;color:var(--muted);font-size:12px;line-height:1.5}.product-size-dialog-close{width:35px;height:35px;border:0;border-radius:50%;background:var(--canvas);color:var(--ink);font-size:22px}.product-detail-actions button:disabled{cursor:not-allowed;opacity:.5}.
     .product-options-panel{position:relative;margin-top:20px;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--paper);box-shadow:0 10px 28px rgba(25,18,32,.07);overflow:hidden}.product-options-panel:before{content:"";position:absolute;inset:0 0 auto;height:3px;background:linear-gradient(90deg,var(--deep),var(--lime));opacity:.85}.product-options-panel h4{display:flex;align-items:center;gap:9px;margin:0 0 7px;font-size:18px;font-weight:850;letter-spacing:-.35px;color:var(--ink)}.product-options-panel h4:before{content:"";display:inline-block;width:4px;height:19px;border-radius:4px;background:var(--deep)}.product-options-panel>p{margin:0 0 17px;padding-bottom:14px;border-bottom:1px solid var(--line);color:var(--muted);font-size:12px;line-height:1.6}.product-options-panel .product-option-grid{margin-top:0;gap:14px}.product-options-panel .field{min-width:0;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--canvas)}.product-options-panel .field label{display:block;margin-bottom:8px;font-size:12px;font-weight:800;color:var(--ink)}.product-options-panel select{width:100%;min-height:46px;padding:0 12px;border:1px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink);font-weight:650}.product-options-panel .notice{margin:8px 0 0;font-size:12px;line-height:1.5}
     .product-detail-actions{display:flex;gap:9px;margin-top:18px}
     .product-detail-actions button{flex:1}
@@ -1066,7 +1066,7 @@
       const item=getGoodsListing(listingId);
       if(!item){showToast("This listing is no longer available.");return}
       const sizeEnabled=["clothing","shoes","caps"].includes(item.sizeType),sizes=sizeEnabled&&Array.isArray(item.sizes)?item.sizes:[],colors=Array.isArray(item.colors)?item.colors:[];
-      if(sizes.length&&!options.size||colors.length&&!options.color){showToast("Choose the available options before adding this item.");return}
+      if(sizeEnabled&&(!sizes.length||!options.size||!isProductSizeAvailable(item,options.size))||colors.length&&!options.color){showToast("Choose the available options before adding this item.");return}
       const selectedItem={listingId,title:item.title,seller:item.seller,image:(item.colorImages&&item.colorImages[options.color])||item.image,sellerPrice:sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice||item.price),size:options.size||"",color:options.color||""};
       const key=cartItemKey(selectedItem),existing=cartItems.find(cartItem=>cartItemKey(cartItem)===key);
       const nextItems=existing
@@ -1303,15 +1303,35 @@
       const label=document.getElementById("product-color-preview-label");
       if(label)label.textContent=!value?"Choose a color to view its product photo.":key?`Showing the ${key} product photo.`:`A separate photo for ${value} has not been added yet.`;
     }
-    function renderSizeChart(type,listedSizes=[]){
+    function isProductSizeAvailable(item,size){
+      const key=String(size).trim().toLowerCase();
+      const unavailable=Array.isArray(item.outOfStockSizes)&&item.outOfStockSizes.some(value=>String(value).trim().toLowerCase()===key);
+      const stockMap=item.sizeStock||item.inventoryBySize||item.stockBySize||{};
+      const stockKey=Object.keys(stockMap).find(value=>value.trim().toLowerCase()===key);
+      const stock=stockKey===undefined?undefined:Number(stockMap[stockKey]);
+      return !unavailable&&(stock===undefined||!Number.isFinite(stock)||stock>0);
+    }
+    function updateProductVariantState(){
+      const button=document.querySelector("[data-add-to-cart]");if(!button)return;
+      const item=getGoodsListing(button.dataset.addToCart);if(!item)return;
+      const clothing=["clothing","shoes","caps"].includes(item.sizeType);
+      const sizes=clothing&&Array.isArray(item.sizes)?item.sizes:[];
+      const colors=Array.isArray(item.colors)?item.colors:[];
+      const selectedSize=document.querySelector(".product-size-chip[aria-pressed=true]:not(:disabled)")?.dataset.productSize||"";
+      const selectedColor=document.getElementById("product-color")?.value||"";
+      button.disabled=!( (!clothing||(sizes.length>0&&!!selectedSize)) && (colors.length===0||!!selectedColor) );
+      button.title=button.disabled?"Choose all required options before adding this item to your cart.":"";
+    }
+    function renderSizeChart(type,listedSizes=[],item={}){
       const guides={
-        clothing:{title:"Clothing size guide · approximate body measurements",headers:["Size","Chest / bust (cm)","Waist (cm)"],rows:[["XS","76–84","60–68"],["S","84–92","68–76"],["M","92–100","76–84"],["L","100–108","84–92"],["XL","108–116","92–100"],["XXL","116–124","100–108"]]},
-        shoes:{title:"Shoe size guide · EU sizes and foot length",headers:["EU size","Foot length (cm)"],rows:[["36","22.5–23"],["37","23–23.5"],["38","23.5–24"],["39","24–25"],["40","25–25.5"],["41","25.5–26"],["42","26–27"],["43","27–27.5"],["44","27.5–28"]]},
-        caps:{title:"Cap size guide · head circumference",headers:["Size","Head circumference (cm)"],rows:[["S","54–56"],["M","56–58"],["L","58–60"],["XL","60–62"],["One size","54–60"]]}
+        clothing:{title:"Clothing size guide · approximate body measurements",headers:["Size","Bust / chest (cm)","Bust / chest (in)","Waist (cm)","Waist (in)","Garment length (cm)"],rows:[["XS","76–84","30–33","60–68","24–27","60–64"],["S","84–92","33–36","68–76","27–30","62–66"],["M","92–100","36–39","76–84","30–33","64–68"],["L","100–108","39–43","84–92","33–36","66–70"],["XL","108–116","43–46","92–100","36–39","68–72"],["XXL","116–124","46–49","100–108","39–43","70–74"]]},
+        shoes:{title:"Shoe size guide · EU sizes and foot length",headers:["EU size","Foot length (cm)","Foot length (in)"],rows:[["36","22.5–23","8.9–9.1"],["37","23–23.5","9.1–9.3"],["38","23.5–24","9.3–9.4"],["39","24–25","9.4–9.8"],["40","25–25.5","9.8–10.0"],["41","25.5–26","10.0–10.2"],["42","26–27","10.2–10.6"],["43","27–27.5","10.6–10.8"],["44","27.5–28","10.8–11.0"]]},
+        caps:{title:"Cap size guide · head circumference",headers:["Size","Head circumference (cm)","Head circumference (in)"],rows:[["S","54–56","21.3–22.0"],["M","56–58","22.0–22.8"],["L","58–60","22.8–23.6"],["XL","60–62","23.6–24.4"],["One size","54–60","21.3–23.6"]]}
       };
       const guide=guides[type];if(!guide)return "";
       const available=new Set(listedSizes.map(value=>String(value).trim().toLowerCase()));
-      return `<details class="product-size-chart"><summary>${guide.title}</summary><table class="size-chart-table"><thead><tr>${guide.headers.map(value=>`<th scope="col">${value}</th>`).join("")}<th scope="col">Listing</th></tr></thead><tbody>${guide.rows.map(row=>`<tr>${row.map(value=>`<td>${value}</td>`).join("")}<td>${available.has(row[0].toLowerCase())?"Available":"Not listed"}</td></tr>`).join("")}</tbody></table><p class="notice">Measure your body, foot, or head and compare it with the available sizes shown. Fit can vary by brand; ask the seller if you are between sizes.</p></details>`;
+      const rows=guide.rows.map(row=>`<tr>${row.map(value=>`<td>${value}</td>`).join("")}<td>${available.has(row[0].toLowerCase())?(isProductSizeAvailable(item,row[0])?"Available":"Out of stock"):"Not listed"}</td></tr>`).join("");
+      return `<button class="product-size-guide-link" type="button" data-open-size-guide>Size Guide</button><dialog class="product-size-dialog" id="product-size-guide-dialog" aria-labelledby="product-size-guide-title"><div class="product-size-dialog-content"><div class="product-size-dialog-head"><div><h3 id="product-size-guide-title">${guide.title}</h3><p>Measurements are a general guide. Compare them with your own measurements and check the seller’s fit notes.</p></div><button class="product-size-dialog-close" type="button" data-close-size-guide aria-label="Close size guide">×</button></div><div style="overflow-x:auto"><table class="size-chart-table"><thead><tr>${guide.headers.map(value=>`<th scope="col">${value}</th>`).join("")}<th scope="col">Availability</th></tr></thead><tbody>${rows}</tbody></table></div></div></dialog>`;
     }
     function renderProductReviewSection(item){
       const reviews=reviewsByListing[item.id]||[],realReviews=reviews.filter(review=>!review.demo),count=realReviews.length;
@@ -1336,8 +1356,8 @@
       const sellerPrice=sellerPriceFrom(item.basePrice===undefined?item.price:item.basePrice);
       const displayedPrice=sellerPrice?currencyFormatter.format(buyerPrice(sellerPrice)):item.price;
       const variantFields=[
-        sizeEnabled?(sizes.length?`<div class="field"><label for="product-size">Size</label><select id="product-size" required><option value="">Choose a size</option>${sizes.map(size=>`<option value="${escapeHtml(size)}">${escapeHtml(size)}</option>`).join("")}</select></div>`:`<p class="notice">The seller has not added size choices for this item yet.</p>`):"",
-        colors.length?`<div class="field"><label for="product-color">Colour</label><select id="product-color" required><option value="">Choose a colour</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select><small id="product-color-preview-label" class="notice">Choose a colour to view its product photo.</small></div>`:`<p class="notice">No colour options have been provided by the seller for this item.</p>`
+        sizeEnabled?(sizes.length?`<div class="field"><div class="product-size-heading"><span class="field-label">Size</span>${renderSizeChart(item.sizeType,sizes,item)}</div><div class="product-size-options" role="group" aria-label="Choose a size">${sizes.map(size=>{const available=isProductSizeAvailable(item,size);return `<button class="product-size-chip" type="button" data-product-size="${escapeHtml(size)}" aria-pressed="false" ${available?"":"disabled aria-label=\""+escapeHtml(size)+" — out of stock\""}>${escapeHtml(size)}</button>`}).join("")}</div><small class="product-size-help">Choose one size. Unavailable sizes are crossed out.</small></div>`:`<p class="notice">The seller has not added size choices for this clothing item yet, so it cannot be added to the cart.</p>`):"",
+        colors.length?`<div class="field"><label for="product-color">Colour</label><select id="product-color" required><option value="">Choose a colour</option>${colors.map(color=>`<option value="${escapeHtml(color)}">${escapeHtml(color)}</option>`).join("")}</select><small id="product-color-preview-label" class="notice">Choose a colour to view its product photo.</small></div>`:""
       ].filter(Boolean).join("");
       document.getElementById("product-detail-content").innerHTML=`
         <article class="product-detail">
@@ -1379,6 +1399,7 @@
           <div class="listing-grid">${allRelated.length?allRelated.map(renderGoodsCard).join(""):'<p class="notice">No other goods are available yet.</p>'}</div>
         </section>`;
       if(typeof updateSavedButtons==="function")updateSavedButtons();
+      updateProductVariantState();
       currentProductId=item.id;
       setPage("product-details");
       renderProductReviewSection(item);
@@ -1588,7 +1609,10 @@
       const category=event.target.closest("[data-category]");if(category){activeCategory=category.dataset.category;document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button===category));renderListings(document.getElementById("search-input").value);return}
       const serviceCategory=event.target.closest("[data-service-category]");if(serviceCategory){activeServiceCategory=serviceCategory.dataset.serviceCategory;document.querySelectorAll("[data-service-category]").forEach(button=>button.classList.toggle("active",button===serviceCategory));renderServices(document.getElementById("service-search-input").value);return}
       const save=event.target.closest("[data-save]");if(save){const saved=save.classList.toggle("saved");save.innerHTML=heartIcon(saved);showToast(saved?"Saved to your favorites.":"Removed from your favorites.");return}
-      const addCartButton=event.target.closest("[data-add-to-cart]");if(addCartButton){addToCart(addCartButton.dataset.addToCart,{size:document.getElementById("product-size")?.value||"",color:document.getElementById("product-color")?.value||""});return}
+      const sizeChip=event.target.closest("[data-product-size]");if(sizeChip&&!sizeChip.disabled){document.querySelectorAll(".product-size-chip").forEach(button=>button.setAttribute("aria-pressed",String(button===sizeChip)));updateProductVariantState();return}
+      if(event.target.closest("[data-open-size-guide]")){document.getElementById("product-size-guide-dialog")?.showModal();return}
+      if(event.target.closest("[data-close-size-guide]")){document.getElementById("product-size-guide-dialog")?.close();return}
+      const addCartButton=event.target.closest("[data-add-to-cart]");if(addCartButton&&!addCartButton.disabled){addToCart(addCartButton.dataset.addToCart,{size:document.querySelector(".product-size-chip[aria-pressed=true]")?.dataset.productSize||"",color:document.getElementById("product-color")?.value||""});return}
       const cartAction=event.target.closest("[data-cart-action]");if(cartAction){updateCartItem(cartAction.dataset.cartId,cartAction.dataset.cartAction);return}
       if(event.target.closest("[data-checkout-demo]")){showToast("Checkout and payments aren't connected in this prototype.");return}
       const serviceDetailRequest=event.target.closest("[data-service-detail-request]");if(serviceDetailRequest&&selectedServiceDetail){
@@ -1615,7 +1639,7 @@
       if(event.target.closest("[data-reply], [data-reply-to]"))showToast("Replying is a demo; connect an inbox to send real messages.");
     });
     document.addEventListener("change",event=>{
-      if(event.target.id==="product-color")updateProductColorImage(event.target.value);
+      if(event.target.id==="product-color"){updateProductColorImage(event.target.value);updateProductVariantState();}
       if(event.target.matches("[data-color-image]")&&event.target.files&&event.target.files[0]){
         const photo=event.target.closest(".variant-photo-field").querySelector("img");
         if(photo.dataset.previewUrl)URL.revokeObjectURL(photo.dataset.previewUrl);
