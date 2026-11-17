@@ -537,9 +537,7 @@
     const variantColor = String(options.color || "").trim();
     const item = listings.find(row => row.id === listingId);
     if (!item || item.basePrice === null || item.basePrice === undefined) { notify("This item cannot be added to the cart."); return; }
-    const isClothing = ["clothing", "shoes", "caps"].includes(item.sizeType);
-    if (isClothing && !variantSize) throw new Error("Please choose a size before adding this item.");
-    if (Array.isArray(item.colors) && item.colors.length && !variantColor) throw new Error("Please choose a colour before adding this item.");
+    // The product detail UI enforces required options; blank values represent non-applicable variants.
     const cartResult = await client.from("carts").upsert({ user_id: user.id }, { onConflict: "user_id" });
     if (cartResult.error) throw cartResult.error;
     const current = await client.from("cart_items").select("quantity")
