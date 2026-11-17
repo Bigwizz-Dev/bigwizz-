@@ -621,7 +621,7 @@
     .seller-sales-amount{display:block;margin-top:6px;font-size:clamp(25px,5vw,34px);font-weight:850;letter-spacing:-1px}
     .seller-sales-change{color:#8ee0a0;font-size:20px;font-weight:850}
     .seller-chart-line{width:100%;height:112px;margin:4px 0 0;overflow:visible}
-    .seller-kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px}
+    .seller-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:6px}
     .seller-kpi{padding:10px 12px;border-left:1px solid #ffffff22}
     .seller-kpi:first-child{border-left:0;padding-left:0}
     .seller-kpi span{display:block;color:#c7bacd;font-size:11px}
@@ -668,7 +668,7 @@
       .seller-product-card img{width:46px;height:46px;flex-basis:46px}
       .seller-product-copy strong{font-size:10px}
       .seller-product-card button{font-size:9px;padding:6px}
-      .seller-kpi strong{font-size:19px}
+      .seller-kpi strong{font-size:19px}.seller-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
       .seller-studio-foot{padding-bottom:20px}
     }
     @media(max-width:390px){.seller-product-grid{grid-template-columns:1fr}.seller-kpi{padding-inline:8px}}
@@ -763,7 +763,7 @@
           <h2>Real-Time Performance</h2>
           <div class="seller-performance-top"><div><small>Today's Order Value</small><strong class="seller-sales-amount" id="seller-today-sales">₦0.00</strong></div><strong class="seller-sales-change" id="seller-sales-trend">—</strong></div>
           <svg class="seller-chart-line" viewBox="0 0 560 112" preserveAspectRatio="none" aria-label="Sales trend chart"><defs><linearGradient id="sellerLineGlow" x1="0" x2="1"><stop stop-color="#8de7ee"/><stop offset="1" stop-color="#d45acb"/></linearGradient></defs><path id="seller-sales-chart-line" d="M0 108 L560 108" fill="none" stroke="url(#sellerLineGlow)" stroke-width="3" stroke-linecap="round"/><path id="seller-sales-chart-fill" d="M0 108 L560 108 V112 H0Z" fill="#a34cb8" opacity=".08"/></svg>
-          <div class="seller-kpis"><div class="seller-kpi"><span>Orders</span><strong id="seller-order-count">0</strong></div><div class="seller-kpi"><span>Active Products</span><strong id="seller-product-count">0</strong></div><div class="seller-kpi"><span>Open Requests</span><strong id="seller-request-count">0</strong></div></div>
+          <div class="seller-kpis"><div class="seller-kpi"><span>Orders</span><strong id="seller-order-count">0</strong></div><div class="seller-kpi"><span>Active Products</span><strong id="seller-product-count">0</strong></div><div class="seller-kpi"><span>Open Requests</span><strong id="seller-request-count">0</strong></div><div class="seller-kpi"><span>Customer Rating</span><strong id="seller-average-rating">—</strong></div></div>
         </section>
         <div class="seller-dashboard-grid">
           <section class="seller-panel seller-action-panel"><h2>Action Items</h2><div id="seller-action-items"><p class="notice">Loading your store activity…</p></div></section>
@@ -773,7 +773,7 @@
         <p class="seller-studio-foot">Manage your store effectively. Bigwizz Seller Hub.</p>
       </section>
       <section id="seller-products" class="page seller-data-page"><div class="section-head"><div><h2>My Products</h2><p>Your published and paused marketplace listings.</p></div><button class="outline-button" style="width:auto" type="button" data-page="seller-studio">Back to Studio</button></div><div class="seller-data-list seller-product-grid" id="seller-products-list"><p class="notice">Loading products…</p></div></section>
-      <section id="seller-orders" class="page seller-data-page"><div class="section-head"><div><h2>Orders & Analytics</h2><p>Orders and sales recorded against your seller account.</p></div><button class="outline-button" style="width:auto" type="button" data-page="seller-studio">Back to Studio</button></div><div class="seller-data-list" id="seller-orders-list"><p class="notice">Loading orders…</p></div><section class="service-request-section" style="margin-top:22px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--paper)"><h3>Customer service requests</h3><div id="seller-service-request-list" class="service-request-list"><p class="notice">Loading customer requests…</p></div></section></section>
+      <section id="seller-orders" class="page seller-data-page"><div class="section-head"><div><h2>Orders & Analytics</h2><p>Orders and sales recorded against your seller account.</p></div><button class="outline-button" style="width:auto" type="button" data-page="seller-studio">Back to Studio</button></div><div class="seller-data-list" id="seller-orders-list"><p class="notice">Loading orders…</p></div><section class="service-request-section" style="margin-top:22px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--paper)"><h3>Customer service requests</h3><div id="seller-service-request-list" class="service-request-list"><p class="notice">Loading customer requests…</p></div></section><section class="service-request-section" style="margin-top:22px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--paper)"><h3>Buyer order reports</h3><div id="seller-reports-list" class="service-request-list"><p class="notice">Loading buyer reports…</p></div></section><section class="service-request-section" style="margin-top:22px;padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--paper)"><h3>Customer reviews</h3><div id="seller-reviews-list" class="service-request-list"><p class="notice">Loading customer reviews…</p></div></section></section>
       <section id="discover" class="page active">
         <div class="hero"><div class="hero-copy"><div class="eyebrow">Good finds. Better connections.</div><h1>Find what suits<br>your style.</h1><p>Discover quality goods from thoughtful sellers, with clear details, real reviews, and support if something isn't right.</p><form class="searchbar" id="search-form"><input id="search-input" type="search" aria-label="Search quality goods"><button type="submit" aria-label="Search goods"><svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg></button></form></div>
           <div class="hero-art" aria-hidden="true"><div class="art-main"><img class="product-hero-image" src="assets/product-tote.jpg" alt=""><strong>Made with intention</strong><span>Small makers, thoughtful goods</span></div><div class="art-note"><b>Trusted, not guessed</b><span>Verified shops & reviews</span></div><div class="art-badge">A better kind of marketplace <svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 1.6 7.4L21 12l-7.4 1.6L12 21l-1.6-7.4L3 12l7.4-2.6z"/></svg></div></div>
