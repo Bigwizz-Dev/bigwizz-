@@ -89,17 +89,21 @@ CREATE POLICY "Community media is publicly viewable"
   USING (bucket_id = 'community-media');
 
 DROP POLICY IF EXISTS "Users upload their own community media" ON storage.objects;
-CREATE POLICY "Users upload their own community media"
+DROP POLICY IF EXISTS "Sellers upload their own community media" ON storage.objects;
+CREATE POLICY "Sellers upload their own community media"
   ON storage.objects FOR INSERT TO authenticated
   WITH CHECK (
     bucket_id = 'community-media'
     AND (storage.foldername(name))[1] = (SELECT auth.uid())::text
+    AND EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'seller')
   );
 
 DROP POLICY IF EXISTS "Users delete their own community media" ON storage.objects;
-CREATE POLICY "Users delete their own community media"
+DROP POLICY IF EXISTS "Sellers delete their own community media" ON storage.objects;
+CREATE POLICY "Sellers delete their own community media"
   ON storage.objects FOR DELETE TO authenticated
   USING (
     bucket_id = 'community-media'
     AND (storage.foldername(name))[1] = (SELECT auth.uid())::text
+    AND EXISTS (SELECT 1 FROM public.user_roles WHERE user_id = auth.uid() AND role = 'seller')
   );
