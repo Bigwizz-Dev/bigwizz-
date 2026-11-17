@@ -614,13 +614,13 @@
     .seller-studio-page .seller-welcome p strong{color:#c35bdb}
     .seller-studio-page .seller-avatar{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border:1px solid #ffffff2a;border-radius:50%;background:#34263c;color:#f4dffb;font-weight:800}
     .seller-panel{border:1px solid #74418a;border-radius:20px;background:linear-gradient(135deg,#24162e,#1c1723 62%,#30172d);box-shadow:0 12px 34px #09050d55}
-    .seller-performance{position:relative;overflow:hidden;padding:20px;margin-bottom:24px}
+    .seller-performance{position:relative;overflow:hidden;padding:20px;margin-bottom:0}
     .seller-performance h2,.seller-action-panel h2,.seller-product-panel h2,.seller-growth-panel h2{margin:0 0 15px;font-size:19px}
     .seller-performance-top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
     .seller-performance small{color:#c7bacd;font-size:12px}
     .seller-sales-amount{display:block;margin-top:6px;font-size:clamp(25px,5vw,34px);font-weight:850;letter-spacing:-1px}
     .seller-sales-change{color:#8ee0a0;font-size:20px;font-weight:850}
-    .seller-chart-line{width:100%;height:112px;margin:4px 0 0;overflow:visible}
+    .seller-chart-line{width:100%;height:112px;margin:4px 0 0;overflow:visible}.seller-chart-days{display:flex;justify-content:space-between;gap:5px;margin-top:-2px;color:#c7bacd;font-size:10px}.seller-chart-caption{margin:9px 0 0;color:#c7bacd;font-size:11px}
     .seller-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:6px}
     .seller-kpi{padding:10px 12px;border-left:1px solid #ffffff22}
     .seller-kpi:first-child{border-left:0;padding-left:0}
@@ -759,15 +759,16 @@
     <main>
       <section id="seller-studio" class="page seller-studio-page">
         <div class="seller-welcome"><div><h1>Seller Studio</h1><p>Welcome Back, <strong id="seller-welcome-name">Seller</strong>!</p></div><div class="seller-avatar" id="seller-studio-avatar" aria-hidden="true">S</div></div>
-        <section class="seller-panel seller-performance">
-          <h2>Real-Time Performance</h2>
-          <div class="seller-performance-top"><div><small>Today's Order Value</small><strong class="seller-sales-amount" id="seller-today-sales">₦0.00</strong></div><strong class="seller-sales-change" id="seller-sales-trend">—</strong></div>
-          <svg class="seller-chart-line" viewBox="0 0 560 112" preserveAspectRatio="none" aria-label="Sales trend chart"><defs><linearGradient id="sellerLineGlow" x1="0" x2="1"><stop stop-color="#8de7ee"/><stop offset="1" stop-color="#d45acb"/></linearGradient></defs><path id="seller-sales-chart-line" d="M0 108 L560 108" fill="none" stroke="url(#sellerLineGlow)" stroke-width="3" stroke-linecap="round"/><path id="seller-sales-chart-fill" d="M0 108 L560 108 V112 H0Z" fill="#a34cb8" opacity=".08"/></svg>
-          <div class="seller-kpis"><div class="seller-kpi"><span>Orders</span><strong id="seller-order-count">0</strong></div><div class="seller-kpi"><span>Active Products</span><strong id="seller-product-count">0</strong></div><div class="seller-kpi"><span>Open Requests</span><strong id="seller-request-count">0</strong></div><div class="seller-kpi"><span>Customer Rating</span><strong id="seller-average-rating">—</strong></div></div>
-        </section>
         <div class="seller-dashboard-grid">
           <section class="seller-panel seller-action-panel"><h2>Action Items</h2><div id="seller-action-items"><p class="notice">Loading your store activity…</p></div></section>
-          <section class="seller-panel seller-product-panel"><h2>Product Overview</h2><div class="seller-product-grid" id="seller-dashboard-products"><p class="notice">Loading your products…</p></div><button type="button" class="outline-button" style="margin-top:13px;width:100%" data-page="seller-products">View all products</button></section>
+          <section class="seller-panel seller-performance">
+            <h2>Sales Progress Chart</h2>
+            <div class="seller-performance-top"><div><small>Today's Order Value</small><strong class="seller-sales-amount" id="seller-today-sales">₦0.00</strong></div><strong class="seller-sales-change" id="seller-sales-trend">—</strong></div>
+            <svg class="seller-chart-line" viewBox="0 0 560 112" preserveAspectRatio="none" role="img" aria-label="Daily sales trend for the last seven days"><defs><linearGradient id="sellerLineGlow" x1="0" x2="1"><stop stop-color="#8de7ee"/><stop offset="1" stop-color="#d45acb"/></linearGradient></defs><path id="seller-sales-chart-line" d="M0 108 L560 108" fill="none" stroke="url(#sellerLineGlow)" stroke-width="3" stroke-linecap="round"/><path id="seller-sales-chart-fill" d="M0 108 L560 108 V112 H0Z" fill="#a34cb8" opacity=".08"/></svg>
+            <div id="seller-chart-days" class="seller-chart-days" aria-hidden="true"></div>
+            <p class="seller-chart-caption">Daily sales revenue · Last 7 days</p>
+            <div class="seller-kpis"><div class="seller-kpi"><span>Orders</span><strong id="seller-order-count">0</strong></div><div class="seller-kpi"><span>Active Products</span><strong id="seller-product-count">0</strong></div><div class="seller-kpi"><span>Open Requests</span><strong id="seller-request-count">0</strong></div><div class="seller-kpi"><span>Customer Rating</span><strong id="seller-average-rating">—</strong></div></div>
+          </section>
         </div>
         <section class="seller-panel seller-growth-panel"><h2>Growth Center</h2><h3 style="margin:0 0 12px;font-size:16px">Grow Your Business</h3><div class="seller-growth-list"><div class="seller-growth-row"><span class="seller-growth-icon">⭐</span><span>Create a Promotion (Discount/Bundles)</span><button type="button" data-growth-coming-soon>Coming soon</button></div><div class="seller-growth-row"><span class="seller-growth-icon">📣</span><span>Launch an Ad Campaign</span><button type="button" data-growth-coming-soon>Coming soon</button></div><div class="seller-growth-row"><span class="seller-growth-icon">📊</span><span>View Detailed Analytics</span><button type="button" data-page="seller-orders">View</button></div></div></section>
         <p class="seller-studio-foot">Manage your store effectively. Bigwizz Seller Hub.</p>
