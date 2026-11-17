@@ -95,7 +95,7 @@
     if(error)throw error;
     return (data||[]).map(row=>({id:row.id,body:row.body,status:row.status,author:row.author_name||"Community member",createdAt:row.created_at}));
   }
-  async function submitCommunityPost({title,category,body,file}){
+  async function submitCommunityPost({title,category,body,file,productId}){
     if(!user){showAuth();throw new Error("Please sign in to share a maker update.");}
     const cleanBody=String(body||"").trim();
     if(!cleanBody||cleanBody.length>5000)throw new Error("Add a caption before sharing.");
