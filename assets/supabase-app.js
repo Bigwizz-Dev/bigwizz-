@@ -138,6 +138,17 @@
   }
 
 
+
+  async function updateSellerOrderStatus(orderId,nextStatus){
+    if(!user||!accountRoles.includes("seller"))throw new Error("A seller account is required.");
+    if(!["processing","shipped","completed","cancelled"].includes(nextStatus))throw new Error("That order status is not allowed.");
+    const {data,error}=await client.from("orders").update({status:nextStatus}).eq("id",orderId).eq("seller_id",user.id).select("id,order_number,status").maybeSingle();
+    if(error)throw error;
+    if(!data)throw new Error("Only paid orders can be moved through fulfilment. Payment must be confirmed first.");
+    await loadSellerStudio();
+    notify("Order "+data.order_number+" updated to "+data.status+". The buyer has been notified.");
+  }
+
   async function loadBuyerOrders(){
     const target=document.getElementById("buyer-orders-list");
     if(!target)return;
@@ -227,9 +238,12 @@
     if(dashboardProducts)dashboardProducts.innerHTML=products.length?products.slice(0,4).map(productCard).join(""):productMarkup;
     if(allProducts)allProducts.innerHTML=productMarkup;
     const orderMarkup=orders.length?orders.slice(0,50).map(order=>{
-      const payment=order.payment_records?.[0];
+      const payment=order.payment_records?.[0],status=String(order.status||"pending").toLowerCase();
       const lines=(order.order_items||[]).map(item=>'<li>'+escapeHtml(item.title_snapshot)+' × '+item.quantity+((item.variant_size||item.variant_color)?' <small>('+escapeHtml([item.variant_size&&"Size: "+item.variant_size,item.variant_color&&"Color: "+item.variant_color].filter(Boolean).join(" · "))+')</small>':'')+'</li>').join("");
-      return '<article class="seller-order-card"><div><strong>'+escapeHtml(order.order_number||("Order "+String(order.id).slice(0,8)))+'</strong><small>'+new Date(order.created_at).toLocaleString()+' · '+money(order.total,order.currency)+' · '+(payment?.status==="paid"?"Paid":"Payment pending")+'</small><ul class="seller-order-lines">'+lines+'</ul></div><span class="seller-order-status">'+escapeHtml(order.status||"pending")+'</span></article>';
+      const next=status==="pending"?"processing":status==="processing"?"shipped":status==="shipped"?"completed":null;
+      const actionLabel=next==="processing"?"Start fulfilment":next==="shipped"?"Mark shipped":next==="completed"?"Mark completed":"";
+      const action=payment?.status==="paid"&&next?'<button type="button" data-seller-order-status="'+next+'" data-order-id="'+escapeHtml(order.id)+'">'+actionLabel+'</button>':"";
+      return '<article class="seller-order-card"><div><strong>'+escapeHtml(order.order_number||("Order "+String(order.id).slice(0,8)))+'</strong><small>'+new Date(order.created_at).toLocaleString()+' · '+money(order.total,order.currency)+' · '+(payment?.status==="paid"?"Paid":"Payment pending")+'</small><ul class="seller-order-lines">'+lines+'</ul>'+action+'</div><span class="seller-order-status">'+escapeHtml(status)+'</span></article>';
     }).join(""):'<p class="notice">No customer orders have been recorded yet. Buyer purchases will appear here.</p>';
     const orderTarget=document.getElementById("seller-orders-list");if(orderTarget)orderTarget.innerHTML=orderMarkup;
     const openRequests=requests.filter(item=>["new","responded"].includes(item.status));
@@ -247,7 +261,7 @@
     return {shop,products,orders,requests,reports,reviews,todayValue};
   }
 
-  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),getActiveAccount:()=>activeAccount,setActiveAccount:(account)=>{if(account==="seller"&&(!user||!accountRoles.includes("seller")))return false;activeAccount=account==="seller"?"seller":"buyer";updateAccountState();activatePage(activeAccount==="seller"?"seller-studio":"discover");if(activeAccount==="seller")Promise.all([loadSellerStudio(),loadSellerServiceRequests()]).catch(error=>report(error,"Seller Studio could not be be loaded."));return true;},loadSellerStudio,loadBuyerOrders,checkoutCart,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),getActiveAccount:()=>activeAccount,setActiveAccount:(account)=>{if(account==="seller"&&(!user||!accountRoles.includes("seller")))return false;activeAccount=account==="seller"?"seller":"buyer";updateAccountState();activatePage(activeAccount==="seller"?"seller-studio":"discover");if(activeAccount==="seller")Promise.all([loadSellerStudio(),loadSellerServiceRequests()]).catch(error=>report(error,"Seller Studio could not be be loaded."));return true;},loadSellerStudio,loadBuyerOrders,checkoutCart,updateSellerOrderStatus,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -1289,6 +1303,8 @@
         .catch(error => report(error, "Could not update your shared cart."));
       return;
     }
+    const sellerOrderAction=event.target.closest("[data-seller-order-status]");
+    if(sellerOrderAction){stop(event);updateSellerOrderStatus(sellerOrderAction.dataset.orderId,sellerOrderAction.dataset.sellerOrderStatus).catch(error=>report(error,error.message||"Order status could not be updated."));return;}
     const listingAction = event.target.closest("[data-seller-listing-action]");
     if (listingAction) {
       stop(event);
