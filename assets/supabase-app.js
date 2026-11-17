@@ -692,33 +692,29 @@
     if(!listingId||!targetProviderId)throw new Error("This service listing is not connected to a provider account yet. Please choose a published service listing.");
     const scheduledAt=bookingTiming==="later"&&preferredDate&&preferredTime?new Date(preferredDate+"T"+preferredTime).toISOString():null;
     if(bookingTiming==="later"&&!scheduledAt)throw new Error("Choose a date and time for your scheduled request.");
-    const {data:request,error}=await client.from("service_requests").insert({
-      buyer_id:user.id,listing_id:listingId,provider_id:targetProviderId,service_title:String(serviceTitle||"").slice(0,200),
-      request_type:bookingTiming==="later"?"Request a time":"Ask a question",booking_timing:bookingTiming,
-      preferred_date:bookingTiming==="later"?preferredDate:null,preferred_time:bookingTiming==="later"?preferredTime:null,scheduled_at:scheduledAt,
-      city:String(city||"").trim(),area:String(area||"").trim(),service_address:[city,area].filter(Boolean).join(", "),
-      details:String(details||"").trim(),matching_mode:"direct",quote_currency:"NGN"
-    }).select("id").single();
-    if(error)throw error;
-    const uploaded=[];
+    const requestId=crypto.randomUUID(),uploaded=[];
     try{
       for(const file of files){
         const safeName=String(file.name||"attachment").replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
-        const path=user.id+"/"+request.id+"/"+crypto.randomUUID()+"-"+safeName;
+        const path=user.id+"/"+requestId+"/"+crypto.randomUUID()+"-"+safeName;
         const {error:uploadError}=await client.storage.from("service-request-media").upload(path,file,{contentType:file.type,upsert:false});
         if(uploadError)throw uploadError;
         uploaded.push({path,name:file.name,type:file.type,size:file.size});
       }
-      if(uploaded.length){
-        const {error:updateError}=await client.from("service_requests").update({attachments:uploaded,updated_at:new Date().toISOString()}).eq("id",request.id).eq("buyer_id",user.id);
-        if(updateError)throw updateError;
-      }
+      const {data:request,error}=await client.from("service_requests").insert({
+        id:requestId,buyer_id:user.id,listing_id:listingId,provider_id:targetProviderId,service_title:String(serviceTitle||"").slice(0,200),
+        request_type:bookingTiming==="later"?"Request a time":"Ask a question",booking_timing:bookingTiming,
+        preferred_date:bookingTiming==="later"?preferredDate:null,preferred_time:bookingTiming==="later"?preferredTime:null,scheduled_at:scheduledAt,
+        city:String(city||"").trim(),area:String(area||"").trim(),service_address:[city,area].filter(Boolean).join(", "),
+        details:String(details||"").trim(),matching_mode:"direct",quote_currency:"NGN",attachments:uploaded
+      }).select("id").single();
+      if(error)throw error;
+      await Promise.all([loadBuyerServiceRequests(),loadSellerServiceRequests()]);
+      return request;
     }catch(error){
       if(uploaded.length)await client.storage.from("service-request-media").remove(uploaded.map(file=>file.path));
-      throw new Error("The request was created, but its attachments could not be saved. Please resend the request without files or try again.");
+      throw error;
     }
-    await Promise.all([loadBuyerServiceRequests(),loadSellerServiceRequests()]);
-    return request;
   }
   async function loadSellerServiceRequests(){
     const target=document.getElementById("seller-service-request-list");if(!target)return;
