@@ -159,6 +159,13 @@
     const today=new Date().toLocaleDateString("en-CA");
     const todaysOrders=orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===today);
     const todayValue=todaysOrders.reduce((sum,order)=>sum+Number(order.total||0),0);
+    const dailyTotals=Array.from({length:7},(_,index)=>{const date=new Date();date.setDate(date.getDate()-(6-index));const key=date.toLocaleDateString("en-CA");return orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===key).reduce((sum,order)=>sum+Number(order.total||0),0);});
+    const maxDaily=Math.max(1,...dailyTotals);
+    const points=dailyTotals.map((amount,index)=>({x:index*560/6,y:102-(amount/maxDaily)*82}));
+    const linePath=points.map((point,index)=>(index?"L":"M")+point.x.toFixed(1)+" "+point.y.toFixed(1)).join(" ");
+    const line=document.getElementById("seller-sales-chart-line"),fill=document.getElementById("seller-sales-chart-fill");
+    if(line)line.setAttribute("d",linePath);
+    if(fill)fill.setAttribute("d",linePath+" L560 112 L0 112 Z");
     const money=(amount,currencyCode="NGN")=>new Intl.NumberFormat("en-NG",{style:"currency",currency:currencyCode||"NGN",maximumFractionDigits:2}).format(Number(amount||0));
     const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=String(value);};
     setText("seller-today-sales",money(todayValue));
