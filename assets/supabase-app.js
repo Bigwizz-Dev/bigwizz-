@@ -686,14 +686,14 @@
     }
     return "Requested as soon as possible";
   }
-  async function submitServiceRequest({listingId,serviceTitle,bookingTiming="now",preferredDate="",preferredTime="",city="",area="",details="",files=[]}){
+  async function submitServiceRequest({listingId,providerId,serviceTitle,bookingTiming="now",preferredDate="",preferredTime="",city="",area="",details="",files=[]}){
     if(!user){showAuth();throw new Error("Please sign in before sending a service request.");}
-    const providerId=String(listingId||"");
-    if(!providerId)throw new Error("This service listing is not connected to a provider account yet. Please choose a published service listing.");
+    const targetProviderId=String(providerId||"");
+    if(!listingId||!targetProviderId)throw new Error("This service listing is not connected to a provider account yet. Please choose a published service listing.");
     const scheduledAt=bookingTiming==="later"&&preferredDate&&preferredTime?new Date(preferredDate+"T"+preferredTime).toISOString():null;
     if(bookingTiming==="later"&&!scheduledAt)throw new Error("Choose a date and time for your scheduled request.");
     const {data:request,error}=await client.from("service_requests").insert({
-      buyer_id:user.id,listing_id:providerId,provider_id:providerId,service_title:String(serviceTitle||"").slice(0,200),
+      buyer_id:user.id,listing_id:listingId,provider_id:targetProviderId,service_title:String(serviceTitle||"").slice(0,200),
       request_type:bookingTiming==="later"?"Request a time":"Ask a question",booking_timing:bookingTiming,
       preferred_date:bookingTiming==="later"?preferredDate:null,preferred_time:bookingTiming==="later"?preferredTime:null,scheduled_at:scheduledAt,
       city:String(city||"").trim(),area:String(area||"").trim(),service_address:[city,area].filter(Boolean).join(", "),
