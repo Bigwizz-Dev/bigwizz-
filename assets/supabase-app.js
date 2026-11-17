@@ -293,7 +293,7 @@
     document.getElementById("profile-avatar").textContent = initials(name);
     document.getElementById("account-switch-trigger").setAttribute(
       "aria-label",
-      user ? "Switch account. Current account: Buyer" : "Switch account"
+      user ? "Switch account. Current account: " + (activeAccount === "seller" ? "Seller" : "Buyer") : "Switch account"
     );
     const authOpen = document.querySelector("[data-auth-open]");
     if (authOpen) {
