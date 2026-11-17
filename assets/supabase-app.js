@@ -446,7 +446,7 @@
       return;
     }
     const { data, error } = await client.from("cart_items")
-      .select("listing_id,quantity,listings(id,title,seller_name,image_url,price,kind)")
+      .select("listing_id,quantity,variant_size,variant_color,listings(id,title,seller_name,image_url,price,kind)")
       .eq("user_id", user.id);
     if (error) {
       const itemsContainer = document.getElementById("cart-items");
@@ -463,7 +463,9 @@
       seller: row.listings.seller_name,
       image: row.listings.image_url,
       sellerPrice: Number(row.listings.price),
-      quantity: Number(row.quantity)
+      quantity: Number(row.quantity),
+      size: row.variant_size || "",
+      color: row.variant_color || ""
     }));
     const cartCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
     const cartBadge = document.getElementById("cart-count");
@@ -482,17 +484,20 @@
     container.innerHTML = items.map(row => {
       const item = row.listings;
       const buyerPrice = Math.round((Number(item.price) * 1.02 + Number.EPSILON) * 100) / 100;
+      const variantText = [row.variant_size ? `Size: ${escapeHtml(row.variant_size)}` : "", row.variant_color ? `Color: ${escapeHtml(row.variant_color)}` : ""].filter(Boolean).join(" · ");
+      const variantAttrs = `data-cart-size="${escapeHtml(row.variant_size || "")}" data-cart-color="${escapeHtml(row.variant_color || "")}"`;
       return `<article class="cart-item">
         <img src="${escapeHtml(item.image_url)}" alt="">
         <div class="cart-item-info"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.seller_name)}</p>
+          ${variantText ? `<small>${variantText}</small>` : ""}
           <strong>${currency.format(buyerPrice)} each</strong>
           <small>Includes ${currency.format(buyerPrice - Number(item.price))} Bigwizz fee</small>
         </div>
         <div class="cart-item-actions">
-          <button type="button" aria-label="Decrease quantity of ${escapeHtml(item.title)}" data-cart-action="decrease" data-cart-id="${item.id}">−</button>
+          <button type="button" aria-label="Decrease quantity of ${escapeHtml(item.title)}" data-cart-action="decrease" data-cart-id="${item.id}" ${variantAttrs}>−</button>
           <span>${row.quantity}</span>
-          <button type="button" aria-label="Increase quantity of ${escapeHtml(item.title)}" data-cart-action="increase" data-cart-id="${item.id}">+</button>
-          <button type="button" class="cart-remove" data-cart-action="remove" data-cart-id="${item.id}">Remove</button>
+          <button type="button" aria-label="Increase quantity of ${escapeHtml(item.title)}" data-cart-action="increase" data-cart-id="${item.id}" ${variantAttrs}>+</button>
+          <button type="button" class="cart-remove" data-cart-action="remove" data-cart-id="${item.id}" ${variantAttrs}>Remove</button>
         </div>
       </article>`;
     }).join("");
@@ -507,51 +512,46 @@
       <p class="notice">Checkout and payments aren't connected yet.</p>`;
   }
 
-  async function changeCart(listingId, action) {
-    if (!user) {
-      showAuth();
-      return;
-    }
-    const { data, error } = await client.from("cart_items").select("quantity")
-      .eq("user_id", user.id).eq("listing_id", listingId).maybeSingle();
+  async function changeCart(listingId, action, options = {}) {
+    if (!user) { showAuth(); return; }
+    const variantSize = String(options.size || "");
+    const variantColor = String(options.color || "");
+    const filters = query => query.eq("user_id", user.id).eq("listing_id", listingId).eq("variant_size", variantSize).eq("variant_color", variantColor);
+    const { data, error } = await filters(client.from("cart_items").select("quantity")).maybeSingle();
     if (error) throw error;
-    if (action === "remove" || (action === "decrease" && data && data.quantity <= 1)) {
-      const result = await client.from("cart_items").delete()
-        .eq("user_id", user.id).eq("listing_id", listingId);
+    if (action === "remove" || (action === "decrease" && data && Number(data.quantity) <= 1)) {
+      const result = await filters(client.from("cart_items").delete());
       if (result.error) throw result.error;
     } else {
-      if (!data && action === "decrease") throw new Error("This cart item is no longer available.");
+      if (!data && action === "decrease") throw new Error("This cart variant is no longer available.");
       const quantity = action === "increase" ? Math.min(99, (data ? Number(data.quantity) : 0) + 1) : Number(data.quantity) - 1;
-      const result = await client.from("cart_items")
-        .upsert({ user_id: user.id, listing_id: listingId, quantity }, { onConflict: "user_id,listing_id" });
+      const result = await client.from("cart_items").upsert({ user_id: user.id, listing_id: listingId, variant_size: variantSize, variant_color: variantColor, quantity }, { onConflict: "user_id,listing_id,variant_size,variant_color" });
       if (result.error) throw result.error;
     }
     await loadCart();
   }
 
-  async function addCartItem(listingId) {
-    if (!user) {
-      showAuth();
-      return;
-    }
+  async function addCartItem(listingId, options = {}) {
+    if (!user) { showAuth(); return; }
+    const variantSize = String(options.size || "").trim();
+    const variantColor = String(options.color || "").trim();
     const item = listings.find(row => row.id === listingId);
-    if (!item || item.basePrice === null || item.basePrice === undefined) {
-      notify("This item cannot be added to the cart.");
-      return;
-    }
+    if (!item || item.basePrice === null || item.basePrice === undefined) { notify("This item cannot be added to the cart."); return; }
+    const isClothing = ["clothing", "shoes", "caps"].includes(item.sizeType);
+    if (isClothing && !variantSize) throw new Error("Please choose a size before adding this item.");
+    if (Array.isArray(item.colors) && item.colors.length && !variantColor) throw new Error("Please choose a colour before adding this item.");
     const cartResult = await client.from("carts").upsert({ user_id: user.id }, { onConflict: "user_id" });
     if (cartResult.error) throw cartResult.error;
     const current = await client.from("cart_items").select("quantity")
-      .eq("user_id", user.id).eq("listing_id", listingId).maybeSingle();
+      .eq("user_id", user.id).eq("listing_id", listingId).eq("variant_size", variantSize).eq("variant_color", variantColor).maybeSingle();
     if (current.error) throw current.error;
     const result = await client.from("cart_items").upsert({
-      user_id: user.id,
-      listing_id: listingId,
+      user_id: user.id, listing_id: listingId, variant_size: variantSize, variant_color: variantColor,
       quantity: Math.min(99, (current.data ? Number(current.data.quantity) : 0) + 1)
-    }, { onConflict: "user_id,listing_id" });
+    }, { onConflict: "user_id,listing_id,variant_size,variant_color" });
     if (result.error) throw result.error;
     await loadCart();
-    notify("Added to your shared cart.");
+    notify("Added to your cart.");
   }
 
   async function saveListing(listingId) {
