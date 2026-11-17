@@ -185,6 +185,22 @@
     #service-dialog .service-request-field textarea{min-height:112px;resize:vertical;line-height:1.5}
     #service-dialog .service-request-field input:focus,#service-dialog .service-request-field select:focus,#service-dialog .service-request-field textarea:focus{border-color:#9475a2;box-shadow:0 0 0 3px #9475a21c}
     #service-dialog .service-request-submit{display:flex;justify-content:center;align-items:center;gap:10px;min-height:52px;margin-top:2px;border:0;border-radius:13px;background:var(--deep);color:#fff;font-size:14px;font-weight:850}
+    #service-dialog .request-media-upload{display:grid;gap:8px}
+    #service-dialog .request-media-dropzone{display:grid;place-items:center;gap:7px;min-height:126px;padding:17px;border:1.5px dashed #b9a6c3;border-radius:14px;background:var(--canvas);color:var(--ink);text-align:center;cursor:pointer;transition:border-color .18s,background .18s}
+    #service-dialog .request-media-dropzone:hover,#service-dialog .request-media-dropzone.is-dragover{border-color:#765684;background:#f4edf7}
+    #service-dialog .request-media-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:12px;background:#eee5f2;color:#765684;font-size:20px}
+    #service-dialog .request-media-dropzone strong{font-size:12px}
+    #service-dialog .request-media-dropzone small{color:var(--muted);font-size:10px}
+    #service-dialog .request-media-browse{padding:0;border:0;background:transparent;color:#765684;font:inherit;font-size:12px;font-weight:850;text-decoration:underline;cursor:pointer}
+    #service-dialog .request-media-input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;clip-path:inset(50%)}
+    #service-dialog .request-media-list{display:grid;gap:6px}
+    #service-dialog .request-media-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--paper);font-size:11px}
+    #service-dialog .request-media-item span{min-width:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    #service-dialog .request-media-item small{color:var(--muted);white-space:nowrap}
+    #service-dialog .request-media-remove{width:27px;height:27px;border:0;border-radius:8px;background:var(--canvas);color:var(--ink);font-size:17px}
+    html[data-theme="dark"] #service-dialog .request-media-dropzone:hover,html[data-theme="dark"] #service-dialog .request-media-dropzone.is-dragover{background:#3b3043}
+    html[data-theme="dark"] #service-dialog .request-media-icon{background:#4a3b51;color:#e4c9f0}
+
     #service-dialog .service-request-submit span{font-size:19px;line-height:1}
     #service-dialog .service-request-note{margin: -5px 0 0;color:var(--muted);font-size:10px;line-height:1.5;text-align:center}
     html[data-theme="dark"] #service-dialog .service-request-header{background:linear-gradient(135deg,#382b41,#2a2331)}
@@ -691,6 +707,17 @@
         <div class="service-request-field">
           <label for="request-area">Neighbourhood / area</label>
           <input id="request-area" name="area" placeholder="Enter your neighbourhood or area" autocomplete="address-line2" required>
+        </div>
+        <div class="request-media-upload">
+          <label for="request-media-files">Add photos or a video <span>(optional)</span></label>
+          <input class="request-media-input" id="request-media-files" name="mediaFiles" type="file" accept="image/*,video/*" multiple>
+          <div class="request-media-dropzone" id="request-media-dropzone" role="button" tabindex="0" aria-controls="request-media-files" aria-label="Choose or drop photos and videos">
+            <span class="request-media-icon" aria-hidden="true">＋</span>
+            <strong>Drag and drop photos or videos here</strong>
+            <small>or <button class="request-media-browse" type="button" id="request-media-browse">Browse files</button></small>
+            <small>Up to 5 files · 50 MB each</small>
+          </div>
+          <div class="request-media-list" id="request-media-list" aria-live="polite"></div>
         </div>
         <div class="service-request-field">
           <label for="request-details">Tell the provider a little more</label>
@@ -1613,7 +1640,32 @@
       }
     });
     document.querySelector(".service-request-close").addEventListener("click",()=>document.getElementById("service-dialog").close());
-    document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");requests.push({...Object.fromEntries(new FormData(event.currentTarget).entries()),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();document.getElementById("service-dialog").close();showToast("Demo request saved locally. Sign in to send a real request through Bigwizz.")});
+    const requestMediaInput=document.getElementById("request-media-files");
+    const requestMediaZone=document.getElementById("request-media-dropzone");
+    const requestMediaList=document.getElementById("request-media-list");
+    let requestMediaFiles=[];
+    function renderRequestMedia(){
+      requestMediaList.innerHTML=requestMediaFiles.map((file,index)=>'<div class="request-media-item"><span>'+escapeHtml(file.name)+'</span><small>'+((file.size/1024/1024).toFixed(1))+' MB</small><button class="request-media-remove" type="button" data-remove-request-media="'+index+'" aria-label="Remove '+escapeHtml(file.name)+'">×</button></div>').join("");
+    }
+    function addRequestMedia(files){
+      const incoming=Array.from(files||[]);
+      for(const file of incoming){
+        if(!file.type.startsWith("image/")&&!file.type.startsWith("video/")){showToast("Please choose an image or video file.");continue}
+        if(file.size>50*1024*1024){showToast(file.name+" is larger than 50 MB.");continue}
+        if(requestMediaFiles.length>=5){showToast("You can attach up to 5 files.");break}
+        if(!requestMediaFiles.some(existing=>existing.name===file.name&&existing.size===file.size&&existing.lastModified===file.lastModified))requestMediaFiles.push(file);
+      }
+      renderRequestMedia();
+    }
+    document.getElementById("request-media-browse").addEventListener("click",()=>requestMediaInput.click());
+    requestMediaZone.addEventListener("click",event=>{if(event.target.closest("button"))return;requestMediaInput.click()});
+    requestMediaZone.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();requestMediaInput.click()}});
+    requestMediaInput.addEventListener("change",event=>{addRequestMedia(event.target.files);requestMediaInput.value=""});
+    ["dragenter","dragover"].forEach(type=>requestMediaZone.addEventListener(type,event=>{event.preventDefault();requestMediaZone.classList.add("is-dragover")}));
+    ["dragleave","drop"].forEach(type=>requestMediaZone.addEventListener(type,event=>{event.preventDefault();requestMediaZone.classList.remove("is-dragover")}));
+    requestMediaZone.addEventListener("drop",event=>addRequestMedia(event.dataTransfer.files));
+    requestMediaList.addEventListener("click",event=>{const button=event.target.closest("[data-remove-request-media]");if(!button)return;requestMediaFiles.splice(Number(button.dataset.removeRequestMedia),1);renderRequestMedia()});
+    document.getElementById("service-request-form").addEventListener("submit",event=>{event.preventDefault();const requests=JSON.parse(localStorage.getItem("bigwizz-service-requests")||"[]");const formValues=Object.fromEntries(new FormData(event.currentTarget).entries());delete formValues.mediaFiles;requests.push({...formValues,attachments:requestMediaFiles.map(file=>({name:file.name,type:file.type,size:file.size})),createdAt:new Date().toISOString()});localStorage.setItem("bigwizz-service-requests",JSON.stringify(requests));event.currentTarget.reset();requestMediaFiles=[];renderRequestMedia();document.getElementById("service-dialog").close();showToast("Demo request saved locally. Media selections are not uploaded to a provider yet.")});
     document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
     document.getElementById("new-post").addEventListener("click",()=>showToast("Community posting is a demo. Sign-in and moderation are needed before launch."));
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});
