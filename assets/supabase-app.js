@@ -170,10 +170,11 @@
       client.from("seller_profiles").select("shop_name,seller_type").eq("user_id",user.id).maybeSingle(),
       client.from("listings").select("id,title,kind,price,currency,image_url,status,created_at").eq("seller_id",user.id).order("created_at",{ascending:false}),
       client.from("orders").select("id,order_number,status,total,currency,seller_subtotal,platform_fee,created_at,order_items(id,title_snapshot,quantity,unit_price,variant_size,variant_color),payment_records(status,provider)").eq("seller_id",user.id).order("created_at",{ascending:false}).limit(100),
-      client.from("service_requests").select("id,service_title,status,created_at").eq("provider_id",user.id).order("created_at",{ascending:false}).limit(100)
+      client.from("service_requests").select("id,service_title,status,created_at").eq("provider_id",user.id).order("created_at",{ascending:false}).limit(100),
+      client.from("order_reports").select("id,order_id,order_reference,issue_type,notes,status,created_at").order("created_at",{ascending:false}).limit(100)
     ]);
-    const [shopResult,productsResult,ordersResult,requestsResult]=results;
-    for(const pair of [[shopResult,"Seller profile"],[productsResult,"Seller products"],[ordersResult,"Seller orders"],[requestsResult,"Customer requests"]]){
+    const [shopResult,productsResult,ordersResult,requestsResult,reportsResult]=results;
+    for(const pair of [[shopResult,"Seller profile"],[productsResult,"Seller products"],[ordersResult,"Seller orders"],[requestsResult,"Customer requests"],[reportsResult,"Buyer order reports"]]){
       if(pair[0].error)throw new Error(pair[1]+" could not be loaded: "+pair[0].error.message);
     }
     const shop=shopResult.data||{};
@@ -182,7 +183,11 @@
     const avatarNode=document.getElementById("seller-studio-avatar");
     if(nameNode)nameNode.textContent=displayName;
     if(avatarNode)avatarNode.textContent=initials(displayName);
-    const products=productsResult.data||[],orders=ordersResult.data||[],requests=requestsResult.data||[];
+    const products=productsResult.data||[],orders=ordersResult.data||[],requests=requestsResult.data||[],reports=reportsResult.data||[];
+    const reviewResult=products.length?await client.from("listing_reviews").select("listing_id,rating,body,reviewer_name,created_at").in("listing_id",products.map(item=>item.id)).order("created_at",{ascending:false}):{data:[],error:null};
+    if(reviewResult.error)throw new Error("Customer reviews could not be loaded: "+reviewResult.error.message);
+    const reviews=reviewResult.data||[];
+    const averageRating=reviews.length?reviews.reduce((sum,item)=>sum+Number(item.rating),0)/reviews.length:0;
     const today=new Date().toLocaleDateString("en-CA");
     const paidStatuses=["paid","processing","shipped","completed","delivered"];
     const todaysOrders=orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===today&&paidStatuses.includes(String(order.status||"").toLowerCase()));
@@ -201,6 +206,8 @@
     setText("seller-order-count",orders.length);
     setText("seller-product-count",products.filter(item=>item.status==="published").length);
     setText("seller-request-count",requests.filter(item=>["new","responded"].includes(item.status)).length);
+    setText("seller-average-rating",reviews.length?averageRating.toFixed(1)+" / 5":"—");
+    setText("seller-review-count",reviews.length);
     const productCard=item=>'<article class="seller-product-card"><img src="'+escapeHtml(item.image_url||"assets/ceramic-set.jpg")+'" alt=""><div class="seller-product-copy"><strong>'+escapeHtml(item.title)+'</strong><small>'+(item.status==="published"?"Published":"Paused")+' · '+(item.price===null?"Quote":money(item.price,item.currency))+'</small></div><button type="button" data-page="seller-products">Manage</button></article>';
     const productMarkup=products.length?products.map(productCard).join(""):'<p class="notice">No products yet. Your first listing will appear here once published.</p>';
     const dashboardProducts=document.getElementById("seller-dashboard-products");
@@ -221,7 +228,11 @@
     if(products.some(item=>item.status==="paused"))actions.push('<div class="seller-action-item"><span class="seller-action-icon">▣</span><div class="seller-action-copy"><strong>Paused listings need attention</strong><small>'+products.filter(item=>item.status==="paused").length+' listing(s) are not visible to buyers</small></div><button type="button" data-page="seller-products">Review</button></div>');
     if(!actions.length)actions.push('<div class="seller-action-item"><span class="seller-action-icon">✓</span><div class="seller-action-copy"><strong>You are all caught up</strong><small>New orders and service requests will appear here.</small></div></div>');
     const actionTarget=document.getElementById("seller-action-items");if(actionTarget)actionTarget.innerHTML=actions.join("");
-    return {shop,products,orders,requests,todayValue};
+    const reportTarget=document.getElementById("seller-reports-list");
+    if(reportTarget)reportTarget.innerHTML=reports.length?reports.map(item=>'<article class="seller-order-card"><div><strong>'+escapeHtml(item.order_reference||"Order report")+' · '+escapeHtml(item.issue_type)+'</strong><small>'+new Date(item.created_at).toLocaleString()+' · '+escapeHtml(item.status||"open")+'</small><p>'+escapeHtml(item.notes||"")+'</p></div></article>').join(""):'<p class="notice">No buyer order reports have been submitted.</p>';
+    const reviewTarget=document.getElementById("seller-reviews-list");
+    if(reviewTarget)reviewTarget.innerHTML=reviews.length?reviews.slice(0,50).map(item=>'<article class="seller-order-card"><div><strong>'+Number(item.rating).toFixed(0)+' / 5 · '+escapeHtml(item.reviewer_name||"Customer")+'</strong><small>'+new Date(item.created_at).toLocaleString()+'</small><p>'+escapeHtml(item.body||"")+'</p></div></article>').join(""):'<p class="notice">Customer reviews for your listings will appear here.</p>';
+    return {shop,products,orders,requests,reports,reviews,todayValue};
   }
 
   window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),getActiveAccount:()=>activeAccount,setActiveAccount:(account)=>{if(account==="seller"&&(!user||!accountRoles.includes("seller")))return false;activeAccount=account==="seller"?"seller":"buyer";updateAccountState();activatePage(activeAccount==="seller"?"seller-studio":"discover");if(activeAccount==="seller")Promise.all([loadSellerStudio(),loadSellerServiceRequests()]).catch(error=>report(error,"Seller Studio could not be be loaded."));return true;},loadSellerStudio,loadBuyerOrders,checkoutCart,requireSignIn:()=>showAuth()});
@@ -821,9 +832,14 @@
       return;
     }
     const values = new FormData(event.currentTarget);
+    const orderReference=String(values.get("order")||"").trim();
+    const {data:order,error:orderLookupError}=await client.from("orders").select("id,order_number").eq("buyer_id",user.id).eq("order_number",orderReference).maybeSingle();
+    if(orderLookupError){report(orderLookupError,"Your order could not be verified.");return;}
+    if(!order){notify("Enter an order reference from one of your Bigwizz purchases.");return;}
     const { error } = await client.from("order_reports").insert({
       buyer_id: user.id,
-      order_reference: String(values.get("order") || "").trim(),
+      order_id: order.id,
+      order_reference: order.order_number,
       issue_type: String(values.get("issue") || ""),
       notes: String(values.get("notes") || "").trim()
     });
