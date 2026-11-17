@@ -58,13 +58,30 @@
   }
 
   async function loadCommunityPosts(){
-    const query=client.from("community_posts").select("id,title,category,body,image_url,status,created_at,author_name").order("created_at",{ascending:false});
+    const query=client.from("community_posts").select("id,title,category,body,caption,image_url,media_url,media_type,product_id,author_avatar_url,status,created_at,author_name").order("created_at",{ascending:false});
     const {data,error}=user?await query.or(`status.eq.published,author_id.eq.${user.id}`):await query.eq("status","published");
     if(error)throw error;
-    const rows=data||[],ids=rows.map(row=>row.id);let counts=new Map();
-    if(ids.length){const result=await client.from("community_comments").select("post_id").in("post_id",ids).eq("status","published");if(result.error)throw result.error;for(const row of result.data||[])counts.set(row.post_id,(counts.get(row.post_id)||0)+1);}
-    conversations=rows.map(row=>({id:row.id,title:row.title,meta:row.category||"Community",copy:row.body,author:row.author_name||"Community member",status:row.status,commentCount:counts.get(row.id)||0,image:row.image_url||"assets/home-repairs.jpg"}));
+    const rows=data||[],ids=rows.map(row=>row.id);
+    const counts=new Map(),likes=new Map(),liked=new Set();
+    if(ids.length){
+      const [commentsResult,likesResult]=await Promise.all([
+        client.from("community_comments").select("post_id").in("post_id",ids).eq("status","published"),
+        client.from("community_post_likes").select("post_id,user_id").in("post_id",ids)
+      ]);
+      if(commentsResult.error)throw commentsResult.error;
+      if(likesResult.error)throw likesResult.error;
+      for(const row of commentsResult.data||[])counts.set(row.post_id,(counts.get(row.post_id)||0)+1);
+      for(const row of likesResult.data||[]){likes.set(row.post_id,(likes.get(row.post_id)||0)+1);if(user&&row.user_id===user.id)liked.add(row.post_id);}
+    }
+    conversations=rows.map(row=>({id:row.id,title:row.title,meta:row.category||"Maker update",copy:row.caption||row.body||"",author:row.author_name||"Bigwizz maker",avatar:row.author_avatar_url||"",createdAt:new Date(row.created_at).toLocaleDateString(),status:row.status,commentCount:counts.get(row.id)||0,likeCount:likes.get(row.id)||0,liked:liked.has(row.id),mediaUrl:row.media_url||row.image_url||"",mediaType:row.media_type||(row.image_url?"image":null),productId:row.product_id}));
     return conversations;
+  }
+  async function toggleCommunityLike(postId){
+    if(!user){showAuth();throw new Error("Please sign in to like maker updates.");}
+    const {data,error}=await client.from("community_post_likes").select("id").eq("post_id",postId).eq("user_id",user.id).maybeSingle();
+    if(error)throw error;
+    if(data){const result=await client.from("community_post_likes").delete().eq("id",data.id);if(result.error)throw result.error;}
+    else{const result=await client.from("community_post_likes").insert({post_id:postId,user_id:user.id});if(result.error)throw result.error;}
   }
   async function loadCommunityComments(postId){
     if(!postId)return [];
@@ -73,12 +90,30 @@
     if(error)throw error;
     return (data||[]).map(row=>({id:row.id,body:row.body,status:row.status,author:row.author_name||"Community member",createdAt:row.created_at}));
   }
-  async function submitCommunityPost({title,category,body}){
-    if(!user){showAuth();throw new Error("Please sign in to start a conversation.");}
-    const cleanTitle=String(title||"").trim(),cleanBody=String(body||"").trim();
-    if(!cleanTitle||cleanTitle.length>160||!cleanBody||cleanBody.length>5000)throw new Error("Add a title and a message before submitting.");
-    const {error}=await client.from("community_posts").insert({author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",title:cleanTitle,category:String(category||"General").slice(0,60),body:cleanBody,status:"pending"});
-    if(error)throw error;await loadCommunityPosts();renderCommunity();
+  async function submitCommunityPost({title,category,body,file}){
+    if(!user){showAuth();throw new Error("Please sign in to share a maker update.");}
+    const cleanBody=String(body||"").trim();
+    if(!cleanBody||cleanBody.length>5000)throw new Error("Add a caption before sharing.");
+    let mediaUrl=null,mediaType=null,storagePath=null;
+    if(file){
+      const allowed=["image/jpeg","image/png","image/webp","image/avif","video/mp4","video/webm"];
+      if(!allowed.includes(file.type))throw new Error("Choose a JPG, PNG, WebP, AVIF, MP4 or WebM file.");
+      if(file.size>50*1024*1024)throw new Error("Media must be 50 MB or smaller.");
+      const extension=(file.name.split(".").pop()||"bin").toLowerCase();
+      storagePath=user.id+"/"+crypto.randomUUID()+"."+extension;
+      const uploaded=await client.storage.from("community-media").upload(storagePath,file,{upsert:false});
+      if(uploaded.error)throw uploaded.error;
+      mediaUrl=client.storage.from("community-media").getPublicUrl(storagePath).data.publicUrl;
+      mediaType=file.type.startsWith("video/")?"video":"image";
+    }
+    const {error}=await client.from("community_posts").insert({
+      author_id:user.id,author_name:(profile&&profile.display_name)||"Bigwizz maker",
+      title:cleanBody.slice(0,160)||"Maker update",category:String(category||"Craftsmanship").slice(0,60),
+      body:cleanBody,caption:cleanBody,media_url:mediaUrl,media_type:mediaType,
+      image_url:mediaType==="image"?mediaUrl:null,status:"pending"
+    });
+    if(error){if(storagePath)await client.storage.from("community-media").remove([storagePath]);throw error;}
+    await loadCommunityPosts();renderCommunity();
   }
   async function submitCommunityComment({postId,body}){
     if(!user){showAuth();throw new Error("Please sign in to comment.");}
@@ -86,7 +121,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadSellerServiceRequests,loadBuyerServiceRequests,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
