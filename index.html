@@ -1282,12 +1282,17 @@
       return `<details class="product-size-chart"><summary>${guide.title}</summary><table class="size-chart-table"><thead><tr>${guide.headers.map(value=>`<th scope="col">${value}</th>`).join("")}<th scope="col">Listing</th></tr></thead><tbody>${guide.rows.map(row=>`<tr>${row.map(value=>`<td>${value}</td>`).join("")}<td>${available.has(row[0].toLowerCase())?"Available":"Not listed"}</td></tr>`).join("")}</tbody></table><p class="notice">Measure your body, foot, or head and compare it with the available sizes shown. Fit can vary by brand; ask the seller if you are between sizes.</p></details>`;
     }
     function renderProductReviewSection(item){
-      const reviews=reviewsByListing[item.id]||[],realReviews=reviews.filter(review=>!review.demo),count=realReviews.length,average=count?realReviews.reduce((sum,review)=>sum+Number(review.rating||0),0)/count:0;
-      const avgNodes=document.querySelectorAll("[data-product-rating-average]"),starNodes=document.querySelectorAll("[data-product-rating-stars]"),countNodes=document.querySelectorAll("[data-product-rating-count]"),list=document.querySelector("[data-product-review-list]");
-      avgNodes.forEach(node=>node.textContent=count?average.toFixed(1):"—");
-      starNodes.forEach(node=>node.textContent=count?"★".repeat(Math.round(average))+"☆".repeat(5-Math.round(average)):"☆☆☆☆☆");
-      countNodes.forEach(node=>node.textContent=count?count+" "+(count===1?"rating":"ratings"):"New");
-      if(list)list.innerHTML=count?reviews.slice().reverse().map(review=>`<article class="product-review"><div class="product-review-head"><strong>${escapeHtml(review.reviewer||"Customer")}</strong><span class="product-review-stars" aria-label="${Number(review.rating)} out of 5 stars">${"★".repeat(Number(review.rating)||0)}${"☆".repeat(5-(Number(review.rating)||0))}</span></div><p>${escapeHtml(review.text||"")}</p><small>${review.demo?"Example review":"Customer review"}</small></article>`).join(""):'<p class="notice">No reviews yet. Be the first customer to share your experience.</p>';
+      const reviews=reviewsByListing[item.id]||[],realReviews=reviews.filter(review=>!review.demo),count=realReviews.length;
+      const storedCount=Number(item.ratingCount||0),storedRating=Number.parseFloat(item.rating);
+      const totalCount=storedCount+count;
+      const average=totalCount?((Number.isFinite(storedRating)?storedRating*storedCount:0)+realReviews.reduce((sum,review)=>sum+Number(review.rating||0),0))/totalCount:NaN;
+      const stars=Number.isFinite(average)?Math.round(average):0;
+      const avgNodes=document.querySelectorAll("[data-product-rating-average]"),starNodes=document.querySelectorAll("[data-product-rating-stars]"),countNodes=document.querySelectorAll("[data-product-rating-count]"),list=document.querySelector("[data-product-review-list]"),summary=document.querySelector("[data-product-review-summary]");
+      avgNodes.forEach(node=>node.textContent=Number.isFinite(average)?average.toFixed(1):"New");
+      starNodes.forEach(node=>node.innerHTML=Number.isFinite(average)?"★".repeat(stars)+'<span>'+"★".repeat(5-stars)+"</span>":"☆☆☆☆☆");
+      countNodes.forEach(node=>node.textContent=totalCount+" "+(totalCount===1?"rating":"ratings"));
+      if(summary)summary.innerHTML=`<strong>${Number.isFinite(average)?average.toFixed(1):"New"}</strong><span class="service-rating-stars" aria-label="${stars} out of 5 stars">${"★".repeat(stars)}<span>${"★".repeat(5-stars)}</span></span><small>${totalCount} ${totalCount===1?"rating":"ratings"}</small>`;
+      if(list)list.innerHTML=reviews.length?reviews.slice().reverse().map(review=>`<article class="product-review"><div class="product-review-head"><strong>${escapeHtml(review.reviewer||"Customer")}</strong><span class="product-review-stars" aria-label="${Number(review.rating)} out of 5 stars">${"★".repeat(Number(review.rating)||0)}${"☆".repeat(5-(Number(review.rating)||0))}</span></div><p>${escapeHtml(review.text||"")}</p><small>${review.demo?"Example review":"Customer review"}</small></article>`).join(""):'<p class="notice">No reviews yet. Be the first customer to share your experience.</p>';
     }
     function renderProductDetails(listingId,skipRemoteLoad=false){
       const item=getGoodsListing(listingId);
@@ -1336,7 +1341,7 @@
           ${renderProductRatingStars()}
           <p class="product-rating-note" data-product-rating-note>Tap a star to leave your rating.</p>
           <button class="product-review-write" type="button" data-write-review="${escapeHtml(item.id)}" data-review-title="${escapeHtml(item.title)}">Write a review</button>
-          <h3 class="product-reviews-heading">Customer ratings &amp; reviews</h3><div class="product-review-list" data-product-review-list></div>
+          <h3 class="product-reviews-heading">Customer ratings &amp; reviews</h3><div class="service-rating-summary" data-product-review-summary></div><div class="product-review-list" data-product-review-list></div>
         </section>
         <section class="related-products">
           <div class="listing-grid">${allRelated.length?allRelated.map(renderGoodsCard).join(""):'<p class="notice">No other goods are available yet.</p>'}</div>
