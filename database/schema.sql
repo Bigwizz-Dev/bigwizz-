@@ -396,14 +396,17 @@ drop policy if exists "Published community posts are public" on public.community
 create policy "Published community posts are public" on public.community_posts
   for select to anon, authenticated using (status = 'published' or author_id = auth.uid());
 drop policy if exists "Authenticated users create posts" on public.community_posts;
-create policy "Authenticated users create posts" on public.community_posts
-  for insert to authenticated with check (author_id = auth.uid() and status = 'pending');
+drop policy if exists "Sellers create maker updates" on public.community_posts;
+create policy "Sellers create maker updates" on public.community_posts
+  for insert to authenticated with check (author_id = auth.uid() and status = 'pending' and exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'seller'));
 drop policy if exists "Authors update their posts" on public.community_posts;
-create policy "Authors update their posts" on public.community_posts
-  for update to authenticated using (author_id = auth.uid()) with check (author_id = auth.uid() and status = 'pending');
+drop policy if exists "Sellers update their maker updates" on public.community_posts;
+create policy "Sellers update their maker updates" on public.community_posts
+  for update to authenticated using (author_id = auth.uid() and exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'seller')) with check (author_id = auth.uid() and status = 'pending' and exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'seller'));
 drop policy if exists "Authors delete their posts" on public.community_posts;
-create policy "Authors delete their posts" on public.community_posts
-  for delete to authenticated using (author_id = auth.uid());
+drop policy if exists "Sellers delete their maker updates" on public.community_posts;
+create policy "Sellers delete their maker updates" on public.community_posts
+  for delete to authenticated using (author_id = auth.uid() and exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'seller'));
 drop policy if exists "Published comments are public" on public.community_comments;
 create policy "Published comments are public" on public.community_comments
   for select to anon, authenticated using (status = 'published' or author_id = auth.uid());
