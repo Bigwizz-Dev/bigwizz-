@@ -887,6 +887,7 @@
       await loadAccount();
       showApp();
       await loadCatalog();
+      await Promise.all([loadCart(), loadNotifications()]);
       activeAccount = "buyer";
       if (!document.querySelector(".page.active")) activatePage("discover");
       notify("Signed in. Your account data is shared across devices.");
@@ -1168,7 +1169,7 @@
     .on("postgres_changes",{event:"*",schema:"public",table:"community_posts"},async()=>{try{await loadCommunityPosts();renderCommunity();}catch(error){console.error("Community live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"community_comments"},async()=>{try{await loadCommunityPosts();renderCommunity();const postId=document.getElementById("community-comment-post-id")?.value;if(postId&&document.getElementById("community-thread-dialog")?.open)renderCommunityComments(await loadCommunityComments(postId));}catch(error){console.error("Community comment live refresh failed.",error);}})
     .on("postgres_changes",{event:"*",schema:"public",table:"service_requests"},async payload=>{try{if(!user)return;const row=payload.new||payload.old;if(row?.buyer_id===user.id)await loadBuyerServiceRequests();if(row?.provider_id===user.id)await loadSellerServiceRequests();}catch(error){console.error("Service request live refresh failed.",error);}})
-    .on("postgres_changes",{event:"*",schema:"public",table:"notifications"},async payload=>{try{if(user&&(payload.new||payload.old)?.user_id===user.id&&document.getElementById("notifications")?.classList.contains("active"))await loadNotifications();}catch(error){console.error("Notification live refresh failed.",error);}})
+    .on("postgres_changes",{event:"*",schema:"public",table:"notifications"},async payload=>{try{if(user&&(payload.new||payload.old)?.user_id===user.id)await loadNotifications();}catch(error){console.error("Notification live refresh failed.",error);}})
     .subscribe();
   client.auth.getSession().then(({ data, error }) => {
     if (error) report(error, "Could not check the current sign-in session.");
