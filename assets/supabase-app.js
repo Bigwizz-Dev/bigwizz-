@@ -96,7 +96,8 @@
     return (data||[]).map(row=>({id:row.id,body:row.body,status:row.status,author:row.author_name||"Community member",createdAt:row.created_at}));
   }
   async function submitCommunityPost({title,category,body,file,productId}){
-    if(!user){showAuth();throw new Error("Please sign in to share a maker update.");}
+    if(!user){showAuth();throw new Error("Please sign in with your seller account to share a maker update.");}
+    if(!accountRoles.includes("seller")) throw new Error("Only approved seller accounts can publish Community progress updates.");
     const cleanBody=String(body||"").trim();
     if(!cleanBody||cleanBody.length>5000)throw new Error("Add a caption before sharing.");
     let mediaUrl=null,mediaType=null,storagePath=null;
@@ -261,6 +262,8 @@
       button.hidden = button.dataset.audience !== activeAccount ||
         (!user && button.dataset.audience === "seller" && button.dataset.page !== "seller-studio");
     });
+    const communityPublishButton = document.getElementById("new-post");
+    if (communityPublishButton) communityPublishButton.hidden = !(user && accountRoles.includes("seller"));
     renderAccountMenu();
     setProfileDisplay(profile ? profile.display_name : user ? user.email : "Guest");
   }
