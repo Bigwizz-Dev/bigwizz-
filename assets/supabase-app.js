@@ -86,7 +86,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -686,35 +686,48 @@
     }
     return "Requested as soon as possible";
   }
-  async function createServiceRequestWithMedia({listingId,providerId,serviceTitle,bookingTiming="now",preferredDate="",preferredTime="",city="",area="",details="",files=[]}){
+  async function uploadServiceRequestMedia({requestId,file,onProgress=()=>{}}){
+    if(!user)throw new Error("Please sign in before uploading attachments.");
+    const {data:{session},error:sessionError}=await client.auth.getSession();
+    if(sessionError||!session?.access_token)throw new Error("Your sign-in session has expired. Please sign in again.");
+    const safeName=String(file.name||"attachment").replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
+    const path=user.id+"/"+requestId+"/"+crypto.randomUUID()+"-"+safeName;
+    await new Promise((resolve,reject)=>{
+      const xhr=new XMLHttpRequest();
+      xhr.open("POST",config.url.replace(/\/$/,"")+"/storage/v1/object/service-request-media/"+path.split("/").map(encodeURIComponent).join("/"));
+      xhr.setRequestHeader("Authorization","Bearer "+session.access_token);
+      xhr.setRequestHeader("apikey",config.publishableKey);
+      xhr.setRequestHeader("Content-Type",file.type||"application/octet-stream");
+      xhr.setRequestHeader("x-upsert","false");
+      xhr.upload.onprogress=event=>{if(event.lengthComputable)onProgress(Math.round(event.loaded/event.total*100));};
+      xhr.onload=()=>xhr.status>=200&&xhr.status<300?resolve():reject(new Error("Upload failed ("+xhr.status+")."));
+      xhr.onerror=()=>reject(new Error("Network error while uploading."));
+      xhr.onabort=()=>reject(new Error("Upload cancelled."));
+      xhr.send(file);
+    });
+    return {path,metadata:{path,name:file.name,type:file.type,size:file.size}};
+  }
+  async function removeServiceRequestMedia(paths){
+    if(!user||!paths?.length)return;
+    await client.storage.from("service-request-media").remove(paths);
+  }
+  async function createServiceRequestWithMedia({listingId,providerId,serviceTitle,bookingTiming="now",preferredDate="",preferredTime="",city="",area="",details="",requestId,attachments=[]}){
     if(!user){showAuth();throw new Error("Please sign in before sending a service request.");}
     const targetProviderId=String(providerId||"");
     if(!listingId||!targetProviderId)throw new Error("This service listing is not connected to a provider account yet. Please choose a published service listing.");
+    if(attachments.some(file=>!file?.path||!file.path.startsWith(user.id+"/"+requestId+"/")))throw new Error("One or more attachments are not ready. Please upload them again.");
     const scheduledAt=bookingTiming==="later"&&preferredDate&&preferredTime?new Date(preferredDate+"T"+preferredTime).toISOString():null;
     if(bookingTiming==="later"&&!scheduledAt)throw new Error("Choose a date and time for your scheduled request.");
-    const requestId=crypto.randomUUID(),uploaded=[];
-    try{
-      for(const file of files){
-        const safeName=String(file.name||"attachment").replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
-        const path=user.id+"/"+requestId+"/"+crypto.randomUUID()+"-"+safeName;
-        const {error:uploadError}=await client.storage.from("service-request-media").upload(path,file,{contentType:file.type,upsert:false});
-        if(uploadError)throw uploadError;
-        uploaded.push({path,name:file.name,type:file.type,size:file.size});
-      }
-      const {data:request,error}=await client.from("service_requests").insert({
-        id:requestId,buyer_id:user.id,listing_id:listingId,provider_id:targetProviderId,service_title:String(serviceTitle||"").slice(0,200),
-        request_type:bookingTiming==="later"?"Request a time":"Ask a question",booking_timing:bookingTiming,
-        preferred_date:bookingTiming==="later"?preferredDate:null,preferred_time:bookingTiming==="later"?preferredTime:null,scheduled_at:scheduledAt,
-        city:String(city||"").trim(),area:String(area||"").trim(),service_address:[city,area].filter(Boolean).join(", "),
-        details:String(details||"").trim(),matching_mode:"direct",quote_currency:"NGN",attachments:uploaded
-      }).select("id").single();
-      if(error)throw error;
-      await Promise.all([loadBuyerServiceRequests(),loadSellerServiceRequests()]);
-      return request;
-    }catch(error){
-      if(uploaded.length)await client.storage.from("service-request-media").remove(uploaded.map(file=>file.path));
-      throw error;
-    }
+    const {data:request,error}=await client.from("service_requests").insert({
+      id:requestId,buyer_id:user.id,listing_id:listingId,provider_id:targetProviderId,service_title:String(serviceTitle||"").slice(0,200),
+      request_type:bookingTiming==="later"?"Request a time":"Ask a question",booking_timing:bookingTiming,
+      preferred_date:bookingTiming==="later"?preferredDate:null,preferred_time:bookingTiming==="later"?preferredTime:null,scheduled_at:scheduledAt,
+      city:String(city||"").trim(),area:String(area||"").trim(),service_address:[city,area].filter(Boolean).join(", "),
+      details:String(details||"").trim(),matching_mode:"direct",quote_currency:"NGN",attachments
+    }).select("id").single();
+    if(error)throw error;
+    await Promise.all([loadBuyerServiceRequests(),loadSellerServiceRequests()]);
+    return request;
   }
   async function loadSellerServiceRequests(){
     const target=document.getElementById("seller-service-request-list");if(!target)return;
