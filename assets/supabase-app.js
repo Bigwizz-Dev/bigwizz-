@@ -180,7 +180,7 @@
     const ids=["seller-products-list","seller-orders-list","seller-action-items"];
     ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<p class="notice">Loading store data…</p>';});
     const results=await Promise.all([
-      client.from("seller_profiles").select("shop_name,seller_type").eq("user_id",user.id).maybeSingle(),
+      client.from("seller_profiles").select("shop_name,seller_type,latitude,longitude").eq("user_id",user.id).maybeSingle(),
       client.from("listings").select("id,title,kind,price,currency,image_url,status,created_at").eq("seller_id",user.id).order("created_at",{ascending:false}),
       client.from("orders").select("id,order_number,status,total,currency,seller_subtotal,platform_fee,created_at,order_items(id,title_snapshot,quantity,unit_price,variant_size,variant_color),payment_records(status,provider)").eq("seller_id",user.id).order("created_at",{ascending:false}).limit(100),
       client.from("service_requests").select("id,service_title,status,created_at").eq("provider_id",user.id).order("created_at",{ascending:false}).limit(100),
@@ -193,6 +193,8 @@
     const shop=shopResult.data||{};
     sellerShopName=shop.shop_name||sellerShopName||profile?.display_name||user.email?.split("@")[0]||"Seller";
     sellerProfileReady=true;
+    const gpsCaption=document.getElementById("seller-gps-caption");
+    if(gpsCaption)gpsCaption.textContent=shop.latitude!==null&&shop.latitude!==undefined&&shop.longitude!==null&&shop.longitude!==undefined?"Shop GPS is saved. Nearby buyers can discover your published listings.":"Share your shop location so nearby buyers can discover your goods and services.";
     await loadMyListings();
     const displayName=sellerShopName;
     const titleNode=document.getElementById("seller-studio-title");
