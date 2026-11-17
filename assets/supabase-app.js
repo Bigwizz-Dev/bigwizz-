@@ -135,6 +135,33 @@
     if(error)throw error;return loadCommunityComments(postId);
   }
 
+
+  async function loadBuyerOrders(){
+    const target=document.getElementById("buyer-orders-list");
+    if(!target)return;
+    if(!user){target.innerHTML='<p class="notice">Sign in to view your orders.</p>';return;}
+    target.innerHTML='<p class="notice">Loading your orders…</p>';
+    const {data,error}=await client.from("orders").select("id,order_number,seller_id,status,currency,seller_subtotal,platform_fee,total,created_at,order_items(id,title_snapshot,seller_name_snapshot,unit_price,quantity,variant_size,variant_color),payment_records(provider,status,amount,currency)").eq("buyer_id",user.id).order("created_at",{ascending:false});
+    if(error){target.innerHTML='<p class="notice">Your orders could not be loaded.</p>';report(error,"Your orders could not be loaded.");return;}
+    const money=(amount,code="NGN")=>new Intl.NumberFormat("en-NG",{style:"currency",currency:code||"NGN",maximumFractionDigits:2}).format(Number(amount||0));
+    target.innerHTML=data.length?data.map(order=>{
+      const items=(order.order_items||[]).map(item=>'<li>'+escapeHtml(item.title_snapshot)+' × '+item.quantity+((item.variant_size||item.variant_color)?' <small>('+escapeHtml([item.variant_size&&"Size: "+item.variant_size,item.variant_color&&"Color: "+item.variant_color].filter(Boolean).join(" · "))+')</small>':'')+'</li>').join("");
+      const payment=order.payment_records?.[0];
+      return '<article class="seller-order-card buyer-order-card"><div><strong>'+escapeHtml(order.order_number)+'</strong><small>'+new Date(order.created_at).toLocaleString()+' · '+(payment?.status==="paid"?"Paid":"Payment pending")+'</small><ul class="buyer-order-lines">'+items+'</ul><small>Items: '+money(order.seller_subtotal,order.currency)+' · Bigwizz fee: '+money(order.platform_fee,order.currency)+'</small><strong class="buyer-order-total">Total: '+money(order.total,order.currency)+'</strong></div><span class="seller-order-status">'+escapeHtml(order.status)+'</span></article>';
+    }).join(""):'<p class="notice">You have not placed any orders yet. Products you order will appear here.</p>';
+  }
+
+  async function checkoutCart(){
+    if(!user){showAuth();throw new Error("Please sign in before checkout.");}
+    const {data,error}=await client.rpc("checkout_cart");
+    if(error)throw error;
+    if(!Array.isArray(data)||!data.length)throw new Error("No orders were created. Check your cart and try again.");
+    await Promise.all([loadCart(),loadBuyerOrders(),loadNotifications()]);
+    if(typeof activatePage==="function")activatePage("orders");
+    notify("Your order(s) "+data.map(order=>order.order_number).join(", ")+" have been saved. Payment is not yet available.");
+    return data;
+  }
+
   async function loadSellerStudio(){
     if(!user||!accountRoles.includes("seller"))return;
     const ids=["seller-dashboard-products","seller-products-list","seller-orders-list","seller-action-items"];
@@ -142,7 +169,7 @@
     const results=await Promise.all([
       client.from("seller_profiles").select("shop_name,seller_type").eq("user_id",user.id).maybeSingle(),
       client.from("listings").select("id,title,kind,price,currency,image_url,status,created_at").eq("seller_id",user.id).order("created_at",{ascending:false}),
-      client.from("orders").select("id,order_number,status,total,currency,created_at").eq("seller_id",user.id).order("created_at",{ascending:false}).limit(100),
+      client.from("orders").select("id,order_number,status,total,currency,seller_subtotal,platform_fee,created_at,order_items(id,title_snapshot,quantity,unit_price,variant_size,variant_color),payment_records(status,provider)").eq("seller_id",user.id).order("created_at",{ascending:false}).limit(100),
       client.from("service_requests").select("id,service_title,status,created_at").eq("provider_id",user.id).order("created_at",{ascending:false}).limit(100)
     ]);
     const [shopResult,productsResult,ordersResult,requestsResult]=results;
@@ -157,8 +184,9 @@
     if(avatarNode)avatarNode.textContent=initials(displayName);
     const products=productsResult.data||[],orders=ordersResult.data||[],requests=requestsResult.data||[];
     const today=new Date().toLocaleDateString("en-CA");
-    const todaysOrders=orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===today);
-    const todayValue=todaysOrders.reduce((sum,order)=>sum+Number(order.total||0),0);
+    const paidStatuses=["paid","processing","shipped","completed","delivered"];
+    const todaysOrders=orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===today&&paidStatuses.includes(String(order.status||"").toLowerCase()));
+    const todayValue=todaysOrders.reduce((sum,order)=>sum+Number(order.seller_subtotal||order.total||0),0);
     const dailyTotals=Array.from({length:7},(_,index)=>{const date=new Date();date.setDate(date.getDate()-(6-index));const key=date.toLocaleDateString("en-CA");return orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===key).reduce((sum,order)=>sum+Number(order.total||0),0);});
     const maxDaily=Math.max(1,...dailyTotals);
     const points=dailyTotals.map((amount,index)=>({x:index*560/6,y:102-(amount/maxDaily)*82}));
@@ -179,7 +207,11 @@
     const allProducts=document.getElementById("seller-products-list");
     if(dashboardProducts)dashboardProducts.innerHTML=products.length?products.slice(0,4).map(productCard).join(""):productMarkup;
     if(allProducts)allProducts.innerHTML=productMarkup;
-    const orderMarkup=orders.length?orders.slice(0,30).map(order=>'<article class="seller-order-card"><div><strong>'+escapeHtml(order.order_number||("Order "+String(order.id).slice(0,8)))+'</strong><small>'+new Date(order.created_at).toLocaleString()+' · '+money(order.total,order.currency)+'</small></div><span class="seller-order-status">'+escapeHtml(order.status||"received")+'</span></article>').join(""):'<p class="notice">No customer orders have been recorded yet.</p>';
+    const orderMarkup=orders.length?orders.slice(0,50).map(order=>{
+      const payment=order.payment_records?.[0];
+      const lines=(order.order_items||[]).map(item=>'<li>'+escapeHtml(item.title_snapshot)+' × '+item.quantity+((item.variant_size||item.variant_color)?' <small>('+escapeHtml([item.variant_size&&"Size: "+item.variant_size,item.variant_color&&"Color: "+item.variant_color].filter(Boolean).join(" · "))+')</small>':'')+'</li>').join("");
+      return '<article class="seller-order-card"><div><strong>'+escapeHtml(order.order_number||("Order "+String(order.id).slice(0,8)))+'</strong><small>'+new Date(order.created_at).toLocaleString()+' · '+money(order.total,order.currency)+' · '+(payment?.status==="paid"?"Paid":"Payment pending")+'</small><ul class="seller-order-lines">'+lines+'</ul></div><span class="seller-order-status">'+escapeHtml(order.status||"pending")+'</span></article>';
+    }).join(""):'<p class="notice">No customer orders have been recorded yet. Buyer purchases will appear here.</p>';
     const orderTarget=document.getElementById("seller-orders-list");if(orderTarget)orderTarget.innerHTML=orderMarkup;
     const openRequests=requests.filter(item=>["new","responded"].includes(item.status));
     const pendingOrders=orders.filter(order=>["pending","processing","paid","confirmed","ready_to_ship"].includes(String(order.status||"").toLowerCase()));
@@ -192,7 +224,7 @@
     return {shop,products,orders,requests,todayValue};
   }
 
-  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),getActiveAccount:()=>activeAccount,setActiveAccount:(account)=>{if(account==="seller"&&(!user||!accountRoles.includes("seller")))return false;activeAccount=account==="seller"?"seller":"buyer";updateAccountState();activatePage(activeAccount==="seller"?"seller-studio":"discover");if(activeAccount==="seller")Promise.all([loadSellerStudio(),loadSellerServiceRequests()]).catch(error=>report(error,"Seller Studio could not be be loaded."));return true;},loadSellerStudio,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),getActiveAccount:()=>activeAccount,setActiveAccount:(account)=>{if(account==="seller"&&(!user||!accountRoles.includes("seller")))return false;activeAccount=account==="seller"?"seller":"buyer";updateAccountState();activatePage(activeAccount==="seller"?"seller-studio":"discover");if(activeAccount==="seller")Promise.all([loadSellerStudio(),loadSellerServiceRequests()]).catch(error=>report(error,"Seller Studio could not be be loaded."));return true;},loadSellerStudio,loadBuyerOrders,checkoutCart,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -899,8 +931,10 @@
   async function loadNotifications() {
     const list = document.getElementById("notification-list");
     const badge = document.getElementById("notification-count");
+    const sellerBadge = document.getElementById("seller-notification-count");
     if (!user) {
       if (badge) { badge.hidden = true; badge.textContent = "0"; }
+      if (sellerBadge) { sellerBadge.hidden = true; sellerBadge.textContent = "0"; }
       if (list) list.innerHTML = '<div class="empty">Sign in to view your notifications.</div>';
       showAuth();
       return;
@@ -920,6 +954,11 @@
       badge.hidden = unreadCount === 0;
       badge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
       badge.setAttribute("aria-label", `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`);
+    }
+    if (sellerBadge) {
+      sellerBadge.hidden = unreadCount === 0;
+      sellerBadge.textContent = unreadCount > 99 ? "99+" : String(unreadCount);
+      sellerBadge.setAttribute("aria-label", `${unreadCount} unread notification${unreadCount === 1 ? "" : "s"}`);
     }
     if (list) list.innerHTML = rows.length
       ? rows.map(item => `<article class="notification-card${item.read_at ? "" : " is-unread"}"><div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.body)}</p><small>${escapeHtml(item.kind || "Update")} · ${new Date(item.created_at).toLocaleString()}</small>${item.read_at ? "" : `<button type="button" class="notification-read" data-notification-read="${escapeHtml(item.id)}">Mark as read</button>`}</div></article>`).join("")
