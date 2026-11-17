@@ -177,7 +177,7 @@
 
   async function loadSellerStudio(){
     if(!user||!accountRoles.includes("seller"))return;
-    const ids=["seller-dashboard-products","seller-products-list","seller-orders-list","seller-action-items"];
+    const ids=["seller-products-list","seller-orders-list","seller-action-items"];
     ids.forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML='<p class="notice">Loading store data…</p>';});
     const results=await Promise.all([
       client.from("seller_profiles").select("shop_name,seller_type").eq("user_id",user.id).maybeSingle(),
@@ -215,7 +215,10 @@
     const paidStatuses=["paid","processing","shipped","completed","delivered"];
     const todaysOrders=orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===today&&paidStatuses.includes(String(order.status||"").toLowerCase()));
     const todayValue=todaysOrders.reduce((sum,order)=>sum+Number(order.seller_subtotal||order.total||0),0);
-    const dailyTotals=Array.from({length:7},(_,index)=>{const date=new Date();date.setDate(date.getDate()-(6-index));const key=date.toLocaleDateString("en-CA");return orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===key&&paidStatuses.includes(String(order.status||"").toLowerCase())).reduce((sum,order)=>sum+Number(order.seller_subtotal||order.total||0),0);});
+    const chartDates=Array.from({length:7},(_,index)=>{const date=new Date();date.setHours(0,0,0,0);date.setDate(date.getDate()-(6-index));return date;});
+    const dailyTotals=chartDates.map(date=>{const key=date.toLocaleDateString("en-CA");return orders.filter(order=>new Date(order.created_at).toLocaleDateString("en-CA")===key&&paidStatuses.includes(String(order.status||"").toLowerCase())).reduce((sum,order)=>sum+Number(order.seller_subtotal||order.total||0),0);});
+    const chartDays=document.getElementById("seller-chart-days");
+    if(chartDays)chartDays.innerHTML=chartDates.map(date=>"<span>"+escapeHtml(date.toLocaleDateString("en",{weekday:"short"}))+"</span>").join("");
     const maxDaily=Math.max(1,...dailyTotals);
     const points=dailyTotals.map((amount,index)=>({x:index*560/6,y:102-(amount/maxDaily)*82}));
     const linePath=points.map((point,index)=>(index?"L":"M")+point.x.toFixed(1)+" "+point.y.toFixed(1)).join(" ");
@@ -233,9 +236,7 @@
     setText("seller-review-count",reviews.length);
     const productCard=item=>'<article class="seller-product-card"><img src="'+escapeHtml(item.image_url||"assets/ceramic-set.jpg")+'" alt=""><div class="seller-product-copy"><strong>'+escapeHtml(item.title)+'</strong><small>'+(item.status==="published"?"Published":"Paused")+' · '+(item.price===null?"Quote":money(item.price,item.currency))+'</small></div><button type="button" data-page="seller-products">Manage</button></article>';
     const productMarkup=products.length?products.map(productCard).join(""):'<p class="notice">No products yet. Your first listing will appear here once published.</p>';
-    const dashboardProducts=document.getElementById("seller-dashboard-products");
     const allProducts=document.getElementById("seller-products-list");
-    if(dashboardProducts)dashboardProducts.innerHTML=products.length?products.slice(0,4).map(productCard).join(""):productMarkup;
     if(allProducts)allProducts.innerHTML=productMarkup;
     const orderMarkup=orders.length?orders.slice(0,50).map(order=>{
       const payment=order.payment_records?.[0],status=String(order.status||"pending").toLowerCase();
