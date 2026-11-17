@@ -134,7 +134,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -213,22 +213,21 @@
     resetLink.hidden = mode !== "signin";
     backLink.hidden = mode === "signin";
     if (mode === "signup") {
-      title.textContent = "Create your Buyer account";
-      summary.textContent = "Create your buyer sign-in to shop on Bigwizz.";
+      title.textContent = `Create your ${authAudience} account`;
+      summary.textContent = authAudience === "seller" ? "Create your seller sign-in to offer products and services on Bigwizz." : "Create your buyer sign-in to shop on Bigwizz.";
       submit.textContent = "Create account";
     } else if (mode === "reset") {
-      title.textContent = "Reset Buyer password";
-      summary.textContent = "We will email you a password reset link.";
+      title.textContent = `Reset ${authAudience} password`;
+      summary.textContent = `We will email you a password reset link for your ${authAudience} account.`;
       submit.textContent = "Send reset link";
     } else {
-      title.textContent = "Sign in to your Buyer account";
-      summary.textContent = "Sign in to continue to your Buyer account.";
+      title.textContent = `Sign in to your ${authAudience} account`;
+      summary.textContent = `Sign in to continue to your ${authAudience} account.`;
       submit.textContent = "Sign in";
     }
   }
 
   function showAuth(mode = "signin") {
-    authAudience = "buyer";
     const dialog = document.getElementById("auth-dialog");
     if (!dialog) {
       notify("The sign-in window could not be opened.");
@@ -247,6 +246,7 @@
   }
 
   function showApp() {
+    document.getElementById("account-entry").hidden = true;
     document.getElementById("marketplace-app").hidden = false;
   }
 
@@ -937,7 +937,7 @@
           if (result.error) throw result.error;
           if (result.data.session) {
             document.getElementById("auth-dialog").close();
-            notify("Your Buyer account has been created.");
+            notify(`Your ${authAudience} account has been created.`);
           } else {
             showAuthFeedback("Account created. Check your email for a confirmation link, then return here to sign in.");
           }
@@ -951,7 +951,7 @@
           result = await client.auth.signInWithPassword({ email, password });
           if (result.error) throw result.error;
           document.getElementById("auth-dialog").close();
-          notify("You are signed in to your Buyer account.");
+          notify(`You are signed in to your ${authAudience} account.`);
         }
       } catch (error) {
         showAuthFeedback(error.message || "Authentication failed. Please try again.", true);
