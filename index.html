@@ -648,7 +648,7 @@
   <dialog class="community-dialog" id="community-thread-dialog><div class="dialog-content">
     <div class="dialog-head"><div><h2 id="community-thread-title">Community discussion</h2><p id="community-thread-meta"></p></div><button type="button" class="dialog-close" data-close-community-dialog aria-label="Close">×</button></div>
     <div id="community-thread-body"></div><div class="community-comments" id="community-comments"></div>
-    <form id="community-comment-form"><input type="hidden" name="postId" id="community-comment-post-id"><div class="field"><label for="community-comment-body">Write a comment</label><textarea id="community-comment-body" name="body" maxlength="5000" rows="3" placeholder="Add to the conversation..." required></textarea></div>
+    <p id="community-seller-comment-note" class="notice" hidden>Sellers can read customer comments but cannot reply to them.</p><form id="community-comment-form"><input type="hidden" name="postId" id="community-comment-post-id"><div class="field"><label for="community-comment-body">Write a comment</label><textarea id="community-comment-body" name="body" maxlength="5000" rows="3" placeholder="Add to the conversation..." required></textarea></div>
       <button class="primary dialog-submit" type="submit">Post comment</button><p class="notice">Comments are reviewed before appearing publicly.</p>
     </form></div></dialog>
       <section id="notifications" class="page"><div class="section-head"><div><h2>App notifications</h2><p>Order, service-request and community updates. Bigwizz does not provide private buyer–seller messaging.</p></div></div><div class="notification-list" id="notification-list"></div></section>
@@ -1560,6 +1560,11 @@
       document.getElementById("community-thread-meta").textContent=`${post.meta} · By ${post.author||"Community member"}`;
       document.getElementById("community-thread-body").innerHTML=(post.mediaUrl?(post.mediaType==="video"?'<video class="community-thread-media" src="'+escapeHtml(post.mediaUrl)+'" controls playsinline></video>':'<img class="community-thread-media" src="'+escapeHtml(post.mediaUrl)+'" alt="Maker work">'):"")+'<p>'+escapeHtml(post.copy||"")+'</p>';
       document.getElementById("community-comment-post-id").value=post.id;
+      const sellerViewing = !!window.BIGWIZZ_BACKEND?.isSeller?.();
+      const commentForm = document.getElementById("community-comment-form");
+      const sellerCommentNote = document.getElementById("community-seller-comment-note");
+      if (commentForm) commentForm.hidden = sellerViewing;
+      if (sellerCommentNote) sellerCommentNote.hidden = !sellerViewing;
       document.getElementById("community-comments").innerHTML='<p class="notice">Loading comments…</p>';
       document.getElementById("community-thread-dialog").showModal();
       try{renderCommunityComments(await window.BIGWIZZ_BACKEND.loadCommunityComments(post.id));}
