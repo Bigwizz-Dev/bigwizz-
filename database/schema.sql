@@ -411,14 +411,18 @@ drop policy if exists "Published comments are public" on public.community_commen
 create policy "Published comments are public" on public.community_comments
   for select to anon, authenticated using (status = 'published' or author_id = auth.uid());
 drop policy if exists "Users create their own comments" on public.community_comments;
-create policy "Users create their own comments" on public.community_comments
-  for insert to authenticated with check (author_id = auth.uid() and status = 'pending');
+drop policy if exists "Buyers create their own comments" on public.community_comments;
+create policy "Buyers create their own comments" on public.community_comments
+  for insert to authenticated with check (author_id = auth.uid() and status = 'pending' and not exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'seller'));
 drop policy if exists "Authors update their comments" on public.community_comments;
-create policy "Authors update their comments" on public.community_comments
-  for update to authenticated using (author_id = auth.uid()) with check (author_id = auth.uid() and status = 'pending');
+drop policy if exists "Buyers update their own comments" on public.community_comments;
+create policy "Buyers update their own comments" on public.community_comments
+  for update to authenticated using (author_id = auth.uid() and not exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'seller'))
+  with check (author_id = auth.uid() and status = 'pending' and not exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'seller'));
 drop policy if exists "Authors delete their comments" on public.community_comments;
-create policy "Authors delete their comments" on public.community_comments
-  for delete to authenticated using (author_id = auth.uid());
+drop policy if exists "Buyers delete their own comments" on public.community_comments;
+create policy "Buyers delete their own comments" on public.community_comments
+  for delete to authenticated using (author_id = auth.uid() and not exists (select 1 from public.user_roles where user_id = auth.uid() and role = 'seller'));
 
 create or replace function public.is_conversation_participant(target_conversation uuid)
 returns boolean
