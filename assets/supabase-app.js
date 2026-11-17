@@ -877,6 +877,13 @@
       accountRoles = ["buyer"];
       activeAccount = "buyer";
       authAudience = "buyer";
+      ["cart-count", "notification-count"].forEach(id => { const badge = document.getElementById(id); if (badge) { badge.hidden = true; badge.textContent = "0"; } });
+      const cartItemsTarget = document.getElementById("cart-items");
+      const cartSummaryTarget = document.getElementById("cart-summary");
+      const notificationsTarget = document.getElementById("notification-list");
+      if (cartItemsTarget) cartItemsTarget.innerHTML = '<div class="empty">Sign in to view your cart.</div>';
+      if (cartSummaryTarget) cartSummaryTarget.hidden = true;
+      if (notificationsTarget) notificationsTarget.innerHTML = '<div class="empty">Sign in to view your notifications.</div>';
       sessionStorage.removeItem("bigwizz-active-account");
       sessionStorage.removeItem("bigwizz-pending-seller-studio");
       setProfileDisplay("Guest");
