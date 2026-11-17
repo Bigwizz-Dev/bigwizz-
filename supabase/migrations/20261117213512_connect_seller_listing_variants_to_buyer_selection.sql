@@ -1,5 +1,0 @@
-alter table public.listings add column if not exists size_type text not null default 'other', add column if not exists sizes text[] not null default '{}', add column if not exists colors text[] not null default '{}', add column if not exists color_images jsonb not null default '{}'::jsonb;
-do $$ begin
- if not exists(select 1 from pg_constraint where conname='listings_size_type_check' and conrelid='public.listings'::regclass) then alter table public.listings add constraint listings_size_type_check check(size_type in ('other','clothing','shoes','caps')); end if;
- if not exists(select 1 from pg_constraint where conname='listings_color_images_object_check' and conrelid='public.listings'::regclass) then alter table public.listings add constraint listings_color_images_object_check check(jsonb_typeof(color_images)='object'); end if;
-end $$;
