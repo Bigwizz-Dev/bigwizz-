@@ -86,7 +86,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,submitServiceRequest,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -686,7 +686,7 @@
     }
     return "Requested as soon as possible";
   }
-  async function submitServiceRequest({listingId,providerId,serviceTitle,bookingTiming="now",preferredDate="",preferredTime="",city="",area="",details="",files=[]}){
+  async function createServiceRequestWithMedia({listingId,providerId,serviceTitle,bookingTiming="now",preferredDate="",preferredTime="",city="",area="",details="",files=[]}){
     if(!user){showAuth();throw new Error("Please sign in before sending a service request.");}
     const targetProviderId=String(providerId||"");
     if(!listingId||!targetProviderId)throw new Error("This service listing is not connected to a provider account yet. Please choose a published service listing.");
