@@ -1865,7 +1865,6 @@
         return;
       }
       const page=event.target.closest("[data-page]");if(page){event.preventDefault();setPage(page.dataset.page,page.dataset.focusTarget||null,page.closest(".mobile-nav")?page:null);return}
-      const accountOption=event.target.closest("[data-account-option]");if(accountOption){event.preventDefault();switchAccount(accountOption.dataset.accountOption);return}
       const comingSoon=event.target.closest("[data-growth-coming-soon]");if(comingSoon){event.preventDefault();showToast("Promotions and paid advertising tools are coming soon.");return}
       const themeButton=event.target.closest(".theme-toggle");if(themeButton){setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark",true);return}
       const category=event.target.closest("[data-category]");if(category){activeCategory=category.dataset.category;document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button===category));renderListings(document.getElementById("search-input").value);return}
