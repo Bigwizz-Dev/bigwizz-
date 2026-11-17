@@ -86,7 +86,7 @@
     const {error}=await client.from("community_comments").insert({post_id:postId,author_id:user.id,author_name:(profile&&profile.display_name)||"Community member",body:cleanBody,status:"pending"});
     if(error)throw error;return loadCommunityComments(postId);
   }
-  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,loadSellerServiceRequests,loadBuyerServiceRequests,submitServiceRequest,respondToServiceRequest,getCurrentUser:()=>user,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -686,16 +686,52 @@
     }
     return "Requested as soon as possible";
   }
+  async function submitServiceRequest({listingId,serviceTitle,bookingTiming="now",preferredDate="",preferredTime="",city="",area="",details="",files=[]}){
+    if(!user){showAuth();throw new Error("Please sign in before sending a service request.");}
+    const providerId=String(listingId||"");
+    if(!providerId)throw new Error("This service listing is not connected to a provider account yet. Please choose a published service listing.");
+    const scheduledAt=bookingTiming==="later"&&preferredDate&&preferredTime?new Date(preferredDate+"T"+preferredTime).toISOString():null;
+    if(bookingTiming==="later"&&!scheduledAt)throw new Error("Choose a date and time for your scheduled request.");
+    const {data:request,error}=await client.from("service_requests").insert({
+      buyer_id:user.id,listing_id:providerId,provider_id:providerId,service_title:String(serviceTitle||"").slice(0,200),
+      request_type:bookingTiming==="later"?"Request a time":"Ask a question",booking_timing:bookingTiming,
+      preferred_date:bookingTiming==="later"?preferredDate:null,preferred_time:bookingTiming==="later"?preferredTime:null,scheduled_at:scheduledAt,
+      city:String(city||"").trim(),area:String(area||"").trim(),service_address:[city,area].filter(Boolean).join(", "),
+      details:String(details||"").trim(),matching_mode:"direct",quote_currency:"NGN"
+    }).select("id").single();
+    if(error)throw error;
+    const uploaded=[];
+    try{
+      for(const file of files){
+        const safeName=String(file.name||"attachment").replace(/[^a-zA-Z0-9._-]/g,"_").slice(-100);
+        const path=user.id+"/"+request.id+"/"+crypto.randomUUID()+"-"+safeName;
+        const {error:uploadError}=await client.storage.from("service-request-media").upload(path,file,{contentType:file.type,upsert:false});
+        if(uploadError)throw uploadError;
+        uploaded.push({path,name:file.name,type:file.type,size:file.size});
+      }
+      if(uploaded.length){
+        const {error:updateError}=await client.from("service_requests").update({attachments:uploaded,updated_at:new Date().toISOString()}).eq("id",request.id).eq("buyer_id",user.id);
+        if(updateError)throw updateError;
+      }
+    }catch(error){
+      if(uploaded.length)await client.storage.from("service-request-media").remove(uploaded.map(file=>file.path));
+      throw new Error("The request was created, but its attachments could not be saved. Please resend the request without files or try again.");
+    }
+    await Promise.all([loadBuyerServiceRequests(),loadSellerServiceRequests()]);
+    return request;
+  }
   async function loadSellerServiceRequests(){
     const target=document.getElementById("seller-service-request-list");if(!target)return;
     if(!user){target.innerHTML='<p class="notice">Sign in with your seller account to view customer requests.</p>';return;}
     if(!accountRoles.includes("seller")){target.innerHTML='<p class="notice">This workspace is available to approved seller accounts. Switch to your seller account or complete seller setup.</p>';return;}
     target.innerHTML='<p class="notice">Loading customer requests…</p>';
-    const {data,error}=await client.from("service_requests").select("id,buyer_id,service_title,request_type,booking_timing,preferred_date,preferred_time,scheduled_at,city,area,details,status,quoted_amount,quote_currency,provider_response,created_at").eq("provider_id",user.id).order("created_at",{ascending:false});
+    const {data,error}=await client.from("service_requests").select("id,buyer_id,service_title,request_type,booking_timing,preferred_date,preferred_time,scheduled_at,city,area,details,status,quoted_amount,quote_currency,provider_response,attachments,created_at").eq("provider_id",user.id).order("created_at",{ascending:false});
     if(error){target.innerHTML='<p class="notice">Your service requests could not be loaded.</p>';report(error,"Seller service requests could not be loaded.");return;}
+    await Promise.all((data||[]).map(async item=>{item.attachments=await Promise.all((item.attachments||[]).map(async file=>{const result=await client.storage.from("service-request-media").createSignedUrl(file.path,3600);return {...file,signedUrl:result.error?null:result.data.signedUrl};}));}));
     target.innerHTML=data.length?data.map(item=>`<article class="service-request-card" data-service-request-card="${escapeHtml(item.id)}"><div>
       <h4>${escapeHtml(item.service_title)}</h4><span class="service-request-status status-${escapeHtml(item.status)}">${escapeHtml(serviceStatusLabel(item.status))}</span>
       <p>${escapeHtml(item.details)}</p><small>Customer location: ${escapeHtml(item.city||"")} ${item.city&&item.area?" · ":""}${escapeHtml(item.area)}${serviceTimingLabel(item)} · Received ${new Date(item.created_at).toLocaleString()}</small>
+      ${Array.isArray(item.attachments)&&item.attachments.length?`<div class="service-request-response"><b>Customer attachments</b><div>${item.attachments.map(file=>`<a href="${escapeHtml(file.signedUrl||"#")}" target="_blank" rel="noopener noreferrer">${escapeHtml(file.name||"View attachment")}</a>`).join(" · ")}</div></div>`:""}
       ${item.quoted_amount!==null?`<div class="service-request-response"><b>Quotation sent</b>${escapeHtml(item.quote_currency)} ${Number(item.quoted_amount).toFixed(2)}</div>`:""}
       ${item.provider_response?`<div class="service-request-response"><b>Your response</b>${escapeHtml(item.provider_response)}</div>`:""}
       ${["new","responded"].includes(item.status)?`<form class="seller-request-actions" data-service-response-form><input type="hidden" name="requestId" value="${escapeHtml(item.id)}"><div class="field"><label>Quotation amount (optional)</label><input name="quotedAmount" type="number" min="0" step="0.01" placeholder="Enter your price"></div><div class="field"><label>Your response to the customer</label><textarea name="providerResponse" maxlength="2000" placeholder="Explain your availability, price or next steps…" required></textarea></div><button class="primary" type="submit">Send response / quotation</button><div class="seller-request-action-row"><button class="outline-button" type="button" data-service-request-action="accepted" data-request-id="${escapeHtml(item.id)}">Accept request</button><button class="outline-button" type="button" data-service-request-action="declined" data-request-id="${escapeHtml(item.id)}">Decline</button></div></form>`:""}
