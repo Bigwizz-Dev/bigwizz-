@@ -52,9 +52,11 @@ create table if not exists public.carts (
 create table if not exists public.cart_items (
   user_id uuid not null references public.carts (user_id) on delete cascade,
   listing_id uuid not null references public.listings (id) on delete cascade,
+  variant_size text not null default '',
+  variant_color text not null default '',
   quantity integer not null check (quantity between 1 and 99),
   added_at timestamptz not null default now(),
-  primary key (user_id, listing_id)
+  primary key (user_id, listing_id, variant_size, variant_color)
 );
 
 create table if not exists public.saved_listings (
