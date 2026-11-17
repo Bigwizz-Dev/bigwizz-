@@ -243,7 +243,7 @@
   }
 
   function activatePage(page) {
-    if (["seller-studio", "seller-listings", "seller-progress", "messages"].includes(page)) page = "discover";
+    if (["seller-studio", "seller-listings", "seller-progress", "messages", "inbox", "chat", "conversation"].includes(page)) page = "discover";
     document.querySelectorAll(".page").forEach(section => {
       section.classList.toggle("active", section.id === page);
     });
@@ -783,7 +783,7 @@
       ${Array.isArray(item.attachments)&&item.attachments.length?`<div class="service-request-response"><b>Customer attachments</b><div>${item.attachments.map(file=>`<a href="${escapeHtml(file.signedUrl||"#")}" target="_blank" rel="noopener noreferrer">${escapeHtml(file.name||"View attachment")}</a>`).join(" · ")}</div></div>`:""}
       ${item.quoted_amount!==null?`<div class="service-request-response"><b>Quotation sent</b>${escapeHtml(item.quote_currency)} ${Number(item.quoted_amount).toFixed(2)}</div>`:""}
       ${item.provider_response?`<div class="service-request-response"><b>Your response</b>${escapeHtml(item.provider_response)}</div>`:""}
-      ${["new","responded"].includes(item.status)?`<form class="seller-request-actions" data-service-response-form><input type="hidden" name="requestId" value="${escapeHtml(item.id)}"><div class="field"><label>Quotation amount (optional)</label><input name="quotedAmount" type="number" min="0" step="0.01" placeholder="Enter your price"></div><div class="field"><label>Your response to the customer</label><textarea name="providerResponse" maxlength="2000" placeholder="Explain your availability, price or next steps…" required></textarea></div><button class="primary" type="submit">Send response / quotation</button><div class="seller-request-action-row"><button class="outline-button" type="button" data-service-request-action="accepted" data-request-id="${escapeHtml(item.id)}">Accept request</button><button class="outline-button" type="button" data-service-request-action="declined" data-request-id="${escapeHtml(item.id)}">Decline</button></div></form>`:""}
+      ${["new","responded"].includes(item.status)?`<form class="seller-request-actions" data-service-response-form><input type="hidden" name="requestId" value="${escapeHtml(item.id)}"><div class="field"><label>Formal quotation amount (optional)</label><input name="quotedAmount" type="number" min="0" step="0.01" placeholder="Enter your price"></div><input type="hidden" name="providerResponse" value="A formal quotation was submitted through Bigwizz."><button class="primary" type="submit">Submit formal quotation</button><div class="seller-request-action-row"><button class="outline-button" type="button" data-service-request-action="accepted" data-request-id="${escapeHtml(item.id)}">Accept request</button><button class="outline-button" type="button" data-service-request-action="declined" data-request-id="${escapeHtml(item.id)}">Decline</button></div><small class="notice">No private messages or free-text replies are available.</small></form>`:""}
     </div></article>`).join(""):'<p class="notice">No customer service requests yet. New requests will appear here.</p>';
   }
   async function loadBuyerServiceRequests(){
