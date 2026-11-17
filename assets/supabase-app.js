@@ -574,34 +574,29 @@
     });
   }
 
-  async function loadMyListings() {
-    if (!user || !sellerProfileReady) return;
-    const { data, error } = await client.from("listings")
-      .select("id,kind,category,title,description,price,pricing_mode,image_url,status,seller_name")
-      .eq("seller_id", user.id)
-      .order("created_at", { ascending: false });
-    if (error) {
-      report(error, "Your seller listings could not be loaded.");
-      return;
-    }
-    const container = document.getElementById("seller-listing-items");
-    if (!data.length) {
-      container.innerHTML = '<div class="empty">You haven’t created any listings yet.</div>';
-      return;
-    }
-    container.innerHTML = data.map(item => `<article class="seller-listing-item">
-      <img src="${escapeHtml(item.image_url)}" alt="">
-      <div class="seller-listing-info"><strong>${escapeHtml(item.title)}</strong>
-        <small>${item.kind === "goods" ? "Goods" : "Service"} · ${escapeHtml(item.category)} · ${item.kind === "service" && item.pricing_mode === "quote" ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.kind === "service" && (item.pricing_mode === "quote" || item.price === null) ? "Request a quote" : item.kind === "service" && item.pricing_mode === "starting" ? "From " + currency.format(item.price) : item.price === null ? "Request an estimate" : currency.format(item.price)} · ${item.status === "published" ? "Published" : "Paused"}</small>
-      </div>
-      <div class="seller-listing-actions">
-        <button type="button" data-seller-listing-action="edit" data-listing-id="${item.id}">Edit</button>
-        <button type="button" data-seller-listing-action="toggle" data-listing-id="${item.id}">${item.status === "published" ? "Pause" : "Publish"}</button>
-        <button type="button" data-seller-listing-action="delete" data-listing-id="${item.id}">Delete</button>
-      </div>
-    </article>`).join("");
+  function setSellerProductTab(tab){
+    const inventory=tab==="inventory";
+    document.querySelectorAll("[data-seller-product-tab]").forEach(button=>{const active=button.dataset.sellerProductTab===(inventory?"inventory":"create");button.classList.toggle("active",active);button.setAttribute("aria-selected",String(active));});
+    const createPanel=document.getElementById("seller-create-panel"),inventoryPanel=document.getElementById("seller-inventory-panel");
+    if(createPanel)createPanel.hidden=inventory;if(inventoryPanel)inventoryPanel.hidden=!inventory;
+    if(inventory)loadMyListings();
   }
 
+  async function loadMyListings() {
+    if(!user||!sellerProfileReady)return;
+    const container=document.getElementById("seller-inventory-items");if(!container)return;
+    container.innerHTML='<p class="notice">Loading your inventory…</p>';
+    const {data,error}=await client.from("listings").select("id,kind,category,title,price,pricing_mode,image_url,status,stock_quantity,colors,sizes").eq("seller_id",user.id).order("created_at",{ascending:false});
+    if(error){container.innerHTML='<p class="notice">Your inventory could not be loaded.</p>';report(error,"Your seller inventory could not be loaded.");return;}
+    const rows=data||[],count=document.getElementById("seller-inventory-count");if(count)count.textContent=rows.length+" listing"+(rows.length===1?"":"s");
+    if(!rows.length){container.innerHTML='<div class="empty">You have no listings yet. Choose “Create New” to publish your first product.</div>';return;}
+    container.innerHTML=rows.map(item=>{
+      const stock=item.stock_quantity===null||item.stock_quantity===undefined?'<span class="seller-stock-badge untracked">Stock not tracked</span>':Number(item.stock_quantity)===0?'<span class="seller-stock-badge out">Out of stock</span>':'<span class="seller-stock-badge">'+Number(item.stock_quantity)+' in stock</span>';
+      const price=item.price===null?"Request a quote":currency.format(Number(item.price));
+      const variants=[...(item.colors||[]).map(color=>"Colour: "+color),...(item.sizes||[]).map(size=>"Size: "+size)].slice(0,4).join(" · ");
+      return '<article class="seller-inventory-card"><img src="'+escapeHtml(item.image_url||"assets/product-tote.jpg")+'" alt="'+escapeHtml(item.title)+'"><div class="seller-inventory-card-body"><h3>'+escapeHtml(item.title)+'</h3><div class="seller-inventory-meta"><span>'+escapeHtml(item.category||"Uncategorised")+'</span><span>'+(item.kind==="goods"?"Product":"Service")+'</span></div><strong class="seller-inventory-price">'+escapeHtml(price)+'</strong>'+stock+'<span class="seller-visibility-badge '+(item.status==="published"?"":"paused")+'">'+(item.status==="published"?"In market":"Hidden")+'</span>'+(variants?'<div class="seller-inventory-meta" style="margin-top:6px">'+escapeHtml(variants)+'</div>':"")+'<div class="seller-inventory-actions"><button type="button" data-seller-listing-action="edit" data-listing-id="'+escapeHtml(item.id)+'">Edit</button><button type="button" data-seller-listing-action="toggle" data-listing-id="'+escapeHtml(item.id)+'">'+(item.status==="published"?"Hide from market":"Publish")+'</button><button type="button" class="delete" data-seller-listing-action="delete" data-listing-id="'+escapeHtml(item.id)+'">Delete</button></div></div></article>';
+    }).join("");
+  }
   async function loadCart() {
     if (!user) {
       const badge = document.getElementById("cart-count");
@@ -807,7 +802,8 @@
       const sizes=["clothing","shoes","caps"].includes(sizeType)?String(values.get("sizes")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
       const acceptsCustomMeasurements=kind==="goods"&&["clothing","shoes"].includes(sizeType)&&values.get("customMeasurements")==="true";
       const colors=kind==="goods"?String(values.get("colors")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
-      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:existing.data?.color_images||{},gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements};
+      const rawStock=String(values.get("stockQuantity")||"").trim();const stockQuantity=rawStock===""?null:Number(rawStock);if(stockQuantity!==null&&(!Number.isInteger(stockQuantity)||stockQuantity<0))throw new Error("Stock must be a whole number of zero or more.");
+      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:existing.data?.color_images||{},gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements,stock_quantity:stockQuantity};
       const result=remoteEditingId?await client.from("listings").update(row).eq("id",remoteEditingId).eq("seller_id",user.id):await client.from("listings").insert(row);
       if(result.error)throw result.error;
       if(kind==="service"){
@@ -816,12 +812,13 @@
         if(profileUpdate.error)throw profileUpdate.error;
         sellerAvailabilityStatus=availability;
       }
-      remoteEditingId=null;form.reset();renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
+      remoteEditingId=null;form.reset();const stockField=document.getElementById("seller-listing-stock");if(stockField)stockField.value="";renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
       document.getElementById("seller-listing-submit").textContent="Publish listing";
       document.getElementById("seller-listing-cancel").hidden=true;
       document.getElementById("seller-service-pricing-mode").disabled=false;
       document.getElementById("seller-listing-price").disabled=false;
       await Promise.all([loadMyListings(),loadCatalog(),loadSellerStudio()]);
+      setSellerProductTab("inventory");
       notify("Your listing is live in the Bigwizz marketplace.");
     }catch(error){report(error,error.message||"Listing could not be saved.");}
     finally{submit.disabled=false;}
@@ -833,7 +830,7 @@
       return;
     }
     const row = await client.from("listings")
-      .select("id,title,kind,category,description,price,pricing_mode,image_url,gallery_images,accepts_custom_measurements,status,size_type,sizes,colors")
+      .select("id,title,kind,category,description,price,pricing_mode,image_url,gallery_images,accepts_custom_measurements,status,size_type,sizes,colors,stock_quantity")
       .eq("id", listingId).eq("seller_id", user.id).single();
     if (row.error) throw row.error;
     if (action === "edit") {
@@ -853,6 +850,8 @@
       document.getElementById("seller-service-pricing-mode").value=item.price===null?"quote":item.pricing_mode||"fixed";
       document.getElementById("seller-service-availability").value=sellerAvailabilityStatus;
       document.getElementById("seller-listing-price").value=item.price===null?"":String(item.price);
+      const stockField=document.getElementById("seller-listing-stock");if(stockField)stockField.value=item.stock_quantity===null||item.stock_quantity===undefined?"":String(item.stock_quantity);
+      setSellerProductTab("create");
       document.getElementById("seller-listing-price").disabled=item.kind==="service"&&item.pricing_mode==="quote";
       document.getElementById("seller-listing-description").value=item.description||"";
       document.getElementById("seller-listing-submit").textContent="Save changes";
@@ -868,7 +867,7 @@
         .eq("id", listingId).eq("seller_id", user.id);
     if (result.error) throw result.error;
     await Promise.all([loadMyListings(), loadCatalog()]);
-    notify(action === "delete" ? "Listing deleted." : "Listing status updated.");
+    notify(action === "delete" ? "Listing deleted." : "Listing visibility updated.");
   }
 
   async function submitServiceRequest(event) {
@@ -1419,6 +1418,8 @@
     }
     const sellerOrderAction=event.target.closest("[data-seller-order-status]");
     if(sellerOrderAction){stop(event);updateSellerOrderStatus(sellerOrderAction.dataset.orderId,sellerOrderAction.dataset.sellerOrderStatus).catch(error=>report(error,error.message||"Order status could not be updated."));return;}
+    const productTab=event.target.closest("[data-seller-product-tab]");
+    if(productTab){stop(event);setSellerProductTab(productTab.dataset.sellerProductTab);return;}
     const listingAction = event.target.closest("[data-seller-listing-action]");
     if (listingAction) {
       stop(event);
