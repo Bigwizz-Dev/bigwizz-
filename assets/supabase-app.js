@@ -270,7 +270,7 @@
         (!user && button.dataset.audience === "seller" && button.dataset.page !== "seller-studio");
     });
     const communityPublishButton = document.getElementById("new-post");
-    if (communityPublishButton) communityPublishButton.hidden = !(user && accountRoles.includes("seller"));
+    if (communityPublishButton) communityPublishButton.hidden = !(user && activeAccount === "seller" && accountRoles.includes("seller"));
     renderAccountMenu();
     setProfileDisplay(profile ? profile.display_name : user ? user.email : "Guest");
   }
