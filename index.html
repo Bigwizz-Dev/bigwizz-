@@ -1324,25 +1324,31 @@
       if(wrap)wrap.classList.remove("is-open");
     }
     function renderAccountMenu(){
-      document.getElementById("account-switch-trigger").setAttribute("aria-label","Switch account. Current account: Buyer");
-      const buyerCheck=document.getElementById("buyer-account-check");
-      if(buyerCheck)buyerCheck.innerHTML='<span aria-hidden="true">✓</span>';
-      document.querySelectorAll("#account-switch-menu [data-account-option]").forEach(button=>button.setAttribute("aria-pressed",String(button.dataset.accountOption==="buyer")));
+      const selected=window.BIGWIZZ_BACKEND?.getActiveAccount?.()||activeAccount||"buyer";
+      document.getElementById("account-switch-trigger").setAttribute("aria-label","Switch account. Current account: "+(selected==="seller"?"Seller":"Buyer"));
+      const buyerCheck=document.getElementById("buyer-account-check"),sellerCheck=document.getElementById("seller-account-check");
+      if(buyerCheck)buyerCheck.innerHTML=selected==="buyer"?'<span aria-hidden="true">✓</span>':"";
+      if(sellerCheck)sellerCheck.innerHTML=selected==="seller"?'<span aria-hidden="true">✓</span>':"";
+      document.querySelectorAll("#account-switch-menu [data-account-option]").forEach(button=>{button.hidden=button.dataset.accountOption==="seller"&&!window.BIGWIZZ_BACKEND?.isSeller?.();button.setAttribute("aria-pressed",String(button.dataset.accountOption===selected));});
     }
     function updateMobileNavigation(){
-      document.querySelectorAll(".mobile-nav [data-audience]").forEach(button=>{button.hidden=button.dataset.audience!=="buyer"});
+      const selected=window.BIGWIZZ_BACKEND?.getActiveAccount?.()||activeAccount||"buyer";
+      document.querySelectorAll(".mobile-nav [data-audience]").forEach(button=>{button.hidden=button.dataset.audience!==selected});
     }
     function switchAccount(account){
       closeAccountMenu();
-      activeAccount="buyer";
-      sessionStorage.setItem("bigwizz-active-account","buyer");
+      const selected=account==="seller"?"seller":"buyer";
+      if(!window.BIGWIZZ_BACKEND?.setActiveAccount?.(selected)){showToast("A seller account is required to open Seller Studio.");return;}
+      activeAccount=selected;
+      sessionStorage.setItem("bigwizz-active-account",selected);
       updateMobileNavigation();
       renderAccountMenu();
-      setPage("discover");
-      showToast("Buyer account selected.");
+      setPage(selected==="seller"?"seller-studio":"discover");
+      showToast(selected==="seller"?"Seller account selected.":"Buyer account selected.");
     }
     function setPage(page,focusTarget=null,mobileNavButton=null){
       if(["messages","inbox","chat","conversation"].includes(page)){showToast("Private buyer–seller messaging is not available on Bigwizz.");page="discover";}
+      if(["seller-studio","seller-products","seller-orders"].includes(page)&&!window.BIGWIZZ_BACKEND?.isSeller?.()){showToast("Sign in with an approved seller account to access Seller Studio.");return;}
       if(!document.getElementById(page))return;
       document.querySelectorAll(".page").forEach(section=>section.classList.toggle("active",section.id===page));
       if(!mobileNavButton)mobileNavButton=Array.from(document.querySelectorAll(".mobile-nav [data-page]")).find(button=>!button.hidden&&button.dataset.page===page)||null;
@@ -1353,6 +1359,8 @@
       if(page==="notifications"){if(window.BIGWIZZ_BACKEND?.loadNotifications)window.BIGWIZZ_BACKEND.loadNotifications();else renderNotifications();}
       if(page==="cart"){if(window.BIGWIZZ_BACKEND?.loadCart)window.BIGWIZZ_BACKEND.loadCart();else renderCart();}
       if(page==="orders")window.BIGWIZZ_BACKEND?.loadBuyerServiceRequests?.();
+      if(page==="seller-studio"||page==="seller-products"||page==="seller-orders"){window.BIGWIZZ_BACKEND?.loadSellerStudio?.().catch(error=>showToast(error.message||"Seller data could not be loaded."));if(page==="seller-orders")window.BIGWIZZ_BACKEND?.loadSellerServiceRequests?.();}
+      if(page==="seller-products")window.BIGWIZZ_BACKEND?.loadSellerStudio?.().catch(error=>showToast(error.message||"Products could not be loaded."));
       if(focusTarget){document.getElementById(focusTarget).scrollIntoView({behavior:"smooth",block:"start"})}
       else {
         /* Reset the document scroll when switching tabs; a retained scroll offset
@@ -1821,6 +1829,8 @@
         return;
       }
       const page=event.target.closest("[data-page]");if(page){event.preventDefault();setPage(page.dataset.page,page.dataset.focusTarget||null,page.closest(".mobile-nav")?page:null);return}
+      const accountOption=event.target.closest("[data-account-option]");if(accountOption){event.preventDefault();switchAccount(accountOption.dataset.accountOption);return}
+      const comingSoon=event.target.closest("[data-growth-coming-soon]");if(comingSoon){event.preventDefault();showToast("Promotions and paid advertising tools are coming soon.");return}
       const themeButton=event.target.closest(".theme-toggle");if(themeButton){setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark",true);return}
       const category=event.target.closest("[data-category]");if(category){activeCategory=category.dataset.category;document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button===category));renderListings(document.getElementById("search-input").value);return}
       const serviceCategory=event.target.closest("[data-service-category]");if(serviceCategory){activeServiceCategory=serviceCategory.dataset.serviceCategory;document.querySelectorAll("[data-service-category]").forEach(button=>button.classList.toggle("active",button===serviceCategory));renderServices(document.getElementById("service-search-input").value);return}
