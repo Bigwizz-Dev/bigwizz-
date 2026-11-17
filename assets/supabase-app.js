@@ -195,8 +195,10 @@
     sellerProfileReady=true;
     await loadMyListings();
     const displayName=sellerShopName;
+    const titleNode=document.getElementById("seller-studio-title");
     const nameNode=document.getElementById("seller-welcome-name");
     const avatarNode=document.getElementById("seller-studio-avatar");
+    if(titleNode)titleNode.textContent=displayName;
     if(nameNode)nameNode.textContent=displayName;
     if(avatarNode)avatarNode.textContent=initials(displayName);
     const products=productsResult.data||[],orders=ordersResult.data||[],requests=requestsResult.data||[],reports=reportsResult.data||[];
