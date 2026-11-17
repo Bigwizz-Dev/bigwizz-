@@ -13,11 +13,11 @@
     /* Keep cart and notification content flush with the top of the page. */
     #notifications.page,#cart.page{margin:0;padding:0}
     #notifications.page>.section-head,#cart.page>.section-head{margin:0 0 17px;padding:0}
-    /* Mobile tab content was rendering far below the header. Pull both
-       sections upward together so their headings sit directly under the topbar. */
+    /* Pull both mobile tabs firmly up to the app header, eliminating the
+       remaining blank viewport area above their section headings. */
     @media(max-width:700px){
       #notifications.page.active,#cart.page.active{
-        margin-top:calc(-1 * min(52vh,460px));
+        margin-top:calc(-1 * min(82vh,760px));
         position:relative;
         z-index:1;
       }
