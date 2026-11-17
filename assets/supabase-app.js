@@ -436,6 +436,12 @@
 
   async function loadCart() {
     if (!user) {
+      const badge = document.getElementById("cart-count");
+      const itemsContainer = document.getElementById("cart-items");
+      const summary = document.getElementById("cart-summary");
+      if (badge) { badge.hidden = true; badge.textContent = "0"; }
+      if (itemsContainer) itemsContainer.innerHTML = '<div class="empty">Sign in to view your cart.</div>';
+      if (summary) summary.hidden = true;
       showAuth();
       return;
     }
@@ -443,11 +449,15 @@
       .select("listing_id,quantity,listings(id,title,seller_name,image_url,price,kind)")
       .eq("user_id", user.id);
     if (error) {
+      const itemsContainer = document.getElementById("cart-items");
+      const summary = document.getElementById("cart-summary");
+      if (itemsContainer) itemsContainer.innerHTML = '<div class="empty">Your cart could not be loaded. Please try again.</div>';
+      if (summary) summary.hidden = true;
       report(error, "Your shared cart could not be loaded.");
       return;
     }
     const items = (data || []).filter(row => row.listings && row.listings.kind === "goods");
-    cartItems = items.map(row => ({
+    const cartItems = items.map(row => ({
       listingId: row.listing_id,
       title: row.listings.title,
       seller: row.listings.seller_name,
