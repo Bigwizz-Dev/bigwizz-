@@ -102,6 +102,16 @@
     try{return await new Promise((resolve,reject)=>{video.preload="metadata";video.onloadedmetadata=()=>resolve(video.duration);video.onerror=()=>reject(new Error("Video duration could not be checked."));video.src=objectUrl;});}
     finally{URL.revokeObjectURL(objectUrl);video.removeAttribute("src");video.load();}
   }
+  async function generateSellerAiCopy({kind,details}){
+    if(!user){showAuth();throw new Error("Please sign in to use AI writing tools.");}
+    if(!accountRoles.includes("seller"))throw new Error("AI writing tools are available to seller accounts only.");
+    if(!["maker_story","product_description"].includes(kind))throw new Error("That AI writing task is not supported.");
+    const {data,error}=await client.functions.invoke("seller-ai-copy",{body:{kind,details:details||{}}});
+    if(error)throw new Error(error.message||"AI writing is temporarily unavailable.");
+    if(!data||typeof data.text!=="string"||!data.text.trim())throw new Error(data?.error||"AI could not generate text. Please try again.");
+    return data;
+  }
+
   async function submitCommunityPost({title,category,body,file,productId}){
     if(!user){showAuth();throw new Error("Please sign in with your seller account to share a maker update.");}
     if(!accountRoles.includes("seller")) throw new Error("Only approved seller accounts can publish Community progress updates.");
@@ -266,7 +276,7 @@
     return {shop,products,orders,requests,reports,reviews,todayValue};
   }
 
-  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),getActiveAccount:()=>activeAccount,setActiveAccount:(account)=>{if(account==="seller"&&(!user||!accountRoles.includes("seller")))return false;activeAccount=account==="seller"?"seller":"buyer";updateAccountState();activatePage(activeAccount==="seller"?"seller-studio":"discover");if(activeAccount==="seller")Promise.all([loadSellerStudio(),loadSellerServiceRequests()]).catch(error=>report(error,"Seller Studio could not be be loaded."));return true;},loadSellerStudio,loadBuyerOrders,checkoutCart,updateSellerOrderStatus,requireSignIn:()=>showAuth()});
+  window.BIGWIZZ_BACKEND=Object.freeze({beginAuth:(audience,mode="signin")=>{authAudience=audience==="seller"?"seller":"buyer";document.getElementById("auth-role").value=authAudience;showAuth(mode);},loadProductReviews,submitProductReview,loadListingReviews,submitListingReview,loadCommunityPosts,loadCommunityComments,generateSellerAiCopy,submitCommunityPost,submitCommunityComment,toggleCommunityLike,loadCommunityProducts,loadSellerServiceRequests,loadBuyerServiceRequests,loadCart,changeCart,addCartItem,loadNotifications,markNotificationRead,uploadServiceRequestMedia,removeServiceRequestMedia,createServiceRequestWithMedia,respondToServiceRequest,getCurrentUser:()=>user,isSeller:()=>!!user&&accountRoles.includes("seller"),getActiveAccount:()=>activeAccount,setActiveAccount:(account)=>{if(account==="seller"&&(!user||!accountRoles.includes("seller")))return false;activeAccount=account==="seller"?"seller":"buyer";updateAccountState();activatePage(activeAccount==="seller"?"seller-studio":"discover");if(activeAccount==="seller")Promise.all([loadSellerStudio(),loadSellerServiceRequests()]).catch(error=>report(error,"Seller Studio could not be be loaded."));return true;},loadSellerStudio,loadBuyerOrders,checkoutCart,updateSellerOrderStatus,requireSignIn:()=>showAuth()});
 
   function escapeHtml(value) {
     return String(value).replace(/[&<>"']/g, character => ({
@@ -1237,18 +1247,27 @@
     const amount=Number(input.value);
     preview.textContent=input.value&&Number.isFinite(amount)&&amount>0?new Intl.NumberFormat("en-NG",{style:"currency",currency:"NGN",minimumFractionDigits:2}).format(amount):"₦0.00";
   }
-  function createSellerDescriptionDraft(){
-    const title=document.getElementById("seller-listing-title")?.value.trim()||"this piece";
+  async function createSellerDescriptionDraft(){
+    const title=document.getElementById("seller-listing-title")?.value.trim()||"";
     const category=document.getElementById("seller-listing-category")?.value.trim()||"";
     const colours=document.getElementById("seller-listing-colors")?.value.trim()||"";
     const sizes=document.getElementById("seller-listing-sizes")?.value.trim()||"";
-    const custom=document.getElementById("seller-custom-measurements")?.checked;
+    const custom=!!document.getElementById("seller-custom-measurements")?.checked;
     const existing=document.getElementById("seller-listing-description")?.value.trim()||"";
-    const details=[category?" in "+category:"",colours?" available in "+colours:"",sizes?" in sizes "+sizes:"",custom?" with custom measurements available":""].join("");
-    const draft=`Meet ${title}${details}. Thoughtfully selected and ready to become part of your everyday style. Add this piece to your collection and enjoy a product made with care. Please review the photos and listing options before ordering.`;
     const field=document.getElementById("seller-listing-description");
-    if(field){field.value=existing?existing+"\\n\\n"+draft:draft;field.focus();}
-    notify("A starter description is ready. Personalise it with your product's real features and materials.");
+    const button=document.getElementById("seller-magic-description");
+    if(!title){notify("Add a product title first so AI can write an accurate description.");document.getElementById("seller-listing-title")?.focus();return;}
+    if(!window.BIGWIZZ_BACKEND?.generateSellerAiCopy){notify("AI writing is not available right now. Please try again shortly.");return;}
+    const original=button?.textContent||"✦ Magic AI Description";
+    if(button){button.disabled=true;button.textContent="Writing…";}
+    try{
+      const result=await window.BIGWIZZ_BACKEND.generateSellerAiCopy({kind:"product_description",details:{title,category,colours,sizes,customMeasurements:custom,existingDraft:existing}});
+      const draft=String(result?.text||"").trim();
+      if(!draft)throw new Error("The AI returned an empty description. Please try again.");
+      if(field){field.value=draft;field.focus();}
+      notify("Your AI product description is ready. Review it and confirm every product detail before publishing.");
+    }catch(error){notify(error?.message||"Could not generate your product description. Please try again.");}
+    finally{if(button){button.disabled=false;button.textContent=original;}}
   }
   document.addEventListener("click",event=>{
     if(event.target.closest("#seller-magic-description")){event.preventDefault();createSellerDescriptionDraft();}
