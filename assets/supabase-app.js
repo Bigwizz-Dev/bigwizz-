@@ -513,7 +513,7 @@
   async function loadAccount() {
     if (!user) return;
     const [profileResult, rolesResult] = await Promise.all([
-      client.from("profiles").select("display_name,country,state,city,area").eq("id", user.id).maybeSingle(),
+      client.from("profiles").select("display_name,country,state,city,area,latitude,longitude").eq("id", user.id).maybeSingle(),
       client.from("user_roles").select("role").eq("user_id", user.id)
     ]);
     if (profileResult.error) throw profileResult.error;
@@ -522,8 +522,8 @@
     profile = profileResult.data || { display_name: user.email || "Member" };
     const metadata = user.user_metadata || {};
     if (!profileResult.data || (!profile.city && metadata.city)) {
-      const saved = { id:user.id, display_name:profile.display_name || metadata.display_name || user.email || "Member", country:metadata.country || "Nigeria", state:metadata.state || null, city:metadata.city || null, area:metadata.area || null };
-      const savedResult = await client.from("profiles").update({ country:saved.country, state:saved.state, city:saved.city, area:saved.area }).eq("id",user.id).select("display_name,country,state,city,area").single();
+      const saved = { id:user.id, display_name:profile.display_name || metadata.display_name || user.email || "Member", country:metadata.country || "Nigeria", state:metadata.state || null, city:metadata.city || null, area:metadata.area || null, latitude:metadata.latitude ?? null, longitude:metadata.longitude ?? null };
+      const savedResult = await client.from("profiles").update({ country:saved.country, state:saved.state, city:saved.city, area:saved.area, latitude:saved.latitude, longitude:saved.longitude }).eq("id",user.id).select("display_name,country,state,city,area,latitude,longitude").single();
       if (!savedResult.error) profile = savedResult.data;
     }
     window.BIGWIZZ_LOCATION_CONTEXT = { source:"saved", country:profile.country||"", state:profile.state||"", city:profile.city||"", area:profile.area||"", latitude:null, longitude:null };
