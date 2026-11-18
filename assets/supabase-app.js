@@ -521,7 +521,7 @@
 
     profile = profileResult.data || { display_name: user.email || "Member" };
     const metadata = user.user_metadata || {};
-    if (!profileResult.data || (!profile.city && metadata.city)) {
+    if (!profileResult.data || (!profile.city && metadata.city) || (profile.latitude == null && metadata.latitude != null && profile.longitude == null && metadata.longitude != null)) {
       const saved = { id:user.id, display_name:profile.display_name || metadata.display_name || user.email || "Member", country:metadata.country || "Nigeria", state:metadata.state || null, city:metadata.city || null, area:metadata.area || null, latitude:metadata.latitude ?? null, longitude:metadata.longitude ?? null };
       const savedResult = await client.from("profiles").update({ country:saved.country, state:saved.state, city:saved.city, area:saved.area, latitude:saved.latitude, longitude:saved.longitude }).eq("id",user.id).select("display_name,country,state,city,area,latitude,longitude").single();
       if (!savedResult.error) profile = savedResult.data;
