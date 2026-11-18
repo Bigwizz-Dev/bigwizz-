@@ -853,7 +853,7 @@
             <div class="field" id="seller-service-pricing-field" hidden><label for="seller-service-pricing-mode">Service pricing</label><select id="seller-service-pricing-mode" name="pricingMode"><option value="fixed">Fixed price</option><option value="starting">Starting price</option><option value="quote">Request a quote</option></select></div>
             <div class="field" id="seller-service-availability-field" hidden><label for="seller-service-availability">Service availability</label><select id="seller-service-availability" name="serviceAvailability"><option value="available">Available</option><option value="busy">Busy</option><option value="offline">Offline</option></select></div>
             <div class="field"><label for="seller-listing-price">Price (NGN)</label><input id="seller-listing-price" name="price" type="number" min="1" step="0.01" required placeholder="Enter price"><small class="listing-price-preview" id="seller-price-preview" aria-live="polite">₦0.00</small></div><div class="field"><label for="seller-listing-stock">Available stock (optional)</label><input id="seller-listing-stock" name="stockQuantity" type="number" min="0" step="1" placeholder="Leave blank if stock is not tracked"><small>Enter 0 to mark this item as out of stock.</small></div>
-            <div class="field listing-description-field"><div class="listing-description-heading"><label for="seller-listing-description">Product description</label><button class="listing-ai-button" type="button" id="seller-magic-description">✦ Magic AI Description</button></div><textarea id="seller-listing-description" name="description" maxlength="5000" required placeholder="Tell buyers what makes this product special…"></textarea><small class="listing-ai-note">Need inspiration? Create a starter description from your listing details, then make it your own.</small></div>
+            <div class="field listing-description-field"><label for="seller-listing-description">Product description</label><textarea id="seller-listing-description" name="description" maxlength="5000" required placeholder="Tell buyers what makes this product special…"></textarea><small>Describe the product clearly, including its features and available options.</small></div>
           </div>
           <div class="seller-listing-form-actions"><button class="primary" id="seller-listing-submit" type="submit">Publish listing</button><button class="outline-button" id="seller-listing-cancel" type="button" hidden>Cancel edit</button></div>
         </form></section><section id="seller-inventory-panel" class="seller-panel" hidden><div class="seller-inventory-heading"><div><h2>Goods in Market</h2><p>Your published products and services, with visibility and stock controls.</p></div><span id="seller-inventory-count" class="seller-inventory-count">0 listings</span></div><div class="seller-inventory-grid" id="seller-inventory-items"><p class="notice">Loading your inventory…</p></div></section>
@@ -921,12 +921,10 @@
       <div class="field">
       <div class="story-section-header" style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px;">
         <label for="community-post-body" style="font-weight:500;color:#fff;margin:0;">Tell the story</label>
-        <button type="button" id="magic-wand-btn" style="background:linear-gradient(135deg,#f3c68f,#d49a56);border:none;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600;color:#1a1528;display:flex;align-items:center;gap:4px;cursor:pointer;box-shadow:0 2px 6px rgba(212,154,86,.3);">
-          <span aria-hidden="true">✨</span> Magic Wand
-        </button>
+
       </div>
       <textarea id="community-post-body" name="body" maxlength="5000" rows="4" placeholder="What are you making? Share the process, materials or inspiration…" required></textarea>
-      <small class="listing-ai-note" id="maker-story-ai-status" aria-live="polite">Add a few notes, then let AI help shape your maker story.</small>
+      <small>Describe what you are making, the process, materials and inspiration.</small>
     </div>
       <div class="field"><label for="community-post-product">Tag a marketplace product (optional)</label><select id="community-post-product" name="productId"><option value="">No product tagged</option></select></div>
       <div class="field"><label for="community-post-category">Maker category</label><select id="community-post-category" name="category"><option value="Craftsmanship">Craftsmanship</option><option value="Fashion & tailoring">Fashion & tailoring</option><option value="Behind the scenes">Behind the scenes</option><option value="New collection">New collection</option><option value="Work in progress">Work in progress</option><option value="Product showcase">Product showcase</option></select></div>
@@ -2091,29 +2089,6 @@
     document.getElementById("service-request-form").addEventListener("submit",async event=>{event.preventDefault();event.stopImmediatePropagation();const form=event.currentTarget,submit=form.querySelector("[type=submit]");if(requestMediaUploading||requestMediaFiles.some(item=>item.status!=="uploaded")){showToast("Please wait until all photos and videos finish uploading.");return}if(!window.BIGWIZZ_BACKEND?.createServiceRequestWithMedia){showToast("Service requests are temporarily unavailable. Please sign in and try again.");return}const values=Object.fromEntries(new FormData(form).entries());submit.disabled=true;submit.textContent="Sending request…";try{await window.BIGWIZZ_BACKEND.createServiceRequestWithMedia({listingId:values.listingId,providerId:values.providerId,serviceTitle:values.service,bookingTiming:values.bookingTiming,preferredDate:values.preferredDate,preferredTime:values.preferredTime,city:values.city,area:values.area,details:values.details,requestId:requestMediaId,attachments:requestMediaFiles.map(item=>item.metadata)});form.reset();requestMediaFiles=[];requestMediaId=crypto.randomUUID();renderRequestMedia();document.getElementById("service-dialog").close();showToast("Your service request and attachments have been sent to the provider.");}catch(error){showToast(error?.message||"Your service request could not be sent. Please try again.");}finally{submit.disabled=false;submit.innerHTML='Send service request <span aria-hidden="true">→</span>';}});
     document.getElementById("search-form").addEventListener("submit",event=>{event.preventDefault();const input=document.getElementById("search-input"),query=input.value.trim();if(!query){input.focus();return}activeCategory="All";document.querySelectorAll(".category").forEach(button=>button.classList.toggle("selected",button.dataset.category==="All"));renderSearchResults(query);setPage("search-results")});
     document.getElementById("new-post").addEventListener("click",()=>{if(!window.BIGWIZZ_BACKEND?.getCurrentUser()){window.BIGWIZZ_BACKEND?.requireSignIn();return}document.getElementById("community-post-form").reset();document.getElementById("community-compose-dialog").showModal()});
-    document.getElementById("magic-wand-btn")?.addEventListener("click",async event=>{
-      const button=event.currentTarget,storyField=document.getElementById("community-post-body"),status=document.getElementById("maker-story-ai-status");
-      if(!window.BIGWIZZ_BACKEND?.getCurrentUser()){window.BIGWIZZ_BACKEND?.requireSignIn();return;}
-      if(!window.BIGWIZZ_BACKEND?.isSeller?.()){showToast("Only seller accounts can create maker stories.");return;}
-      const category=document.getElementById("community-post-category")?.value||"Craftsmanship";
-      const productSelect=document.getElementById("community-post-product");
-      const productTitle=productSelect?.selectedOptions?.[0]?.textContent||"";
-      const notes=storyField?.value.trim()||"";
-      const original=button.innerHTML;
-      button.disabled=true;button.innerHTML="<span aria-hidden='true'>✨</span> Writing…";
-      if(status)status.textContent="AI is shaping your maker story…";
-      try{
-        const result=await window.BIGWIZZ_BACKEND.generateSellerAiCopy({kind:"maker_story",details:{notes,category,productTitle:productSelect?.value?productTitle:""}});
-        const generated=String(result?.text||"").trim();
-        if(!generated)throw new Error("The AI returned an empty story. Please try again.");
-        if(storyField){storyField.value=generated;storyField.focus();}
-        if(status)status.textContent="AI story ready. Review and edit it before sharing.";
-        showToast("Your maker story is ready. Review it before sharing.");
-      }catch(error){
-        if(status)status.textContent=error?.message||"AI story generation failed. Please try again.";
-        showToast(error?.message||"Could not generate your maker story.");
-      }finally{button.disabled=false;button.innerHTML=original;}
-    });
     document.getElementById("launch-screen").addEventListener("transitionend",event=>{if(event.target.id==="launch-screen"&&event.propertyName==="opacity")event.target.hidden=true});
     setTimeout(()=>{
       const launch=document.getElementById("launch-screen");
