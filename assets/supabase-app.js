@@ -776,7 +776,8 @@
     event.stopImmediatePropagation();
     if(!user){showAuth();return;}
     if(!accountRoles.includes("seller")||!sellerProfileReady)throw new Error("Complete seller account setup before publishing listings.");
-    const form=event.currentTarget,submit=document.getElementById("seller-listing-submit");
+    const form=event.target,submit=document.getElementById("seller-listing-submit");
+    if(!(form instanceof HTMLFormElement))throw new Error("The listing form could not be found. Please refresh and try again.");
     submit.disabled=true;
     try{
       const values=new FormData(form);
@@ -873,7 +874,9 @@
   async function submitServiceRequest(event) {
     event.preventDefault();event.stopImmediatePropagation();
     if(!user){showAuth();return;}
-    const form=event.currentTarget,values=new FormData(form),submit=form.querySelector('[type="submit"]');
+    const form=event.target;
+    if(!(form instanceof HTMLFormElement))throw new Error("The service request form could not be found. Please refresh and try again.");
+    const values=new FormData(form),submit=form.querySelector('[type="submit"]');
     const serviceTitle=String(values.get("service")||"").trim(),listing=services.find(item=>item.title===serviceTitle);
     const city=String(values.get("city")||"").trim(),area=String(values.get("area")||"").trim(),details=String(values.get("details")||"").trim();
     const bookingTiming=String(values.get("bookingTiming")||"now");
