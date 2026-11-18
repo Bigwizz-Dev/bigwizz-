@@ -771,6 +771,22 @@
     return urls;
   }
 
+  async function uploadColorVariantImages(colors,existingImages={}){
+    const result={};
+    const selectedFiles=window.bigwizzColorImageFiles||{};
+    for(const color of colors){
+      const file=selectedFiles[color];
+      if(!file){if(existingImages[color])result[color]=existingImages[color];continue;}
+      if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024)throw new Error(`The ${color} photo must be JPG, PNG or WebP and no larger than 5 MB.`);
+      const extension=file.type==="image/png"?"png":file.type==="image/webp"?"webp":"jpg";
+      const path=`${user.id}/variants/${crypto.randomUUID()}-${extension}`;
+      const {error}=await client.storage.from("listing-images").upload(path,file,{contentType:file.type,upsert:false});
+      if(error)throw error;
+      result[color]=client.storage.from("listing-images").getPublicUrl(path).data.publicUrl;
+    }
+    return result;
+  }
+
   async function saveSellerListing(event) {
     event.preventDefault();
     event.stopImmediatePropagation();
@@ -803,8 +819,10 @@
       const sizes=["clothing","shoes","caps"].includes(sizeType)?String(values.get("sizes")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
       const acceptsCustomMeasurements=kind==="goods"&&["clothing","shoes"].includes(sizeType)&&values.get("customMeasurements")==="true";
       const colors=kind==="goods"?String(values.get("colors")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
+      const previousColorImages=existing.data?.color_images&&typeof existing.data.color_images==="object"?existing.data.color_images:{};
+      const colorImages=kind==="goods"?await uploadColorVariantImages(colors,previousColorImages):{};
       const rawStock=String(values.get("stockQuantity")||"").trim();const stockQuantity=rawStock===""?null:Number(rawStock);if(stockQuantity!==null&&(!Number.isInteger(stockQuantity)||stockQuantity<0))throw new Error("Stock must be a whole number of zero or more.");
-      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:existing.data?.color_images||{},gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements,stock_quantity:stockQuantity};
+      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:colorImages,gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements,stock_quantity:stockQuantity};
       const result=remoteEditingId?await client.from("listings").update(row).eq("id",remoteEditingId).eq("seller_id",user.id):await client.from("listings").insert(row);
       if(result.error)throw result.error;
       if(kind==="service"){
@@ -813,7 +831,7 @@
         if(profileUpdate.error)throw profileUpdate.error;
         sellerAvailabilityStatus=availability;
       }
-      remoteEditingId=null;form.reset();const stockField=document.getElementById("seller-listing-stock");if(stockField)stockField.value="";renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
+      remoteEditingId=null;window.bigwizzColorImageFiles={};form.reset();const stockField=document.getElementById("seller-listing-stock");if(stockField)stockField.value="";renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
       document.getElementById("seller-listing-submit").textContent="Publish listing";
       document.getElementById("seller-listing-cancel").hidden=true;
       document.getElementById("seller-service-pricing-mode").disabled=false;
