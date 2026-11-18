@@ -1159,7 +1159,7 @@
       const email = document.getElementById("auth-email").value.trim();
       const password = document.getElementById("auth-password").value;
       const displayName = document.getElementById("auth-name").value.trim();
-      const registrationLocation = { country: document.getElementById("auth-country")?.value.trim() || "Nigeria", state: document.getElementById("auth-state")?.value.trim() || "", city: document.getElementById("auth-city")?.value.trim() || "", area: document.getElementById("auth-area")?.value.trim() || "" };
+      const registrationLocation = { country: document.getElementById("auth-country")?.value.trim() || "Nigeria", state: document.getElementById("auth-state")?.value.trim() || "", city: document.getElementById("auth-city")?.value.trim() || "", area: document.getElementById("auth-area")?.value.trim() || "", latitude: document.getElementById("auth-latitude")?.value ? Number(document.getElementById("auth-latitude").value) : null, longitude: document.getElementById("auth-longitude")?.value ? Number(document.getElementById("auth-longitude").value) : null };
       const accountType = document.getElementById("auth-role").value;
       submit.disabled = true;
       submit.textContent = "Please wait…";
@@ -1170,7 +1170,7 @@
             email,
             password,
             options: {
-              data: { display_name: displayName, account_type: accountType, country: registrationLocation.country, state: registrationLocation.state, city: registrationLocation.city, area: registrationLocation.area },
+              data: { display_name: displayName, account_type: accountType, country: registrationLocation.country, state: registrationLocation.state, city: registrationLocation.city, area: registrationLocation.area, latitude: registrationLocation.latitude, longitude: registrationLocation.longitude },
               emailRedirectTo: window.location.origin + window.location.pathname
             }
           });
