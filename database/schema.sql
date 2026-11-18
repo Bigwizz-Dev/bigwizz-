@@ -36,6 +36,7 @@ create table if not exists public.listings (
   price numeric(12, 2) check (price is null or price > 0),
   currency text not null default 'NGN' check (currency ~ '^[A-Z]{3}$'),
   image_url text not null,
+  gallery_images text[] not null default '{}' check (coalesce(array_length(gallery_images, 1), 0) <= 1),
   status text not null default 'published' check (status in ('draft', 'published', 'paused', 'archived')),
   rating numeric(2, 1) check (rating >= 0 and rating <= 5),
   rating_count integer not null default 0 check (rating_count >= 0),
