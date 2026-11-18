@@ -776,7 +776,7 @@
     event.stopImmediatePropagation();
     if(!user){showAuth();return;}
     if(!accountRoles.includes("seller")||!sellerProfileReady)throw new Error("Complete seller account setup before publishing listings.");
-    const form=event.target,submit=document.getElementById("seller-listing-submit");
+    const form=document.getElementById("seller-listing-form"),submit=document.getElementById("seller-listing-submit");
     if(!(form instanceof HTMLFormElement))throw new Error("The listing form could not be found. Please refresh and try again.");
     submit.disabled=true;
     try{
