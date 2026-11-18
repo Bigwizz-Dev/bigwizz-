@@ -757,8 +757,8 @@
   }
 
   async function uploadListingImages(files) {
-    const selected=Array.from(files||[]);
-    if(selected.length>8)throw new Error("Choose up to 8 listing photos.");
+    const selected=Array.from(files||[]).slice(0,1);
+    if(Array.from(files||[]).length>1)throw new Error("Only one photo is allowed per listing.");
     const urls=[];
     for(const file of selected){
       if(!["image/jpeg","image/png","image/webp"].includes(file.type)||file.size>5*1024*1024)throw new Error("Each photo must be JPG, PNG or WebP and no larger than 5 MB.");
