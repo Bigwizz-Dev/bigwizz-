@@ -310,7 +310,7 @@
     .listing-review-button{margin-top:7px;padding:4px 0;font-size:10px}
     .listing-title-button{padding:0;border:0;background:transparent;color:inherit;text-align:left;font:inherit;font-weight:inherit}
     .product-detail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:26px;padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--paper)}
-    .product-image-frame{position:relative;overflow:hidden;height:min(440px,55vw);min-height:260px;border-radius:15px;background:var(--canvas)}.product-detail-image{width:100%;height:100%;display:block;object-fit:cover}.product-size-chart{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}.product-size-chart summary{cursor:pointer;color:var(--deep);font-size:12px;font-weight:750}.size-chart-table{width:100%;margin-top:10px;border-collapse:collapse;font-size:11px}.size-chart-table th,.size-chart-table td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}.size-chart-table th{color:var(--muted);font-weight:750}.variant-photo-field{display:grid;grid-template-columns:64px 1fr;gap:11px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.variant-photo-field img{width:64px;height:64px;object-fit:cover;border-radius:8px;background:var(--canvas)}.variant-photo-list{display:grid;gap:8px;margin-top:8px}
+    .product-image-frame{position:relative;overflow:hidden;height:min(440px,55vw);min-height:260px;border-radius:15px;background:var(--canvas)}.product-detail-image{width:100%;height:100%;display:block;object-fit:cover}.product-size-chart{margin-top:14px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}.product-size-chart summary{cursor:pointer;color:var(--deep);font-size:12px;font-weight:750}.size-chart-table{width:100%;margin-top:10px;border-collapse:collapse;font-size:11px}.size-chart-table th,.size-chart-table td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}.size-chart-table th{color:var(--muted);font-weight:750}.variant-photo-field{display:grid;grid-template-columns:64px 1fr;gap:11px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--paper)}.variant-photo-field img{width:64px;height:64px;object-fit:cover;border-radius:8px;background:var(--canvas)}.variant-photo-list{display:grid;gap:8px;margin-top:8px}.seller-color-variant-list{display:grid;gap:9px;margin-top:10px}.seller-color-variant{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--paper)}.seller-color-variant img{width:76px;height:76px;object-fit:cover;border-radius:9px;background:var(--canvas)}.seller-color-variant label{display:block;font-size:12px;font-weight:800}.seller-color-variant input{display:block;width:100%;margin-top:7px;font-size:11px}.seller-color-variant small{display:block;margin-top:5px;color:var(--muted);font-size:10px}
     .product-detail-info h2{margin:8px 0;font-size:28px;letter-spacing:-.7px}
     .product-detail-price{margin:12px 0;color:var(--deep);font-size:22px;font-weight:850}
     .product-detail-description{color:var(--muted);font-size:13px;line-height:1.6}
@@ -849,7 +849,7 @@
             <div class="field"><label for="seller-listing-category">Category</label><input id="seller-listing-category" name="category" required maxlength="60" placeholder="e.g. Home decor"></div>
             <div class="field"><label for="seller-size-type">Product size type</label><select id="seller-size-type" name="sizeType"><option value="other">Non-clothing product</option><option value="clothing">Clothing / Apparel</option><option value="shoes">Shoes</option><option value="caps">Caps</option></select></div>
             <div class="field listing-apparel-field" id="seller-size-options-field" hidden><label>Available standard sizes</label><div class="listing-size-chips" id="seller-size-chips"><label><input type="checkbox" value="S"><span>S</span></label><label><input type="checkbox" value="M"><span>M</span></label><label><input type="checkbox" value="L"><span>L</span></label><label><input type="checkbox" value="XL"><span>XL</span></label><label><input type="checkbox" value="XXL"><span>XXL</span></label></div><input id="seller-listing-sizes" name="sizes" type="hidden"><label class="listing-custom-size-toggle"><input id="seller-custom-measurements" name="customMeasurements" type="checkbox" value="true"><span><strong>Accepts Custom Measurements</strong><small>Customers can request a bespoke fit made to their measurements.</small></span></label></div>
-            <div class="field" id="seller-colour-options-field"><label for="seller-listing-colors">Available colours</label><input id="seller-listing-colors" name="colors" placeholder="e.g. Black, Cream, Blue"></div>
+            <div class="field" id="seller-colour-options-field"><label for="seller-listing-colors">Available colours</label><input id="seller-listing-colors" name="colors" placeholder="e.g. Black, Cream, Blue"><small>Add comma-separated colours. Upload a separate photo for each colour below.</small><div id="seller-color-photo-fields" class="seller-color-variant-list" aria-live="polite"></div></div>
             <div class="field" id="seller-service-pricing-field" hidden><label for="seller-service-pricing-mode">Service pricing</label><select id="seller-service-pricing-mode" name="pricingMode"><option value="fixed">Fixed price</option><option value="starting">Starting price</option><option value="quote">Request a quote</option></select></div>
             <div class="field" id="seller-service-availability-field" hidden><label for="seller-service-availability">Service availability</label><select id="seller-service-availability" name="serviceAvailability"><option value="available">Available</option><option value="busy">Busy</option><option value="offline">Offline</option></select></div>
             <div class="field"><label for="seller-listing-price">Price (NGN)</label><input id="seller-listing-price" name="price" type="number" min="1" step="0.01" required placeholder="Enter price"><small class="listing-price-preview" id="seller-price-preview" aria-live="polite">₦0.00</small></div><div class="field"><label for="seller-listing-stock">Available stock (optional)</label><input id="seller-listing-stock" name="stockQuantity" type="number" min="0" step="1" placeholder="Leave blank if stock is not tracked"><small>Enter 0 to mark this item as out of stock.</small></div>
@@ -1283,11 +1283,16 @@
         guidePreview.innerHTML=type==="goods"&&activeType!=="other"?renderSizeChart(activeType,listedSizes).replace("<details class=\"product-size-chart\">","<details class=\"product-size-chart\" open>"):"";
       }
     }
+    window.bigwizzColorImageFiles=window.bigwizzColorImageFiles||{};
     function renderSellerColorPhotoFields(colors,colorImages={}){
       const container=document.getElementById("seller-color-photo-fields");
+      if(!container)return;
+      const selectedFiles=window.bigwizzColorImageFiles||{};
       container.innerHTML=colors.map(color=>{
-        const image=colorImages[color];
-        return `<div class="variant-photo-field"><img src="${image?escapeHtml(image):"assets/product-photography.jpg"}" alt="${image?`Current ${escapeHtml(color)} product photo preview`:"Preview placeholder"}"><div class="field"><label>Photo for ${escapeHtml(color)}</label><input type="file" accept="image/jpeg,image/png,image/webp" data-color-image="${escapeHtml(color)}" aria-label="Upload ${escapeHtml(color)} product photo"><small class="notice">${image?"Choose a new photo to replace this one.":"Required to show this color option to buyers."}</small></div></div>`;
+        const image=colorImages[color]||"";
+        const file=selectedFiles[color];
+        const preview=file?URL.createObjectURL(file):image||"assets/product-photography.jpg";
+        return `<div class="seller-color-variant"><img src="${escapeHtml(preview)}" alt="${escapeHtml(color)} variant preview"><div><label>Photo for ${escapeHtml(color)}</label><input type="file" accept="image/jpeg,image/png,image/webp" data-color-image="${escapeHtml(color)}" aria-label="Upload ${escapeHtml(color)} product photo"><small>${file?"New photo selected":image?"Current photo saved. Choose another to replace it.":"Optional: buyers will see the main product photo if none is added."}</small></div></div>`;
       }).join("");
     }
     function parseVariantOptions(value){
@@ -1489,6 +1494,7 @@
     function resetSellerListingForm(){
       const form=document.getElementById("seller-listing-form");
       form.reset();
+      window.bigwizzColorImageFiles={};
       editingListingId=null;
       updateSellerListingOptions("goods");
       renderSellerColorPhotoFields([]);
@@ -1507,6 +1513,7 @@
       updateSellerListingOptions(item.type,item.category,item.sizeType||"other");
       document.getElementById("seller-listing-description").value=item.description;
       document.getElementById("seller-listing-sizes").value=(item.sizes||[]).join(", ");
+      window.bigwizzColorImageFiles={};
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
       renderSellerColorPhotoFields(item.colors||[],item.colorImages||{});
       document.getElementById("seller-listing-submit").textContent="Save changes";
@@ -1989,6 +1996,9 @@
       if(event.target.id==="community-post-media"){const input=event.target,file=input.files&&input.files[0],preview=document.getElementById("community-media-preview");if(!preview)return;if(!file){preview.hidden=true;preview.innerHTML="";return;}if(file.size>50*1024*1024){input.value="";preview.hidden=true;showToast("Media must be 50 MB or smaller.");return;}const allowed=["image/jpeg","image/png","image/webp","image/avif","video/mp4","video/webm"];if(!allowed.includes(file.type)){input.value="";preview.hidden=true;showToast("Choose a JPG, PNG, WebP, AVIF, MP4 or WebM file.");return;}if(file.type.startsWith("video/")){try{const duration=await getRequestVideoDuration(file);if(!Number.isFinite(duration)||duration<=0||duration>60){input.value="";preview.hidden=true;showToast("Maker videos must be 60 seconds or shorter.");return;}}catch(error){input.value="";preview.hidden=true;showToast("Video duration could not be checked.");return;}}const url=URL.createObjectURL(file);preview.hidden=false;preview.innerHTML=file.type.startsWith("video/")?`<video controls playsinline src="${url}" class="maker-preview-media"></video>`:`<img src="${url}" alt="Selected maker media preview" class="maker-preview-media">`;}
       if(event.target.id==="product-color"||event.target.id==="product-custom-measurements"){if(event.target.id==="product-color")updateProductColorImage(event.target.value);updateProductVariantState();}
       if(event.target.matches("[data-color-image]")&&event.target.files&&event.target.files[0]){
+        const color=event.target.dataset.colorImage;
+        window.bigwizzColorImageFiles=window.bigwizzColorImageFiles||{};
+        window.bigwizzColorImageFiles[color]=event.target.files[0];
         const photo=event.target.closest(".variant-photo-field").querySelector("img");
         if(photo.dataset.previewUrl)URL.revokeObjectURL(photo.dataset.previewUrl);
         photo.dataset.previewUrl=URL.createObjectURL(event.target.files[0]);photo.src=photo.dataset.previewUrl;
