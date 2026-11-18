@@ -864,6 +864,7 @@
       document.getElementById("seller-custom-measurements").checked=!!item.accepts_custom_measurements;
       renderSellerListingImagePreviews([item.image_url].filter(Boolean));
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
+      document.getElementById("seller-listing-colors").dispatchEvent(new Event("input",{bubbles:true}));
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change",{bubbles:true}));
       document.getElementById("seller-size-type").dispatchEvent(new Event("change",{bubbles:true}));
       document.getElementById("seller-service-pricing-mode").value=item.price===null?"quote":item.pricing_mode||"fixed";
