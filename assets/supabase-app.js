@@ -454,7 +454,7 @@
       basePrice: row.price,
       currency: row.currency||"NGN",
       image: row.image_url,
-      galleryImages:Array.isArray(row.gallery_images)&&row.gallery_images.length?row.gallery_images:[row.image_url],
+      galleryImages:[row.image_url],
       acceptsCustomMeasurements:!!row.accepts_custom_measurements,
       sellerLatitude:row.seller_profiles?.latitude??null,
       sellerLongitude:row.seller_profiles?.longitude??null,
@@ -795,8 +795,8 @@
       if(existing.error)throw existing.error;
       const files=document.getElementById("seller-listing-image").files;
       const uploadedUrls=await uploadListingImages(files);
-      const previousGallery=Array.isArray(existing.data?.gallery_images)?existing.data.gallery_images:[];
-      const galleryImages=uploadedUrls.length?uploadedUrls:(previousGallery.length?previousGallery:[existing.data?.image_url].filter(Boolean));
+      const previousGallery=Array.isArray(existing.data?.gallery_images)?existing.data.gallery_images.slice(0,1):[];
+      const galleryImages=[uploadedUrls[0]||(previousGallery[0]||existing.data?.image_url)].filter(Boolean);
       const imageUrl=uploadedUrls[0]||(existing.data&&existing.data.image_url);
       if(!imageUrl)throw new Error("Upload at least one product or service photo before publishing.");
       const sizeType=kind==="goods"?String(values.get("sizeType")||"other"):"other";
@@ -844,7 +844,7 @@
       document.getElementById("seller-listing-sizes").value=(item.sizes||[]).join(",");
       document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=(item.sizes||[]).includes(input.value));
       document.getElementById("seller-custom-measurements").checked=!!item.accepts_custom_measurements;
-      renderSellerListingImagePreviews(item.gallery_images?.length?item.gallery_images:[item.image_url].filter(Boolean));
+      renderSellerListingImagePreviews([item.image_url].filter(Boolean));
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change",{bubbles:true}));
       document.getElementById("seller-size-type").dispatchEvent(new Event("change",{bubbles:true}));
@@ -1226,8 +1226,8 @@
     if(!wrap)return;
     sellerListingPreviewUrls.forEach(url=>{if(url.startsWith("blob:"))URL.revokeObjectURL(url);});
     sellerListingPreviewUrls=[];
-    const list=Array.from(items||[]).slice(0,8);
-    if(count)count.textContent=list.length+" / 8 photos";
+    const list=Array.from(items||[]).slice(0,1);
+    if(count)count.textContent=list.length+" / 1 photo";
     if(!list.length){wrap.innerHTML='<p class="listing-empty-preview">Your photo previews will appear here.</p>';return;}
     wrap.innerHTML="";
     list.forEach((item,index)=>{
@@ -1254,7 +1254,7 @@
     ["dragenter","dragover"].forEach(name=>listingDropzone.addEventListener(name,event=>{event.preventDefault();listingDropzone.classList.add("is-dragging");}));
     ["dragleave","drop"].forEach(name=>listingDropzone.addEventListener(name,event=>{event.preventDefault();listingDropzone.classList.remove("is-dragging");}));
     listingDropzone.addEventListener("drop",event=>{
-      const files=Array.from(event.dataTransfer?.files||[]).filter(file=>file.type.startsWith("image/")).slice(0,8);
+      const files=Array.from(event.dataTransfer?.files||[]).filter(file=>["image/jpeg","image/png","image/webp"].includes(file.type)).slice(0,1);
       if(!files.length)return;
       const input=document.getElementById("seller-listing-image");
       const transfer=new DataTransfer();files.forEach(file=>transfer.items.add(file));input.files=transfer.files;
