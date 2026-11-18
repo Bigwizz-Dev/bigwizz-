@@ -1137,6 +1137,21 @@
     event.stopImmediatePropagation();
   }
 
+  document.getElementById("auth-save-gps")?.addEventListener("click",event=>{
+    const button=event.currentTarget,caption=document.getElementById("auth-gps-caption");
+    if(!navigator.geolocation){if(caption)caption.textContent="GPS is not available in this browser.";return;}
+    button.disabled=true;button.textContent="Finding location…";
+    navigator.geolocation.getCurrentPosition(position=>{
+      document.getElementById("auth-latitude").value=String(position.coords.latitude);
+      document.getElementById("auth-longitude").value=String(position.coords.longitude);
+      if(caption)caption.textContent="GPS coordinates saved with this sign-up profile.";
+      button.textContent="✓ GPS location saved";button.disabled=false;
+    },error=>{
+      if(caption)caption.textContent=error.code===1?"Location permission denied. You can still sign up without GPS.":"Could not get GPS. You can still sign up without it.";
+      button.textContent="⌖ Save my GPS location";button.disabled=false;
+    },{enableHighAccuracy:true,timeout:15000,maximumAge:60000});
+  });
+
   document.addEventListener("submit", async event => {
     if (event.target.id === "auth-form") {
       stop(event);
