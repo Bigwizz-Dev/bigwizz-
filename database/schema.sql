@@ -4,6 +4,12 @@ create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
   display_name text not null default '',
   avatar_url text,
+  country text,
+  state text,
+  city text,
+  area text,
+  latitude double precision check (latitude is null or latitude between -90 and 90),
+  longitude double precision check (longitude is null or longitude between -180 and 180),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
@@ -20,6 +26,9 @@ create table if not exists public.seller_profiles (
   shop_name text not null,
   seller_type text not null check (seller_type in ('Quality goods', 'Professional services', 'Goods and services')),
   is_public boolean not null default false,
+  latitude double precision check (latitude is null or latitude between -90 and 90),
+  longitude double precision check (longitude is null or longitude between -180 and 180),
+  location_source text check (location_source is null or location_source in ('live', 'profile')),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
