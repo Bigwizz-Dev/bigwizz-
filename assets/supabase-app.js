@@ -741,18 +741,28 @@
 
   async function saveSellerStoreLocation(button){
     if(!user||!accountRoles.includes("seller")){showAuth();return;}
-    if(!navigator.geolocation){notify("GPS is not available in this browser.");return;}
-    button.disabled=true;button.textContent="Finding your shop…";
+    const source=document.querySelector('input[name="seller-location-source"]:checked')?.value||"live";
+    button.disabled=true;button.textContent=source==="live"?"Finding your location…":"Loading profile location…";
     try{
-      const position=await new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,timeout:15000,maximumAge:60000}));
-      const latitude=position.coords.latitude,longitude=position.coords.longitude;
-      const {error}=await client.from("seller_profiles").update({latitude,longitude,is_public:true}).eq("user_id",user.id);
+      let latitude,longitude;
+      if(source==="live"){
+        if(!navigator.geolocation)throw new Error("GPS is not available in this browser.");
+        const position=await new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,timeout:15000,maximumAge:60000}));
+        latitude=Number(position.coords.latitude);longitude=Number(position.coords.longitude);
+      }else{
+        const {data,error}=await client.from("profiles").select("latitude,longitude").eq("id",user.id).maybeSingle();
+        if(error)throw error;
+        if(!data||data.latitude==null||data.longitude==null)throw new Error("Your sign-up profile has no saved GPS coordinates yet. Choose live GPS or add coordinates to your profile first.");
+        latitude=Number(data.latitude);longitude=Number(data.longitude);
+      }
+      if(!Number.isFinite(latitude)||!Number.isFinite(longitude)||latitude < -90||latitude > 90||longitude < -180||longitude > 180)throw new Error("The selected profile location has invalid GPS coordinates.");
+      const {error}=await client.from("seller_profiles").update({latitude,longitude,location_source:source,is_public:true}).eq("user_id",user.id);
       if(error)throw error;
       const caption=document.getElementById("seller-gps-caption");
-      if(caption)caption.textContent="Shop GPS saved. Buyers using nearby discovery can now find your published listings.";
+      if(caption)caption.textContent=source==="live"?"Live GPS saved. Nearby buyers can now discover your published listings.":"Your sign-up profile GPS saved as the shop location.";
       await loadCatalog();
-      notify("Your shop GPS location is saved.");
-    }catch(error){notify(error.code===1?"Location permission was denied. Allow it in your browser settings.":error.message||"Could not save your shop GPS location.");}
+      notify(source==="live"?"Your live shop GPS location is saved.":"Your profile sign-up location is saved as your shop GPS.");
+    }catch(error){notify(error.code===1?"Location permission was denied. Allow it in browser settings.":error.message||"Could not save your shop location.");}
     finally{button.disabled=false;button.textContent="⌖ Save shop GPS";}
   }
 
