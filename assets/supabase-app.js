@@ -905,7 +905,12 @@
       showAuth();
       return;
     }
-    const values = new FormData(event.currentTarget);
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement)) {
+      report(new Error("The order report form could not be found. Please refresh and try again."), "Order report could not be saved.");
+      return;
+    }
+    const values = new FormData(form);
     const orderReference=String(values.get("order")||"").trim();
     const {data:order,error:orderLookupError}=await client.from("orders").select("id,order_number").eq("buyer_id",user.id).eq("order_number",orderReference).maybeSingle();
     if(orderLookupError){report(orderLookupError,"Your order could not be verified.");return;}
@@ -921,7 +926,7 @@
       report(error, "Order report could not be saved.");
       return;
     }
-    event.currentTarget.reset();
+    form.reset();
     notify("Order report saved to the database. Support has not been contacted.");
   }
 
