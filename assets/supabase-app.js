@@ -834,7 +834,7 @@
     const missingColourFields=uniqueColourNames.length>0&&colourStockFields.length!==uniqueColourNames.length;
     if(listingKind==="goods"&&((uniqueColourNames.length>0&&(missingColourFields||!!invalidColourStock))||(uniqueColourNames.length===0&&!validStock))){
       if(stockError){stockError.textContent=missingColourFields?"Add a stock quantity for every colour.":invalidColourStock?"Enter a whole-number stock quantity of at least 1 for "+invalidColourStock.dataset.colorStock+".":"Please enter how many items are in stock.";stockError.hidden=false;}
-      const target=invalidColourStock||stockField;
+      const target=invalidColourStock||(missingColourFields?document.getElementById("seller-listing-colors"):stockField);
       if(target){target.setAttribute("aria-invalid","true");target.focus();}
       return;
     }
