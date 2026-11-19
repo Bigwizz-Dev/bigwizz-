@@ -881,7 +881,7 @@
         const raw=String(values.get("stockQuantity")??"").trim();stockQuantity=Number(raw);
         if(!raw||!Number.isInteger(stockQuantity)||stockQuantity<1)throw new Error("Please enter how many items are in stock.");
       }
-      const rawStock=String(values.get("stockQuantity")??"").trim();const stockQuantity=kind==="goods"?Number(rawStock):null;if(kind==="goods"&&(!rawStock||!Number.isInteger(stockQuantity)||stockQuantity<1))throw new Error("Please enter how many items are in stock.");
+      
       const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:colorImages,gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements,variants,stock_quantity:stockQuantity};
       const result=remoteEditingId?await client.from("listings").update(row).eq("id",remoteEditingId).eq("seller_id",user.id):await client.from("listings").insert(row);
       if(result.error)throw result.error;
@@ -1389,7 +1389,7 @@
       const price=document.getElementById("seller-listing-price");
       const stockField=document.getElementById("seller-listing-stock");
       const stockContainer=document.getElementById("seller-listing-stock-field");
-      if(stockContainer)stockContainer.hidden=service;
+      if(stockContainer)stockContainer.hidden=service||(!service&&document.querySelectorAll("[data-color-stock]").length>0);
       if(stockField){stockField.required=false;stockField.min="1";if(service){stockField.value="";const stockError=document.getElementById("seller-listing-stock-error");if(stockError)stockError.hidden=true;stockField.removeAttribute("aria-invalid");}}
       if(pricing)pricing.hidden=!service;
       if(availability)availability.hidden=!service;
