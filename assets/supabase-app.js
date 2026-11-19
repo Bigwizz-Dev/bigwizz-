@@ -1508,7 +1508,7 @@
     const cartAction = event.target.closest("[data-cart-action]");
     if (cartAction) {
       stop(event);
-      changeCart(cartAction.dataset.cartId, cartAction.dataset.cartAction)
+      changeCart(cartAction.dataset.cartId, cartAction.dataset.cartAction,{size:cartAction.dataset.cartSize||"",color:cartAction.dataset.cartColor||""})
         .catch(error => report(error, "Could not update your shared cart."));
       return;
     }
