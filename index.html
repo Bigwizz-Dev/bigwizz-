@@ -1287,7 +1287,7 @@
     }
     window.bigwizzColorImageFiles=window.bigwizzColorImageFiles||{};
     document.getElementById("seller-listing-colors")?.addEventListener("input",()=>{try{renderSellerColorPhotoFields(parseVariantOptions(document.getElementById("seller-listing-colors").value));}catch(error){showToast(error.message);}});
-    function renderSellerColorPhotoFields(colors,colorImages={},savedVariants=[]){
+    function renderSellerColorPhotoFields(colors,colorImages={},savedVariants=window.bigwizzListingVariants||[]){
       const container=document.getElementById("seller-color-photo-fields");
       if(!container)return;
       const selectedFiles=window.bigwizzColorImageFiles||{};
@@ -1304,7 +1304,7 @@
     function updateSellerVariantStockTotal(){
       const fields=Array.from(document.querySelectorAll("[data-color-stock]"));
       const total=fields.reduce((sum,field)=>{const n=Number(field.value);return sum+(Number.isInteger(n)&&n>0?n:0)},0);
-      const stock=document.getElementById("seller-listing-stock");if(stock)stock.value=fields.length?String(total):"";
+      const stock=document.getElementById("seller-listing-stock"),stockWrap=document.getElementById("seller-listing-stock-field");if(stock){stock.value=fields.length?String(total):"";stock.required=fields.length===0;}if(stockWrap)stockWrap.hidden=fields.length>0;
       const summary=document.getElementById("seller-variant-stock-total");
       if(summary)summary.textContent=total+" total units across colours";
     }
