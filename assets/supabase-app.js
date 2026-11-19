@@ -412,7 +412,7 @@
   async function loadCatalog() {
     const { data: rows, error } = await client
       .from("listings")
-      .select("id,seller_id,kind,category,title,description,seller_name,price,currency,image_url,gallery_images,accepts_custom_measurements,rating,rating_count,size_type,sizes,colors,color_images,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
+      .select("id,seller_id,kind,category,title,description,seller_name,price,currency,image_url,gallery_images,accepts_custom_measurements,rating,rating_count,size_type,sizes,colors,color_images,stock_quantity,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (error) {
@@ -452,6 +452,7 @@
       kind: "Goods",
       price: row.price === null ? "Request an estimate" : currency.format(row.price),
       basePrice: row.price,
+      stockQuantity: row.stock_quantity===null||row.stock_quantity===undefined?null:Number(row.stock_quantity),
       currency: row.currency||"NGN",
       image: row.image_url,
       galleryImages:[row.image_url],
@@ -609,7 +610,7 @@
       return;
     }
     const { data, error } = await client.from("cart_items")
-      .select("listing_id,quantity,variant_size,variant_color,listings(id,title,seller_name,image_url,price,kind)")
+      .select("listing_id,quantity,variant_size,variant_color,listings(id,title,seller_name,image_url,price,kind,stock_quantity)")
       .eq("user_id", user.id);
     if (error) {
       const itemsContainer = document.getElementById("cart-items");
@@ -682,6 +683,13 @@
     const filters = query => query.eq("user_id", user.id).eq("listing_id", listingId).eq("variant_size", variantSize).eq("variant_color", variantColor);
     const { data, error } = await filters(client.from("cart_items").select("quantity")).maybeSingle();
     if (error) throw error;
+    if(action==="increase"){
+      const {data:listing,error:listingError}=await client.from("listings").select("stock_quantity,status,kind").eq("id",listingId).maybeSingle();
+      if(listingError)throw listingError;
+      const available=Number(listing?.stock_quantity);
+      if(!listing||listing.kind!=="goods"||listing.status!=="published"||!Number.isInteger(available)||available<1)throw new Error("This item is no longer available.");
+      if(Number(data?.quantity||0)>=available)throw new Error("You cannot add more than the available stock.");
+    }
     if (action === "remove" || (action === "decrease" && data && Number(data.quantity) <= 1)) {
       const result = await filters(client.from("cart_items").delete());
       if (result.error) throw result.error;
@@ -700,6 +708,8 @@
     const variantColor = String(options.color || "").trim();
     const item = listings.find(row => row.id === listingId);
     if (!item || item.basePrice === null || item.basePrice === undefined) { notify("This item cannot be added to the cart."); return; }
+    const availableStock=Number(item.stockQuantity);
+    if(!Number.isInteger(availableStock)||availableStock<1){notify("This item is currently out of stock.");return;}
     const needsSize=["clothing","shoes","caps"].includes(item.sizeType);
     if(needsSize&&!variantSize){notify("Choose a size or request custom measurements before adding this item.");return;}
     if(Array.isArray(item.colors)&&item.colors.length&&!variantColor){notify("Choose a colour before adding this item.");return;}
@@ -710,9 +720,11 @@
     const current = await client.from("cart_items").select("quantity")
       .eq("user_id", user.id).eq("listing_id", listingId).eq("variant_size", variantSize).eq("variant_color", variantColor).maybeSingle();
     if (current.error) throw current.error;
+    const currentQuantity=current.data?Number(current.data.quantity):0;
+    if(currentQuantity>=availableStock)throw new Error("You already have the maximum available stock of this item in your cart.");
     const result = await client.from("cart_items").upsert({
       user_id: user.id, listing_id: listingId, variant_size: variantSize, variant_color: variantColor,
-      quantity: Math.min(99, (current.data ? Number(current.data.quantity) : 0) + 1)
+      quantity: Math.min(availableStock,99,currentQuantity+1)
     }, { onConflict: "user_id,listing_id,variant_size,variant_color" });
     if (result.error) throw result.error;
     await loadCart();
