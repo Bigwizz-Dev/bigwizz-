@@ -1286,7 +1286,15 @@
       }
     }
     window.bigwizzColorImageFiles=window.bigwizzColorImageFiles||{};
-    document.getElementById("seller-listing-colors")?.addEventListener("input",()=>{try{renderSellerColorPhotoFields(parseVariantOptions(document.getElementById("seller-listing-colors").value));}catch(error){showToast(error.message);}});
+    document.getElementById("seller-listing-colors")?.addEventListener("input",()=>{
+      try{
+        const current=Array.from(document.querySelectorAll("[data-color-stock]")).map(field=>({colour:field.dataset.colorStock,stock:Number(field.value)||0}));
+        const saved=new Map((window.bigwizzListingVariants||[]).map(v=>[String(v.colour||"").toLowerCase(),v]));
+        current.forEach(v=>{const old=saved.get(v.colour.toLowerCase())||{};saved.set(v.colour.toLowerCase(),{...old,...v});});
+        window.bigwizzListingVariants=Array.from(saved.values());
+        renderSellerColorPhotoFields(parseVariantOptions(document.getElementById("seller-listing-colors").value),window.bigwizzListingColorImages||{},window.bigwizzListingVariants);
+      }catch(error){showToast(error.message);}
+    });
     function renderSellerColorPhotoFields(colors,colorImages={},savedVariants=window.bigwizzListingVariants||[]){
       const container=document.getElementById("seller-color-photo-fields");
       if(!container)return;
