@@ -804,6 +804,19 @@
     if(!accountRoles.includes("seller")||!sellerProfileReady)throw new Error("Complete seller account setup before publishing listings.");
     const form=document.getElementById("seller-listing-form"),submit=document.getElementById("seller-listing-submit");
     if(!(form instanceof HTMLFormElement))throw new Error("The listing form could not be found. Please refresh and try again.");
+    const listingKind=document.getElementById("seller-listing-type")?.value||"goods";
+    const stockField=document.getElementById("seller-listing-stock");
+    const stockError=document.getElementById("seller-listing-stock-error");
+    const rawStock=stockField?.value;
+    const stockNumber=Number(rawStock);
+    const validStock=typeof rawStock==="string"&&rawStock.trim()!==""&&rawStock!==null&&rawStock!==undefined&&Number.isInteger(stockNumber)&&stockNumber>=1;
+    if(listingKind==="goods"&&!validStock){
+      if(stockError){stockError.textContent="Please enter how many items are in stock.";stockError.hidden=false;}
+      if(stockField){stockField.setAttribute("aria-invalid","true");stockField.focus();}
+      return;
+    }
+    if(stockError)stockError.hidden=true;
+    if(stockField)stockField.removeAttribute("aria-invalid");
     submit.disabled=true;
     try{
       const values=new FormData(form);
@@ -831,7 +844,7 @@
       const colors=kind==="goods"?String(values.get("colors")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
       const previousColorImages=existing.data?.color_images&&typeof existing.data.color_images==="object"?existing.data.color_images:{};
       const colorImages=kind==="goods"?await uploadColorVariantImages(colors,previousColorImages):{};
-      const rawStock=String(values.get("stockQuantity")||"").trim();const stockQuantity=kind==="goods"?Number(rawStock):null;if(kind==="goods"&&(!rawStock||!Number.isSafeInteger(stockQuantity)||stockQuantity<1))throw new Error("Enter an available stock quantity of at least 1.");
+      const rawStock=String(values.get("stockQuantity")??"").trim();const stockQuantity=kind==="goods"?Number(rawStock):null;if(kind==="goods"&&(!rawStock||!Number.isInteger(stockQuantity)||stockQuantity<1))throw new Error("Please enter how many items are in stock.");
       const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:colorImages,gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements,stock_quantity:stockQuantity};
       const result=remoteEditingId?await client.from("listings").update(row).eq("id",remoteEditingId).eq("seller_id",user.id):await client.from("listings").insert(row);
       if(result.error)throw result.error;
@@ -1309,6 +1322,14 @@
   updateSellerPricePreview();
 
   document.getElementById("seller-save-location")?.addEventListener("click",event=>saveSellerStoreLocation(event.currentTarget));
+  document.addEventListener("input", event => {
+    if(event.target.id==="seller-listing-stock"){
+      const field=event.target,error=document.getElementById("seller-listing-stock-error");
+      const raw=field.value,number=Number(raw);
+      const valid=raw.trim()!==""&&Number.isInteger(number)&&number>=1;
+      if(valid){if(error)error.hidden=true;field.removeAttribute("aria-invalid");}
+    }
+  });
   document.addEventListener("change", event => {
     if(event.target.id==="seller-size-type"||event.target.id==="seller-listing-type"){
       const type=document.getElementById("seller-listing-type")?.value||"goods";
@@ -1330,7 +1351,7 @@
       const stockField=document.getElementById("seller-listing-stock");
       const stockContainer=document.getElementById("seller-listing-stock-field");
       if(stockContainer)stockContainer.hidden=service;
-      if(stockField){stockField.required=!service;stockField.min="1";if(service)stockField.value="";}
+      if(stockField){stockField.required=false;stockField.min="1";if(service){stockField.value="";const stockError=document.getElementById("seller-listing-stock-error");if(stockError)stockError.hidden=true;stockField.removeAttribute("aria-invalid");}}
       if(pricing)pricing.hidden=!service;
       if(availability)availability.hidden=!service;
       if(mode)mode.disabled=!service;
