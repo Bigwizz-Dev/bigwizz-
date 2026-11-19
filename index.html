@@ -1637,11 +1637,11 @@
     }
     function updateProductColorImage(color){
       const image=document.querySelector(".product-detail-image");if(!image)return;
-      const value=String(color||"").trim(),key=Object.keys(productColorImages).find(name=>name.toLowerCase()===value.toLowerCase());
-      image.src=key?productColorImages[key]:productBaseImage;
+      const value=String(color||"").trim(),item=getGoodsListing(currentProductId),variant=(item?.variants||[]).find(v=>String(v.colour||"").toLowerCase()===value.toLowerCase()),key=Object.keys(productColorImages).find(name=>name.toLowerCase()===value.toLowerCase());
+      image.src=variant?.image_url||(key?productColorImages[key]:productBaseImage);
       const title=document.querySelector(".product-detail-info h2")?.textContent||"Product";image.alt=value?`${title} in ${value}`:title;
       const label=document.getElementById("product-color-preview-label");
-      if(label)label.textContent=!value?"Choose a color to view its product photo.":key?`Showing the ${key} product photo.`:`A separate photo for ${value} has not been added yet.`;
+      if(label)label.textContent=!value?"Choose a colour to view its product photo.":variant?`Showing ${value}. ${Number(variant.stock)} in stock.`:key?`Showing the ${key} product photo.`:`A separate photo for ${value} has not been added yet.`;
     }
     function isProductSizeAvailable(item,size){
       const key=String(size).trim().toLowerCase();
@@ -1660,8 +1660,9 @@
       const selectedSize=document.querySelector(".product-size-chip[aria-pressed=true]:not(:disabled)")?.dataset.productSize||"";
       const selectedColor=document.getElementById("product-color")?.value||"";
       const customMeasurements=document.getElementById("product-custom-measurements")?.checked===true;
-      const stock=Number(item.stockQuantity);
-      const outOfStock=!Number.isInteger(stock)||stock<1;
+      const selectedVariant=selectedColor?(item.variants||[]).find(v=>String(v.colour||"").toLowerCase()===selectedColor.toLowerCase()):null;
+      const stock=selectedColor?(selectedVariant?Number(selectedVariant.stock):0):Number(item.stockQuantity);
+      const outOfStock=selectedColor?(!selectedVariant||!Number.isInteger(stock)||stock<1):(!Number.isInteger(stock)||stock<1);
       const missingSize=clothing&&!(!!selectedSize||customMeasurements);
       const missingColor=colors.length>0&&!selectedColor;
       button.disabled=outOfStock||missingSize||missingColor;
