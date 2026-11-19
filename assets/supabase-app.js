@@ -858,7 +858,8 @@
       const sizeType=kind==="goods"?String(values.get("sizeType")||"other"):"other";
       const sizes=["clothing","shoes","caps"].includes(sizeType)?String(values.get("sizes")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
       const acceptsCustomMeasurements=kind==="goods"&&["clothing","shoes"].includes(sizeType)&&values.get("customMeasurements")==="true";
-      const colors=kind==="goods"?String(values.get("colors")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
+      const colors=kind==="goods"?Array.from(new Map(String(values.get("colors")||"").split(",").map(value=>value.trim()).filter(Boolean).map(value=>[value.toLowerCase(),value])).values()):[];
+      if(colors.length>20)throw new Error("Add no more than 20 colours to one listing.");
       const previousColorImages=existing.data?.color_images&&typeof existing.data.color_images==="object"?existing.data.color_images:{};
       const colorImages=kind==="goods"?await uploadColorVariantImages(colors,previousColorImages):{};
       const variantStockInputs=Array.from(document.querySelectorAll("[data-color-stock]"));
