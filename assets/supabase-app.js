@@ -924,7 +924,7 @@
       document.getElementById("seller-custom-measurements").checked=!!item.accepts_custom_measurements;
       renderSellerListingImagePreviews([item.image_url].filter(Boolean));
       window.bigwizzListingVariants=item.variants||[];
-      window.bigwizzListingColorImages=item.color_images||{};
+      window.bigwizzListingColorImages={...(item.color_images||{}),...Object.fromEntries((item.variants||[]).filter(v=>v.image_url).map(v=>[v.colour,v.image_url]))};
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
       document.getElementById("seller-listing-colors").dispatchEvent(new Event("input",{bubbles:true}));
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change",{bubbles:true}));
