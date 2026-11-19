@@ -1286,6 +1286,7 @@
       }
     }
     window.bigwizzColorImageFiles=window.bigwizzColorImageFiles||{};
+    document.addEventListener("input",event=>{if(event.target.matches("[data-color-stock]"))updateSellerVariantStockTotal();});
     document.getElementById("seller-listing-colors")?.addEventListener("input",()=>{
       try{
         const current=Array.from(document.querySelectorAll("[data-color-stock]")).map(field=>({colour:field.dataset.colorStock,stock:Number(field.value)||0}));
