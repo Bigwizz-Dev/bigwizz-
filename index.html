@@ -1649,8 +1649,11 @@
       const selectedSize=document.querySelector(".product-size-chip[aria-pressed=true]:not(:disabled)")?.dataset.productSize||"";
       const selectedColor=document.getElementById("product-color")?.value||"";
       const customMeasurements=document.getElementById("product-custom-measurements")?.checked===true;
-      button.disabled=!( (!clothing||(!!selectedSize||customMeasurements)) && (colors.length===0||!!selectedColor) );
-      button.title=button.disabled?"Choose all required options before adding this item to your cart.":"";
+      const stock=Number(item.stockQuantity);
+      const outOfStock=!Number.isInteger(stock)||stock<1;
+      button.disabled=outOfStock||!( (!clothing||(!!selectedSize||customMeasurements)) && (colors.length===0||!!selectedColor) );
+      button.textContent=outOfStock?"Out of stock":"Add to cart";
+      button.title=outOfStock?"This item is currently out of stock.":button.disabled?"Choose all required options before adding this item to your cart.":"";
     }
     function renderSizeChart(type,listedSizes=[],item={}){
       const guides={
@@ -2132,6 +2135,6 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="assets/supabase-config.js"></script>
-  <script src="assets/supabase-app.js?v=20261119-2"></script>
+  <script src="assets/supabase-app.js?v=20261119-3"></script>
 </body>
 </html>
