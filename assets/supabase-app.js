@@ -688,7 +688,8 @@
       const {data:listing,error:listingError}=await client.from("listings").select("stock_quantity,status,kind,variants").eq("id",listingId).maybeSingle();
       if(listingError)throw listingError;
       const selectedVariant=variantColor?(listing?.variants||[]).find(v=>String(v.colour||"").toLowerCase()===variantColor.toLowerCase()):null;
-      const available=variantColor?(selectedVariant?Number(selectedVariant.stock):0):Number(listing?.stock_quantity);
+      const hasTrackedVariants=Array.isArray(listing?.variants)&&listing.variants.length>0;
+      const available=variantColor&&hasTrackedVariants?(selectedVariant?Number(selectedVariant.stock):0):Number(listing?.stock_quantity);
       if(!listing||listing.kind!=="goods"||listing.status!=="published"||!Number.isInteger(available)||available<1)throw new Error("This item is no longer available.");
       if(Number(data?.quantity||0)>=available)throw new Error("You cannot add more than the available stock.");
     }
@@ -711,7 +712,8 @@
     const item = listings.find(row => row.id === listingId);
     if (!item || item.basePrice === null || item.basePrice === undefined) { notify("This item cannot be added to the cart."); return; }
     const selectedVariant=variantColor?(item.variants||[]).find(v=>String(v.colour||"").toLowerCase()===variantColor.toLowerCase()):null;
-    const availableStock=variantColor?(selectedVariant?Number(selectedVariant.stock):0):Number(item.stockQuantity);
+    const hasTrackedVariants=Array.isArray(item.variants)&&item.variants.length>0;
+    const availableStock=variantColor&&hasTrackedVariants?(selectedVariant?Number(selectedVariant.stock):0):Number(item.stockQuantity);
     if(!Number.isInteger(availableStock)||availableStock<1){notify("This item is currently out of stock.");return;}
     const needsSize=["clothing","shoes","caps"].includes(item.sizeType);
     if(needsSize&&!variantSize){notify("Choose a size or request custom measurements before adding this item.");return;}
