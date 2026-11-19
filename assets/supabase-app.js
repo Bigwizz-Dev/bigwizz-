@@ -1445,8 +1445,10 @@
     }
     if (event.target.closest("#seller-listing-cancel")) {
       remoteEditingId = null;
+      window.bigwizzListingVariants=[];window.bigwizzListingColorImages={};window.bigwizzColorImageFiles={};
       const form=document.getElementById("seller-listing-form");
       if(form)form.reset();
+      document.getElementById("seller-listing-colors")?.dispatchEvent(new Event("input",{bubbles:true}));
       renderSellerListingImagePreviews([]);
       document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);
       updateSellerPricePreview();
