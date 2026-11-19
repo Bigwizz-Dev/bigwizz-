@@ -652,7 +652,7 @@
       const variantText = [row.variant_size ? `Size: ${escapeHtml(row.variant_size)}` : "", row.variant_color ? `Color: ${escapeHtml(row.variant_color)}` : ""].filter(Boolean).join(" · ");
       const variantAttrs = `data-cart-size="${escapeHtml(row.variant_size || "")}" data-cart-color="${escapeHtml(row.variant_color || "")}"`;
       return `<article class="cart-item">
-        <img src="${escapeHtml(item.image_url)}" alt="">
+        <img src="${escapeHtml(row.variant_color?((item.variants||[]).find(v=>String(v.colour||"").toLowerCase()===String(row.variant_color).toLowerCase())?.image_url||item.image_url):item.image_url)}" alt="">
         <div class="cart-item-info"><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.seller_name)}</p>
           ${variantText ? `<small>${variantText}</small>` : ""}
           <strong>${currency.format(buyerPrice)} each</strong>
@@ -860,6 +860,7 @@
       const previousColorImages=existing.data?.color_images&&typeof existing.data.color_images==="object"?existing.data.color_images:{};
       const colorImages=kind==="goods"?await uploadColorVariantImages(colors,previousColorImages):{};
       const variantStockInputs=Array.from(document.querySelectorAll("[data-color-stock]"));
+      if(colors.length&&variantStockInputs.length!==colors.length)throw new Error("Add a stock quantity and photo for every colour before publishing.");
       let variants=[];
       let stockQuantity=null;
       if(kind==="goods"&&colors.length){
@@ -887,7 +888,7 @@
         if(profileUpdate.error)throw profileUpdate.error;
         sellerAvailabilityStatus=availability;
       }
-      remoteEditingId=null;window.bigwizzColorImageFiles={};form.reset();const stockField=document.getElementById("seller-listing-stock");if(stockField)stockField.value="";renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
+      remoteEditingId=null;window.bigwizzColorImageFiles={};window.bigwizzListingVariants=[];form.reset();const stockField=document.getElementById("seller-listing-stock");if(stockField)stockField.value="";renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
       document.getElementById("seller-listing-submit").textContent="Publish listing";
       document.getElementById("seller-listing-cancel").hidden=true;
       document.getElementById("seller-service-pricing-mode").disabled=false;
@@ -919,6 +920,7 @@
       document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=(item.sizes||[]).includes(input.value));
       document.getElementById("seller-custom-measurements").checked=!!item.accepts_custom_measurements;
       renderSellerListingImagePreviews([item.image_url].filter(Boolean));
+      window.bigwizzListingVariants=item.variants||[];
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
       document.getElementById("seller-listing-colors").dispatchEvent(new Event("input",{bubbles:true}));
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change",{bubbles:true}));
