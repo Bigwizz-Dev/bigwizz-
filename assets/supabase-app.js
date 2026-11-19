@@ -888,7 +888,7 @@
         if(profileUpdate.error)throw profileUpdate.error;
         sellerAvailabilityStatus=availability;
       }
-      remoteEditingId=null;window.bigwizzColorImageFiles={};window.bigwizzListingVariants=[];form.reset();const stockField=document.getElementById("seller-listing-stock");if(stockField)stockField.value="";renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
+      remoteEditingId=null;window.bigwizzColorImageFiles={};window.bigwizzListingVariants=[];window.bigwizzListingColorImages={};form.reset();document.getElementById("seller-listing-colors")?.dispatchEvent(new Event("input",{bubbles:true}));const stockField=document.getElementById("seller-listing-stock");if(stockField)stockField.value="";renderSellerListingImagePreviews([]);document.querySelectorAll("#seller-size-chips input").forEach(input=>input.checked=false);updateSellerPricePreview();
       document.getElementById("seller-listing-submit").textContent="Publish listing";
       document.getElementById("seller-listing-cancel").hidden=true;
       document.getElementById("seller-service-pricing-mode").disabled=false;
@@ -921,6 +921,7 @@
       document.getElementById("seller-custom-measurements").checked=!!item.accepts_custom_measurements;
       renderSellerListingImagePreviews([item.image_url].filter(Boolean));
       window.bigwizzListingVariants=item.variants||[];
+      window.bigwizzListingColorImages=item.color_images||{};
       document.getElementById("seller-listing-colors").value=(item.colors||[]).join(", ");
       document.getElementById("seller-listing-colors").dispatchEvent(new Event("input",{bubbles:true}));
       document.getElementById("seller-listing-type").dispatchEvent(new Event("change",{bubbles:true}));
