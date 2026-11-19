@@ -827,9 +827,15 @@
     const rawStock=stockField?.value;
     const stockNumber=Number(rawStock);
     const validStock=typeof rawStock==="string"&&rawStock.trim()!==""&&rawStock!==null&&rawStock!==undefined&&Number.isInteger(stockNumber)&&stockNumber>=1;
-    if(listingKind==="goods"&&!validStock){
-      if(stockError){stockError.textContent="Please enter how many items are in stock.";stockError.hidden=false;}
-      if(stockField){stockField.setAttribute("aria-invalid","true");stockField.focus();}
+    const colourStockFields=Array.from(document.querySelectorAll("[data-color-stock]"));
+    const colourNames=String(document.getElementById("seller-listing-colors")?.value||"").split(",").map(value=>value.trim()).filter(Boolean);
+    const uniqueColourNames=Array.from(new Map(colourNames.map(value=>[value.toLowerCase(),value])).values());
+    const invalidColourStock=colourStockFields.find(field=>!field.value.trim()||!Number.isInteger(Number(field.value))||Number(field.value)<1);
+    const missingColourFields=uniqueColourNames.length>0&&colourStockFields.length!==uniqueColourNames.length;
+    if(listingKind==="goods"&&((uniqueColourNames.length>0&&(missingColourFields||!!invalidColourStock))||(uniqueColourNames.length===0&&!validStock))){
+      if(stockError){stockError.textContent=missingColourFields?"Add a stock quantity for every colour.":invalidColourStock?"Enter a whole-number stock quantity of at least 1 for "+invalidColourStock.dataset.colorStock+".":"Please enter how many items are in stock.";stockError.hidden=false;}
+      const target=invalidColourStock||stockField;
+      if(target){target.setAttribute("aria-invalid","true");target.focus();}
       return;
     }
     if(stockError)stockError.hidden=true;
