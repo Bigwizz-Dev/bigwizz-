@@ -412,7 +412,7 @@
   async function loadCatalog() {
     const { data: rows, error } = await client
       .from("listings")
-      .select("id,seller_id,kind,category,title,description,seller_name,price,currency,image_url,gallery_images,accepts_custom_measurements,rating,rating_count,size_type,sizes,colors,color_images,stock_quantity,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
+      .select("id,seller_id,kind,category,title,description,seller_name,price,currency,image_url,gallery_images,accepts_custom_measurements,rating,rating_count,size_type,sizes,colors,color_images,stock_quantity,variants,seller_profiles(service_area,country,state,city,area,latitude,longitude)")
       .eq("status", "published")
       .order("created_at", { ascending: false });
     if (error) {
@@ -453,6 +453,7 @@
       price: row.price === null ? "Request an estimate" : currency.format(row.price),
       basePrice: row.price,
       stockQuantity: row.stock_quantity===null||row.stock_quantity===undefined?null:Number(row.stock_quantity),
+      variants:Array.isArray(row.variants)?row.variants:[],
       currency: row.currency||"NGN",
       image: row.image_url,
       galleryImages:[row.image_url],
@@ -610,7 +611,7 @@
       return;
     }
     const { data, error } = await client.from("cart_items")
-      .select("listing_id,quantity,variant_size,variant_color,listings(id,title,seller_name,image_url,price,kind,stock_quantity)")
+      .select("listing_id,quantity,variant_size,variant_color,listings(id,title,seller_name,image_url,price,kind,stock_quantity,variants)")
       .eq("user_id", user.id);
     if (error) {
       const itemsContainer = document.getElementById("cart-items");
@@ -625,7 +626,7 @@
       listingId: row.listing_id,
       title: row.listings.title,
       seller: row.listings.seller_name,
-      image: row.listings.image_url,
+      image: row.variant_color?((row.listings.variants||[]).find(v=>String(v.colour||"").toLowerCase()===String(row.variant_color).toLowerCase())?.image_url||row.listings.image_url):row.listings.image_url,
       sellerPrice: Number(row.listings.price),
       quantity: Number(row.quantity),
       size: row.variant_size || "",
@@ -684,9 +685,10 @@
     const { data, error } = await filters(client.from("cart_items").select("quantity")).maybeSingle();
     if (error) throw error;
     if(action==="increase"){
-      const {data:listing,error:listingError}=await client.from("listings").select("stock_quantity,status,kind").eq("id",listingId).maybeSingle();
+      const {data:listing,error:listingError}=await client.from("listings").select("stock_quantity,status,kind,variants").eq("id",listingId).maybeSingle();
       if(listingError)throw listingError;
-      const available=Number(listing?.stock_quantity);
+      const selectedVariant=variantColor?(listing?.variants||[]).find(v=>String(v.colour||"").toLowerCase()===variantColor.toLowerCase()):null;
+      const available=variantColor?(selectedVariant?Number(selectedVariant.stock):0):Number(listing?.stock_quantity);
       if(!listing||listing.kind!=="goods"||listing.status!=="published"||!Number.isInteger(available)||available<1)throw new Error("This item is no longer available.");
       if(Number(data?.quantity||0)>=available)throw new Error("You cannot add more than the available stock.");
     }
@@ -708,7 +710,8 @@
     const variantColor = String(options.color || "").trim();
     const item = listings.find(row => row.id === listingId);
     if (!item || item.basePrice === null || item.basePrice === undefined) { notify("This item cannot be added to the cart."); return; }
-    const availableStock=Number(item.stockQuantity);
+    const selectedVariant=variantColor?(item.variants||[]).find(v=>String(v.colour||"").toLowerCase()===variantColor.toLowerCase()):null;
+    const availableStock=variantColor?(selectedVariant?Number(selectedVariant.stock):0):Number(item.stockQuantity);
     if(!Number.isInteger(availableStock)||availableStock<1){notify("This item is currently out of stock.");return;}
     const needsSize=["clothing","shoes","caps"].includes(item.sizeType);
     if(needsSize&&!variantSize){notify("Choose a size or request custom measurements before adding this item.");return;}
@@ -842,7 +845,7 @@
       if(!title||title.length>80||!description||!category||!["goods","service"].includes(kind))throw new Error("Complete the title, category, type and description.");
       if(price!==null&&(!Number.isFinite(price)||price<=0))throw new Error("Enter a valid listing price.");
       if(price===null&&!(kind==="service"&&pricingMode==="quote"))throw new Error("Enter a price or choose quotation required.");
-      const existing=remoteEditingId?await client.from("listings").select("id,status,image_url,gallery_images,color_images,accepts_custom_measurements").eq("id",remoteEditingId).eq("seller_id",user.id).single():{data:null,error:null};
+      const existing=remoteEditingId?await client.from("listings").select("id,status,image_url,gallery_images,color_images,variants,accepts_custom_measurements").eq("id",remoteEditingId).eq("seller_id",user.id).single():{data:null,error:null};
       if(existing.error)throw existing.error;
       const files=document.getElementById("seller-listing-image").files;
       const uploadedUrls=await uploadListingImages(files);
@@ -856,8 +859,26 @@
       const colors=kind==="goods"?String(values.get("colors")||"").split(",").map(value=>value.trim()).filter(Boolean):[];
       const previousColorImages=existing.data?.color_images&&typeof existing.data.color_images==="object"?existing.data.color_images:{};
       const colorImages=kind==="goods"?await uploadColorVariantImages(colors,previousColorImages):{};
+      const variantStockInputs=Array.from(document.querySelectorAll("[data-color-stock]"));
+      let variants=[];
+      let stockQuantity=null;
+      if(kind==="goods"&&colors.length){
+        variants=colors.map(colour=>{
+          const input=variantStockInputs.find(field=>String(field.dataset.colorStock||"").toLowerCase()===colour.toLowerCase());
+          const raw=String(input?.value??"").trim(),stock=Number(raw);
+          if(!raw||!Number.isInteger(stock)||stock<1)throw new Error("Enter a whole-number stock quantity of at least 1 for "+colour+".");
+          const previous=(existing.data?.variants||[]).find(v=>String(v.colour||"").toLowerCase()===colour.toLowerCase());
+          const variantImage=colorImages[colour]||previous?.image_url||"";
+          if(!variantImage)throw new Error("Upload a photo for "+colour+" before publishing.");
+          return {colour,stock,image_url:variantImage};
+        });
+        stockQuantity=variants.reduce((sum,variant)=>sum+variant.stock,0);
+      }else if(kind==="goods"){
+        const raw=String(values.get("stockQuantity")??"").trim();stockQuantity=Number(raw);
+        if(!raw||!Number.isInteger(stockQuantity)||stockQuantity<1)throw new Error("Please enter how many items are in stock.");
+      }
       const rawStock=String(values.get("stockQuantity")??"").trim();const stockQuantity=kind==="goods"?Number(rawStock):null;if(kind==="goods"&&(!rawStock||!Number.isInteger(stockQuantity)||stockQuantity<1))throw new Error("Please enter how many items are in stock.");
-      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:colorImages,gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements,stock_quantity:stockQuantity};
+      const row={seller_id:user.id,kind,category,title,description,seller_name:sellerShopName,price:price===null?null:Math.round((price+Number.EPSILON)*100)/100,currency:"NGN",pricing_mode:pricingMode,image_url:imageUrl,status:existing.data?existing.data.status:"published",size_type:sizeType,sizes,colors,color_images:colorImages,gallery_images:galleryImages,accepts_custom_measurements:acceptsCustomMeasurements,variants,stock_quantity:stockQuantity};
       const result=remoteEditingId?await client.from("listings").update(row).eq("id",remoteEditingId).eq("seller_id",user.id):await client.from("listings").insert(row);
       if(result.error)throw result.error;
       if(kind==="service"){
@@ -884,7 +905,7 @@
       return;
     }
     const row = await client.from("listings")
-      .select("id,title,kind,category,description,price,pricing_mode,image_url,gallery_images,accepts_custom_measurements,status,size_type,sizes,colors,stock_quantity")
+      .select("id,title,kind,category,description,price,pricing_mode,image_url,gallery_images,accepts_custom_measurements,status,size_type,sizes,colors,stock_quantity,variants")
       .eq("id", listingId).eq("seller_id", user.id).single();
     if (row.error) throw row.error;
     if (action === "edit") {
