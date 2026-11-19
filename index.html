@@ -1672,7 +1672,7 @@
       const selectedVariant=selectedColor?(item.variants||[]).find(v=>String(v.colour||"").toLowerCase()===selectedColor.toLowerCase()):null;
       const hasTrackedVariants=Array.isArray(item.variants)&&item.variants.length>0;
       const stock=selectedColor&&hasTrackedVariants?(selectedVariant?Number(selectedVariant.stock):0):Number(item.stockQuantity);
-      const outOfStock=selectedColor?(!selectedVariant||!Number.isInteger(stock)||stock<1):(!Number.isInteger(stock)||stock<1);
+      const outOfStock=selectedColor&&hasTrackedVariants?(!selectedVariant||!Number.isInteger(stock)||stock<1):(!Number.isInteger(stock)||stock<1);
       const missingSize=clothing&&!(!!selectedSize||customMeasurements);
       const missingColor=colors.length>0&&!selectedColor;
       button.disabled=outOfStock||missingSize||missingColor;
